@@ -1,4 +1,3 @@
-// app/admin/roles/page.tsx
 "use client";
 import { useState, useEffect } from "react";
 import { collection, onSnapshot } from "firebase/firestore";
@@ -10,7 +9,16 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { motion, AnimatePresence } from "framer-motion";
 import { createRole, updateRole, deleteRole } from "@/app/actions/roles";
-import { Trash2, Plus, Save, Edit2, X } from "lucide-react";
+import {
+  Trash2,
+  Plus,
+  Save,
+  Edit2,
+  X,
+  ChevronDown,
+  ChevronUp,
+} from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 export default function RolesManagement() {
   const [roles, setRoles] = useState<Role[]>([]);
@@ -21,6 +29,10 @@ export default function RolesManagement() {
   });
   const [editingRole, setEditingRole] = useState<string | null>(null);
   const [tempRoutes, setTempRoutes] = useState<{ [key: string]: string }>({});
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [expandedRole, setExpandedRole] = useState<string | null>(null);
+
+  const { toast } = useToast();
 
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, "roles"), (snapshot) => {
@@ -43,8 +55,20 @@ export default function RolesManagement() {
   };
 
   const handleSaveEdit = async (roleName: string) => {
-    await updateRole(roleName, tempRoutes);
-    setEditingRole(null);
+    try {
+      await updateRole(roleName, tempRoutes);
+      toast({
+        title: "Role Updated",
+        description: "The role has been updated successfully.",
+      });
+      setEditingRole(null);
+    } catch {
+      toast({
+        variant: "destructive",
+        title: "Update Failed",
+        description: "Failed to update the role.",
+      });
+    }
   };
 
   const handleCancelEdit = (role: Role) => {
@@ -53,7 +77,14 @@ export default function RolesManagement() {
   };
 
   const handleCreateRole = async () => {
-    if (!newRole.name) return;
+    if (!newRole.name) {
+      toast({
+        variant: "destructive",
+        title: "Validation Error",
+        description: "Role name is required.",
+      });
+      return;
+    }
 
     const roleData = {
       name: newRole.name,
@@ -63,105 +94,135 @@ export default function RolesManagement() {
 
     await createRole(roleData);
     setNewRole({ name: "", description: "", routes: {} });
+    setShowCreateForm(false);
   };
 
   return (
-    <motion.div
-      className="min-h-screen bg-gray-50 p-8"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-    >
+    <motion.div className="min-h-screen bg-gray-50 p-8">
       <div className="max-w-7xl mx-auto">
-        <motion.div
-          className="bg-white rounded-xl shadow-sm p-6 mb-8"
-          initial={{ y: -20 }}
-          animate={{ y: 0 }}
-        >
-          <h2 className="text-2xl font-bold mb-6">Create New Role</h2>
-          <div className="grid gap-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Input
-                placeholder="Role Name"
-                value={newRole.name}
-                onChange={(e) =>
-                  setNewRole((prev) => ({ ...prev, name: e.target.value }))
-                }
-              />
-              <Input
-                placeholder="Description"
-                value={newRole.description}
-                onChange={(e) =>
-                  setNewRole((prev) => ({
-                    ...prev,
-                    description: e.target.value,
-                  }))
-                }
-              />
-            </div>
+        {/* Collapsible Create Role Section */}
+        <motion.div className="bg-white rounded-xl shadow-sm mb-8">
+          <div
+            className="p-4 cursor-pointer flex justify-between items-center"
+            onClick={() => setShowCreateForm(!showCreateForm)}
+          >
+            <h2 className="text-2xl font-bold">Create New Role</h2>
+            {showCreateForm ? <ChevronUp /> : <ChevronDown />}
+          </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {ROUTES.PROTECTED.map((route) => (
-                <motion.div
-                  key={route.path}
-                  className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
-                  whileHover={{ scale: 1.02 }}
-                >
-                  <div>
-                    <p className="font-medium">{route.name}</p>
-                    <p className="text-sm text-gray-500">{route.path}</p>
-                  </div>
-                  <Switch
-                    checked={!!newRole.routes?.[route.path]}
-                    onCheckedChange={() => {
+          {showCreateForm && (
+            <motion.div
+              className="p-6 pt-0"
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+            >
+              <div className="grid gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Input
+                    placeholder="Role Name"
+                    value={newRole.name}
+                    onChange={(e) =>
+                      setNewRole((prev) => ({ ...prev, name: e.target.value }))
+                    }
+                  />
+                  <Input
+                    placeholder="Description"
+                    value={newRole.description}
+                    onChange={(e) =>
                       setNewRole((prev) => ({
                         ...prev,
-                        routes: {
-                          ...prev.routes,
-                          [route.path]: route.name,
-                        },
-                      }));
-                    }}
+                        description: e.target.value,
+                      }))
+                    }
                   />
-                </motion.div>
-              ))}
-            </div>
+                </div>
 
-            <Button onClick={handleCreateRole} className="w-full md:w-auto">
-              <Plus className="w-4 h-4 mr-2" />
-              Create Role
-            </Button>
-          </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {ROUTES.PROTECTED.map((route) => (
+                    <motion.div
+                      key={route.path}
+                      className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
+                      whileHover={{ scale: 1.02 }}
+                    >
+                      <div>
+                        <p className="font-medium">{route.name}</p>
+                        <p className="text-sm text-gray-500">{route.path}</p>
+                      </div>
+                      <Switch
+                        checked={!!newRole.routes?.[route.path]}
+                        onCheckedChange={(checked) => {
+                          setNewRole((prev) => {
+                            const updatedRoutes = { ...prev.routes };
+                            if (checked) {
+                              updatedRoutes[route.path] = route.name;
+                            } else {
+                              delete updatedRoutes[route.path];
+                            }
+                            return {
+                              ...prev,
+                              routes: updatedRoutes,
+                            };
+                          });
+                        }}
+                      />
+                    </motion.div>
+                  ))}
+                </div>
+
+                <Button onClick={handleCreateRole} className="w-full md:w-auto">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Create Role
+                </Button>
+              </div>
+            </motion.div>
+          )}
         </motion.div>
 
-        <div className="grid gap-6">
+        {/* Roles List */}
+        <div className="grid gap-3">
           <AnimatePresence>
             {roles.map((role) => (
               <motion.div
                 key={role.name}
-                className="bg-white rounded-xl shadow-sm overflow-hidden"
+                className="bg-white rounded-xl shadow-sm"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
               >
-                <div className="p-6">
-                  <div className="flex items-center justify-between mb-6">
+                <div
+                  className="p-4 cursor-pointer"
+                  onClick={() =>
+                    setExpandedRole(
+                      expandedRole === role.name ? null : role.name
+                    )
+                  }
+                >
+                  <div className="flex items-center justify-between">
                     <div>
                       <h3 className="text-xl font-semibold">{role.name}</h3>
                       <p className="text-gray-500">{role.description}</p>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 items-center">
                       {editingRole === role.name ? (
                         <>
                           <Button
                             variant="default"
-                            onClick={() => handleSaveEdit(role.name)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleSaveEdit(role.name);
+                            }}
                           >
                             <Save className="w-4 h-4 mr-2" />
                             Save
                           </Button>
                           <Button
                             variant="outline"
-                            onClick={() => handleCancelEdit(role)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setExpandedRole(null);
+                              handleCancelEdit(role);
+                            }}
                           >
                             <X className="w-4 h-4 mr-2" />
                             Cancel
@@ -170,7 +231,13 @@ export default function RolesManagement() {
                       ) : (
                         <Button
                           variant="outline"
-                          onClick={() => handleEditClick(role)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setExpandedRole(
+                              expandedRole === role.name ? null : role.name
+                            );
+                            handleEditClick(role);
+                          }}
                         >
                           <Edit2 className="w-4 h-4 mr-2" />
                           Edit
@@ -178,47 +245,69 @@ export default function RolesManagement() {
                       )}
                       <Button
                         variant="destructive"
-                        onClick={() => deleteRole(role.name)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          deleteRole(role.name);
+                        }}
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
+                      {expandedRole === role.name ? (
+                        <ChevronUp />
+                      ) : (
+                        <ChevronDown />
+                      )}
                     </div>
                   </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {ROUTES.PROTECTED.map((route) => (
-                      <motion.div
-                        key={route.path}
-                        className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
-                        whileHover={{ scale: 1.02 }}
-                      >
-                        <div>
-                          <p className="font-medium">{route.name}</p>
-                          <p className="text-sm text-gray-500">{route.path}</p>
-                        </div>
-                        <Switch
-                          checked={
-                            editingRole === role.name
-                              ? !!tempRoutes[route.path]
-                              : !!role.routes[route.path]
-                          }
-                          disabled={editingRole !== role.name}
-                          onCheckedChange={() => {
-                            if (editingRole === role.name) {
-                              const updatedRoutes = { ...tempRoutes };
-                              if (updatedRoutes[route.path]) {
-                                delete updatedRoutes[route.path];
-                              } else {
-                                updatedRoutes[route.path] = route.name;
-                              }
-                              setTempRoutes(updatedRoutes);
-                            }
-                          }}
-                        />
-                      </motion.div>
-                    ))}
-                  </div>
                 </div>
+
+                {/* Expandable Routes Section */}
+                {expandedRole === role.name && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    className="overflow-hidden"
+                  >
+                    <div className="p-4 pt-0">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {ROUTES.PROTECTED.map((route) => (
+                          <motion.div
+                            key={route.path}
+                            className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
+                            whileHover={{ scale: 1.02 }}
+                          >
+                            <div>
+                              <p className="font-medium">{route.name}</p>
+                              <p className="text-sm text-gray-500">
+                                {route.path}
+                              </p>
+                            </div>
+                            <Switch
+                              checked={
+                                editingRole === role.name
+                                  ? !!tempRoutes[route.path]
+                                  : !!role.routes[route.path]
+                              }
+                              disabled={editingRole !== role.name}
+                              onCheckedChange={(checked) => {
+                                if (editingRole === role.name) {
+                                  const updatedRoutes = { ...tempRoutes };
+                                  if (checked) {
+                                    updatedRoutes[route.path] = route.name;
+                                  } else {
+                                    delete updatedRoutes[route.path];
+                                  }
+                                  setTempRoutes(updatedRoutes);
+                                }
+                              }}
+                            />
+                          </motion.div>
+                        ))}
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
               </motion.div>
             ))}
           </AnimatePresence>

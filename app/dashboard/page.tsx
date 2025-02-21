@@ -36,37 +36,6 @@ const MainDashboard = () => {
             can view your overview and quick actions.
           </p>
         </div>
-
-        {/* Quick Stats Section */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <motion.div
-            className="bg-white p-6 rounded-lg shadow-md"
-            whileHover={{ scale: 1.02 }}
-          >
-            <h3 className="text-lg font-semibold text-gray-700">Total Views</h3>
-            <p className="text-3xl font-bold text-blue-500">1,234</p>
-          </motion.div>
-
-          <motion.div
-            className="bg-white p-6 rounded-lg shadow-md"
-            whileHover={{ scale: 1.02 }}
-          >
-            <h3 className="text-lg font-semibold text-gray-700">
-              Active Users
-            </h3>
-            <p className="text-3xl font-bold text-green-500">567</p>
-          </motion.div>
-
-          <motion.div
-            className="bg-white p-6 rounded-lg shadow-md"
-            whileHover={{ scale: 1.02 }}
-          >
-            <h3 className="text-lg font-semibold text-gray-700">
-              Total Revenue
-            </h3>
-            <p className="text-3xl font-bold text-purple-500">$89,234</p>
-          </motion.div>
-        </div>
       </motion.div>
     </ProtectedRoute>
   );

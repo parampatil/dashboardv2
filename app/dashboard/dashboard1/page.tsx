@@ -1,93 +1,87 @@
+// app/dashboard/dashboard1/page.tsx
 "use client";
-import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import { useState, useEffect } from "react";
+import UserTable from "@/components/dashboard1/UserTable";
+import Pagination from "@/components/dashboard1/Pagination";
+import { PageSizeSelector } from "@/components/dashboard1/PageSizeSelector";
 import { motion } from "framer-motion";
 
-const cardVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { 
-    opacity: 1, 
-    y: 0,
-    transition: {
-      duration: 0.5,
-      ease: "easeOut"
-    }
-  }
-};
+export default function Dashboard1() {
+  const [users, setUsers] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [pageSize, setPageSize] = useState(25);
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1
-    }
-  }
-};
+  // app/dashboard/dashboard1/page.tsx
+useEffect(() => {
+  // Add a cleanup function
+  let mounted = true;
 
-const Dashboard1 = () => {
+  const fetchUsers = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(`/api/grpc/profile?page=${currentPage}&pageSize=${pageSize}`);
+      const data = await response.json();
+      if (mounted) {
+        setUsers(data.users);
+        setTotalPages(data.totalPages);
+      }
+    } catch (error) {
+      console.error("Failed to fetch users:", error);
+    }
+    if (mounted) setLoading(false);
+  };
+
+  fetchUsers();
+
+  // Cleanup function
+  return () => {
+    mounted = false;
+  };
+}, [currentPage, pageSize]);
+
+  const handlePageSizeChange = (newSize: number) => {
+    setPageSize(newSize);
+    setCurrentPage(1); // Reset to first page when changing page size
+  };
+
   return (
-    <ProtectedRoute allowedRoutes={["/dashboard/dashboard1"]}>
-      <div className="min-h-screen bg-gray-100 p-8">
-        <div className="max-w-7xl mx-auto">
-          <h1 className="text-3xl font-bold text-gray-800 mb-8">Dashboard 1</h1>
-          
-          <motion.div 
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-          >
-            {/* Stats Cards */}
-            <motion.div 
-              variants={cardVariants}
-              className="bg-white p-6 rounded-lg shadow-md"
-            >
-              <h2 className="text-xl font-semibold text-gray-700 mb-2">Total Users</h2>
-              <p className="text-3xl font-bold text-blue-600">1,234</p>
-            </motion.div>
+    <motion.div
+      className="p-6 space-y-6"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+    >
+      <motion.div
+        className="flex justify-between items-center"
+        initial={{ y: -20 }}
+        animate={{ y: 0 }}
+      >
+        <h1 className="text-2xl font-bold text-gray-800">User Management</h1>
+        <PageSizeSelector
+          pageSize={pageSize}
+          onPageSizeChange={handlePageSizeChange}
+        />
+      </motion.div>
 
-            <motion.div 
-              variants={cardVariants}
-              className="bg-white p-6 rounded-lg shadow-md"
-            >
-              <h2 className="text-xl font-semibold text-gray-700 mb-2">Revenue</h2>
-              <p className="text-3xl font-bold text-green-600">$45,678</p>
-            </motion.div>
+      <UserTable
+        users={users}
+        loading={loading}
+        currentPage={currentPage}
+        pageSize={pageSize}
+      />
 
-            <motion.div 
-              variants={cardVariants}
-              className="bg-white p-6 rounded-lg shadow-md"
-            >
-              <h2 className="text-xl font-semibold text-gray-700 mb-2">Active Projects</h2>
-              <p className="text-3xl font-bold text-purple-600">23</p>
-            </motion.div>
-
-            {/* Chart Cards */}
-            <motion.div 
-              variants={cardVariants}
-              className="bg-white p-6 rounded-lg shadow-md md:col-span-2"
-            >
-              <h2 className="text-xl font-semibold text-gray-700 mb-4">Analytics Overview</h2>
-              <div className="h-64 bg-gray-100 rounded-lg"></div>
-            </motion.div>
-
-            {/* Activity Card */}
-            <motion.div 
-              variants={cardVariants}
-              className="bg-white p-6 rounded-lg shadow-md"
-            >
-              <h2 className="text-xl font-semibold text-gray-700 mb-4">Recent Activity</h2>
-              <div className="space-y-4">
-                <div className="h-10 bg-gray-100 rounded"></div>
-                <div className="h-10 bg-gray-100 rounded"></div>
-                <div className="h-10 bg-gray-100 rounded"></div>
-              </div>
-            </motion.div>
-          </motion.div>
-        </div>
-      </div>
-    </ProtectedRoute>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex justify-center"
+      >
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+        />
+      </motion.div>
+    </motion.div>
   );
 }
-
-export default Dashboard1;

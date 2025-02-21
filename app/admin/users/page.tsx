@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { Trash2, AlertCircle } from "lucide-react";
 import { RoleSelector } from "@/components/admin/RoleSelector";
+import { useToast } from "@/hooks/use-toast";
 
 import {
   Dialog,
@@ -31,26 +32,34 @@ export default function UserManagement() {
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const { toast } = useToast();
+
   useEffect(() => {
     let unsubscribeUsers: () => void;
     let unsubscribeRoles: () => void;
-  
+
     const setupSubscriptions = async () => {
       try {
         unsubscribeUsers = onSnapshot(collection(db, "users"), (snapshot) => {
-          const usersData = snapshot.docs.map((doc) => ({
-            uid: doc.id,
-            ...doc.data(),
-          } as User));
+          const usersData = snapshot.docs.map(
+            (doc) =>
+              ({
+                uid: doc.id,
+                ...doc.data(),
+              } as User)
+          );
           setUsers(usersData);
           setLoading(false);
         });
-  
+
         unsubscribeRoles = onSnapshot(collection(db, "roles"), (snapshot) => {
-          const rolesData = snapshot.docs.map((doc) => ({
-            name: doc.id,
-            ...doc.data(),
-          } as Role));
+          const rolesData = snapshot.docs.map(
+            (doc) =>
+              ({
+                name: doc.id,
+                ...doc.data(),
+              } as Role)
+          );
           setRoles(rolesData);
         });
       } catch (error) {
@@ -58,9 +67,9 @@ export default function UserManagement() {
         setLoading(false);
       }
     };
-  
+
     setupSubscriptions();
-  
+
     return () => {
       if (unsubscribeUsers) {
         unsubscribeUsers();
@@ -72,7 +81,19 @@ export default function UserManagement() {
   }, []);
 
   const handleAddRole = async (userId: string, roleName: string) => {
-    await assignRoleToUser(userId, roleName);
+    try {
+      await assignRoleToUser(userId, roleName);
+      toast({
+        title: "Role Assigned",
+        description: `Role "${roleName}" has been assigned successfully.`,
+      });
+    } catch {
+      toast({
+        variant: "destructive",
+        title: "Assignment Failed",
+        description: "Failed to assign the role.",
+      });
+    }
   };
 
   const handleRemoveRole = async (userId: string, roleName: string) => {
@@ -80,13 +101,19 @@ export default function UserManagement() {
   };
 
   const handleDeleteUser = async () => {
-    if (!deleteConfirm) return;
-
     try {
-      await deleteUser(deleteConfirm);
+      await deleteUser(deleteConfirm!);
+      toast({
+        title: "User Deleted",
+        description: "The user has been deleted successfully.",
+      });
       setDeleteConfirm(null);
-    } catch (error) {
-      console.error("Error deleting user:", error);
+    } catch {
+      toast({
+        variant: "destructive",
+        title: "Deletion Failed",
+        description: "Failed to delete the user.",
+      });
     }
   };
 

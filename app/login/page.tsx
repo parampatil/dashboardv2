@@ -7,9 +7,12 @@ import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase-config";
+import { useToast } from "@/hooks/use-toast"
+
 
 const LoginPage = () => {
   const router = useRouter();
+  const { toast } = useToast()
 
   const handleGoogleLogin = async () => {
     try {
@@ -26,8 +29,12 @@ const LoginPage = () => {
       } else {
         router.push("/unauthorized");
       }
-    } catch (error) {
-      console.error("Login error:", error);
+    } catch {
+      toast({
+        variant: "destructive",
+        title: "Login Failed",
+        description: "There was an error logging in with Google.",
+      });
     }
   };
 

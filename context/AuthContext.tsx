@@ -8,7 +8,8 @@ import { useRouter } from "next/navigation";
 import { User } from "@/types";
 import { createNewUser } from "@/app/actions/auth";
 
-// Create a combined type for the user
+import { useToast } from "@/hooks/use-toast";
+
 type CombinedUser = FirebaseUser & User;
 
 interface AuthContextType {
@@ -23,20 +24,28 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<CombinedUser | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const { toast } = useToast()
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+    let unsubscribeUser: (() => void) | undefined;
+
+    const unsubscribeAuth = onAuthStateChanged(auth, async (firebaseUser) => {
       if (!firebaseUser) {
         setUser(null);
         setLoading(false);
+        // Cleanup existing user listener if any
+        if (unsubscribeUser) {
+          unsubscribeUser();
+          unsubscribeUser = undefined;
+        }
         return;
       }
 
-      const unsubscribeUser = onSnapshot(
+      // Setup new user listener
+      unsubscribeUser = onSnapshot(
         doc(db, "users", firebaseUser.uid),
         async (doc) => {
           if (!doc.exists()) {
-            // Create new user on server
             const { success, user: newUser } = await createNewUser({
               uid: firebaseUser.uid,
               email: firebaseUser.email || '',
@@ -48,7 +57,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
               setUser({
                 ...firebaseUser,
                 ...newUser,
-                email: firebaseUser.email || newUser.email, // Ensure email is never null
+                email: firebaseUser.email || newUser.email,
               } as CombinedUser);
             }
           } else {
@@ -56,23 +65,43 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             setUser({
               ...firebaseUser,
               ...userData,
-              email: firebaseUser.email || userData.email, // Ensure email is never null
+              email: firebaseUser.email || userData.email,
             } as CombinedUser);
           }
           setLoading(false);
+        },
+        (error) => {
+          console.error("User document listener error:", error);
+          // Handle error appropriately
+          if (error.code === 'permission-denied') {
+            setUser(null);
+            setLoading(false);
+          }
         }
       );
-
-      return () => unsubscribeUser();
     });
 
-    return () => unsubscribe();
+    // Cleanup function
+    return () => {
+      unsubscribeAuth();
+      if (unsubscribeUser) {
+        unsubscribeUser();
+      }
+    };
   }, []);
 
   const signOut = async () => {
-    await firebaseSignOut(auth);
-    setUser(null);
-    router.push('/login');
+    try {
+      await firebaseSignOut(auth);
+      setUser(null);
+      router.push('/login');
+    } catch {
+      toast({
+        variant: "destructive",
+        title: "Sign Out Failed",
+        description: "There was an error signing out.",
+      });
+    }
   };
 
   return (
