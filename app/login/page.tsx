@@ -25,7 +25,7 @@ const LoginPage = () => {
       if (userDoc.exists()) {
         const userData = userDoc.data();
         const hasRoutes = Object.keys(userData.allowedRoutes || {}).length > 0;
-        router.push(hasRoutes ? "/dashboard" : "/unauthorized");
+        router.push(hasRoutes ? "/" : "/unauthorized");
       } else {
         router.push("/unauthorized");
       }

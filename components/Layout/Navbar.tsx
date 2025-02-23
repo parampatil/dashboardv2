@@ -2,20 +2,20 @@
 "use client";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
-import { Button } from "@/components/ui/button";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import { useState } from "react";
+import { UserNav } from "@/components/Layout/UserNav"
 
 const Navbar = () => {
-  const { user, loading, signOut } = useAuth();
+  const { user, loading } = useAuth();
   const pathname = usePathname();
   const [hoveredPath, setHoveredPath] = useState(pathname);
 
   if (loading) {
     return (
       <motion.div 
-        className="h-16 bg-background border-b"
+        className="h-16 bg-white border-b border-gray-200"
         initial={{ opacity: 0 }}
         animate={{ opacity: 0.5 }}
         transition={{ duration: 0.5 }}
@@ -23,25 +23,21 @@ const Navbar = () => {
     );
   }
 
-  // Get available routes from user's allowedRoutes
   const getNavItems = () => {
     if (!user) return [{ path: "/login", name: "Login" }];
 
     const items = [];
     const allowedRoutes = user.allowedRoutes || {};
 
-    // Add Dashboard if user has access to any dashboard route
     if (Object.keys(allowedRoutes).some(route => route.startsWith('/dashboard'))) {
       items.push({ path: "/dashboard", name: "Dashboard" });
     }
 
-    // Add Admin if user has access to admin routes
     if (allowedRoutes['/admin']) {
       items.push({ path: "/admin/roles", name: "Roles" });
       items.push({ path: "/admin/users", name: "Users" });
     }
 
-    // Add Profile if user has access
     if (allowedRoutes['/profile']) {
       items.push({ path: "/profile", name: "Profile" });
     }
@@ -53,7 +49,7 @@ const Navbar = () => {
 
   return (
     <motion.nav 
-      className="sticky top-0 z-50 h-16 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
+      className="sticky top-0 z-50 h-16 border-b border-gray-200 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60"
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={{ type: "spring", stiffness: 300, damping: 30 }}
@@ -63,15 +59,15 @@ const Navbar = () => {
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
-          <Link href="/" className="font-semibold text-lg">
-            360 Dashboard
+          <Link href="/" className="font-semibold text-lg text-gray-900">
+            360 Omnipresence
           </Link>
         </motion.div>
 
         <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1 rounded-lg bg-secondary/50 p-1">
-            {navItems.map((item) => (
-              <Link key={item.path} href={item.path}>
+          <div className="flex items-center gap-1 rounded-lg bg-gray-100/80 p-1">
+            {navItems.map((item, index) => (
+              <Link key={`nav-${index}`} href={item.path}>
                 <motion.div
                   onMouseOver={() => setHoveredPath(item.path)}
                   onMouseLeave={() => setHoveredPath(pathname)}
@@ -79,15 +75,15 @@ const Navbar = () => {
                 >
                   <span className={`relative z-10 ${
                     pathname === item.path || pathname?.startsWith(item.path + '/') 
-                      ? "text-primary" 
-                      : "text-muted-foreground"
+                      ? "text-blue-600 font-medium" 
+                      : "text-gray-600 hover:text-gray-900"
                   }`}>
                     {item.name}
                   </span>
                   
                   {(item.path === hoveredPath || pathname?.startsWith(item.path + '/')) && (
                     <motion.div
-                      className="absolute inset-0 bg-secondary rounded-md -z-0"
+                      className="absolute inset-0 bg-gray-200/80 rounded-md -z-0"
                       layoutId="navbar-hover"
                       transition={{
                         type: "spring",
@@ -104,18 +100,9 @@ const Navbar = () => {
           </div>
 
           {user && (
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <Button 
-                variant="outline" 
-                onClick={signOut}
-                className="ml-2"
-              >
-                Logout
-              </Button>
-            </motion.div>
+            <>
+              <UserNav />
+            </>
           )}
         </div>
       </div>

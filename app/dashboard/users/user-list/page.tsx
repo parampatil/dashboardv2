@@ -1,9 +1,9 @@
 // app/dashboard/dashboard1/page.tsx
 "use client";
 import { useState, useEffect } from "react";
-import UserTable from "@/components/dashboard1/UserTable";
-import Pagination from "@/components/dashboard1/Pagination";
-import { PageSizeSelector } from "@/components/dashboard1/PageSizeSelector";
+import UserTable from "@/components/UsersDashboard/UserTable";
+import Pagination from "@/components/UsersDashboard/Pagination";
+import { PageSizeSelector } from "@/components/UsersDashboard/PageSizeSelector";
 import { motion } from "framer-motion";
 
 export default function Dashboard1() {
@@ -48,7 +48,7 @@ useEffect(() => {
 
   return (
     <motion.div
-      className="p-6 space-y-6"
+      className="p-6 space-y-6 flex flex-col h-full"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
     >

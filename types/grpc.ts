@@ -16,9 +16,10 @@ export interface GetAllUsersRequest {
 }
 
 export interface User {
+  userId: number;
   displayName: string;
   email: string;
-  createdTimestamp: Date;
+  createdTimestamp: { seconds: number | string; nanos: number };
   country: string;
 }
 
