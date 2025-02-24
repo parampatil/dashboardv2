@@ -13,7 +13,7 @@ export default function Home() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen">
-      <h1 className="text-4xl font-bold mb-6">Welcome to 360 Dashboards</h1>
+      <h1 className="text-4xl font-bold mb-6">Welcome to 360 Omnipresence Dashboards</h1>
       {user ? (
         <Button onClick={() => router.push("/dashboard")}>Go to Main Dashboard</Button>
       ) : (

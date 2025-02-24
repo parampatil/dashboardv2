@@ -1,0 +1,97 @@
+syntax = "proto3";
+
+option go_package = "./providerEarning";
+
+import "google/protobuf/timestamp.proto";
+
+service ProviderEarningService {
+    rpc CreateProviderEarningAccount(CreateProviderEarningAccountRequest) returns (CreateProviderEarningAccountResponse);
+    rpc GetProviderEarningBalance(GetProviderEarningBalanceRequest) returns (GetProviderEarningBalanceResponse);
+    rpc GetProviderEarningTransactions(GetProviderEarningTransactionsRequest) returns (GetProviderEarningTransactionsResponse);
+    rpc CreatePayoutTransaction(CreatePayoutTransactionRequest) returns (CreatePayoutTransactionResponse);
+    rpc UpdatePayoutTransaction(UpdatePayoutTransactionRequest) returns (UpdatePayoutTransactionResponse);
+    rpc CreateCallTransaction(CreateCallTransactionRequest) returns (CreateCallTransactionResponse);
+}
+
+enum TransactionType {
+    credit = 0;
+    payout = 1;
+}
+
+enum PayoutStatus {
+    created = 0;
+    pending = 1;
+    in_transit = 2;
+    paid = 3;
+    failed = 4;
+    canceled = 5;
+}
+
+message CreateProviderEarningAccountRequest {
+    int64 userId = 1;
+    string currency = 2;
+}
+
+message CreateProviderEarningAccountResponse {
+    string message = 1;
+}
+
+message GetProviderEarningBalanceRequest {
+    int64 userId = 1;
+}
+
+message GetProviderEarningBalanceResponse {
+    double providerEarningBalance = 1;
+    string currency = 2;
+}
+
+message Transaction {
+    int64 transactionId = 1;
+    google.protobuf.Timestamp transactionTimestamp = 2;
+    double callDuration = 3;
+    double rate = 4;
+    string currency = 5;
+    double amount = 6;
+    TransactionType transactionType = 7;
+    PayoutStatus status = 8;
+}
+
+message GetProviderEarningTransactionsRequest {
+    int64 userId = 1;
+}
+
+message GetProviderEarningTransactionsResponse {
+    repeated Transaction providerTransactionHistory = 1;
+}
+
+message CreatePayoutTransactionRequest {
+    int64 userId = 1;
+    double amount = 2;
+    string currency = 3;
+}
+
+message CreatePayoutTransactionResponse {
+    int64 payoutTransactionId = 1;
+}
+
+message UpdatePayoutTransactionRequest {
+    int64 payoutTransactionId = 1;
+    string payoutId = 2;
+    PayoutStatus status = 3;
+}
+
+message UpdatePayoutTransactionResponse {
+    string message = 1;
+}
+
+
+message CreateCallTransactionRequest {
+    int64 userId = 1;
+    double callDuration = 2;
+    double perMinRate = 3;
+    string currency = 4;
+}
+
+message CreateCallTransactionResponse {
+    int64 callTransactionId = 1;
+}
