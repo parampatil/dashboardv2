@@ -15,19 +15,19 @@ export function DashboardFileTree({ isCollapsed, allowedRoutes }: DashboardFileT
   // Group routes by their sections
   const sections = {
     users: ROUTES.PROTECTED.filter(route => 
-      route.path.startsWith("/dashboard/users") && 
+      route.path.startsWith("/dashboard/users/") && 
       Object.keys(allowedRoutes).includes(route.path)
     ),
     customerSupport: ROUTES.PROTECTED.filter(route => 
-      route.path.startsWith("/dashboard/customersupport") && 
+      route.path.startsWith("/dashboard/customersupport/") && 
       Object.keys(allowedRoutes).includes(route.path)
     ),
     devops: ROUTES.PROTECTED.filter(route => 
-      route.path.startsWith("/dashboard/devops") && 
+      route.path.startsWith("/dashboard/devops/") && 
       Object.keys(allowedRoutes).includes(route.path)
     ),
     analytics: ROUTES.PROTECTED.filter(route => 
-      route.path.startsWith("/dashboard/analytics") && 
+      route.path.startsWith("/dashboard/analytics/") && 
       Object.keys(allowedRoutes).includes(route.path)
     ),
   };
@@ -35,7 +35,7 @@ export function DashboardFileTree({ isCollapsed, allowedRoutes }: DashboardFileT
   const treeElements = [
     {
       id: "dashboard",
-      name: "Dashboard",
+      name: "Dashboards",
       children: Object.entries(sections).map(([section, routes]) => ({
         id: section,
         name: section.charAt(0).toUpperCase() + section.slice(1),
@@ -54,7 +54,7 @@ export function DashboardFileTree({ isCollapsed, allowedRoutes }: DashboardFileT
       elements={treeElements}
       initialExpandedItems={["dashboard"]}
     >
-      <Folder element="Dashboard" value="dashboard">
+      <Folder element="Dashboards" value="dashboard">
         {/* Users Section */}
         {sections.users.length > 0 && (
           <Folder element="Users" value="users">

@@ -40,7 +40,6 @@ export function DashboardSidebar() {
         {/* User Info */}
         <motion.div 
           className="mb-8 flex items-center gap-3"
-          animate={{ opacity: isCollapsed ? 0 : 1 }}
         >
           <Link href="/dashboard" className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
             <LayoutDashboard className="h-4 w-4 text-blue-600" />

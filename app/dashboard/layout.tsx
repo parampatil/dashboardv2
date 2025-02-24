@@ -10,7 +10,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
       <DashboardSidebar />
 
       <motion.main
-        className="flex-1 p-8"
+        className="flex-1 p-8 overflow-x-auto overflow-y-hidden"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}

@@ -48,7 +48,7 @@ useEffect(() => {
 
   return (
     <motion.div
-      className="p-6 space-y-6 flex flex-col h-full"
+      className="space-y-2 flex flex-col h-full w-full"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
     >

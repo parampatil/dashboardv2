@@ -24,7 +24,7 @@ export default function UserTable({
       transition={{ duration: 0.3 }}
     >
       <motion.div
-        className="overflow-hidden"
+        className="overflow-x-auto overflow-y-hidden rounded-lg"
         initial={{ height: "auto" }}
         animate={{ height: loading ? "400px" : "auto" }}
         transition={{ duration: 0.3, ease: "easeInOut" }}
