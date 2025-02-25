@@ -25,7 +25,7 @@ export default function FindUser() {
     setLoading(true);
 
     try {
-      const response = await fetch("/api/grpc/user/details", {
+      const response = await fetch("/api/grpc/users/details", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

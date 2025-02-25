@@ -21,7 +21,7 @@ useEffect(() => {
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`/api/grpc/profile?page=${currentPage}&pageSize=${pageSize}`);
+      const response = await fetch(`/api/grpc/users?page=${currentPage}&pageSize=${pageSize}`);
       const data = await response.json();
       if (mounted) {
         setUsers(data.users);

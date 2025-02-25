@@ -1,108 +1,76 @@
 // types/grpc.ts
-import type { ServiceError } from '@grpc/grpc-js';
 
-export interface GetTotalPageCountRequest {
+// Profile Service Types
+export interface ProfileServiceClient {
+  GetTotalPageCount: (params: PageCountRequest) => Promise<PageCountResponse>;
+  GetAllUsers: (params: UsersRequest) => Promise<UsersResponse>;
+  GetUserDetailsByUserId: (params: UserDetailsRequest) => Promise<UserDetailsResponse>;
+}
+
+export interface PageCountRequest {
   perPageEntries: number;
 }
 
-export interface GetTotalPageCountResponse {
+export interface PageCountResponse {
   totalUserCount: number;
   totalPageCount: number;
 }
 
-export interface GetAllUsersRequest {
-  pageSize: number;
+export interface UsersRequest {
   pageNumber: number;
+  pageSize: number;
+}
+
+export interface UsersResponse {
+  users: User[];
+}
+
+export interface UserDetailsRequest {
+  userId: string;
+}
+
+export interface UserDetailsResponse {
+  user: User;
 }
 
 export interface User {
-  userId: number;
+  userId: string;
   displayName: string;
   email: string;
-  createdTimestamp: { seconds: number | string; nanos: number };
+  userType: string;
   country: string;
+  createdTimestamp: UserTimestamp;
+  lastUpdatedTimestamp: UserTimestamp;
+  phoneNumber?: string;
+  userName: string;
 }
 
-export interface GetAllUsersResponse {
-  users: User[];
-  totalCount: number;
+// Consumer Purchase Service Types
+export interface ConsumerPurchaseServiceClient {
+  GetConsumerPurchaseBalance: (params: BalanceRequest) => Promise<ConsumerBalanceResponse>;
 }
 
-export interface ProfileServiceClient {
-  GetTotalPageCount(
-    request: GetTotalPageCountRequest,
-    callback: (error: ServiceError | null, response: GetTotalPageCountResponse) => void
-  ): void;
-  
-  GetAllUsers(
-    request: GetAllUsersRequest,
-    callback: (error: ServiceError | null, response: GetAllUsersResponse) => void
-  ): void;
+export interface BalanceRequest {
+  userId: string;
 }
 
-// Client interface for user-related gRPC services
-export interface UserServiceClient {
-  GetUserDetailsByUserId: (
-    request: { userId: string },
-    callback: (error: Error | null, response: UserDetailsResponse) => void
-  ) => void;
-}
-
-// Client interface for consumer balance gRPC services
-export interface ConsumerBalanceClient {
-  GetConsumerPurchaseBalance: (
-    request: { userId: string },
-    callback: (error: Error | null, response: { consumerPurchaseBalance: number }) => void
-  ) => void;
-}
-
-// Client interface for provider balance gRPC services
-export interface ProviderBalanceClient {
-  GetProviderEarningBalance: (
-    request: { userId: string },
-    callback: (error: Error | null, response: { providerEarningBalance: number, currency: string }) => void
-  ) => void;
-}
-// Response type for user details
-export interface UserDetailsResponse {
-  user: {
-    uid: string;
-    userName: string;
-    firstName: string;
-    middleName: string;
-    lastName: string;
-    dateOfBirth: string;
-    displayName: string;
-    phoneNumber: string;
-    email: string;
-    pin: string;
-    bio: string;
-    userType: string;
-    proximityAsSkill: string;
-    createdTimestamp: {
-      seconds: string;
-      nanos: number;
-    };
-    lastUpdatedTimestamp: {
-      seconds: string;
-      nanos: number;
-    };
-    createdBy: string;
-    updatedBy: string;
-    isActive: boolean;
-    userId: string;
-    passwordHash: string;
-    country: string;
-  };
-}
-
-// Response type for consumer balance
 export interface ConsumerBalanceResponse {
   consumerPurchaseBalance: number;
 }
 
-// Response type for provider balance
+// Provider Earning Service Types
+export interface ProviderEarningServiceClient {
+  GetProviderEarningBalance: (params: BalanceRequest) => Promise<ProviderBalanceResponse>;
+}
+
 export interface ProviderBalanceResponse {
   providerEarningBalance: number;
   currency: string;
 }
+
+
+// Helper interface to format protobuf timestamp
+export interface UserTimestamp {
+    seconds: string;
+    nanos: number;
+  }

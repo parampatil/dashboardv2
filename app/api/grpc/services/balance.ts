@@ -1,10 +1,13 @@
-// app/api/grpc/services/balance.ts
+// api/grpc/services/balance.ts
 import { clients } from '../client';
 import { promisify } from 'util';
-import type { ConsumerBalanceClient, ProviderBalanceClient } from '@/types/grpc';
+import type { 
+  ConsumerPurchaseServiceClient, 
+  ProviderEarningServiceClient 
+} from '@/types/grpc';
 
-const consumerClient = clients.consumerBalance as unknown as ConsumerBalanceClient;
-const providerClient = clients.providerBalance as unknown as ProviderBalanceClient;
+const consumerClient = clients.consumerPurchase as unknown as ConsumerPurchaseServiceClient;
+const providerClient = clients.providerEarning as unknown as ProviderEarningServiceClient;
 
 export const balanceService = {
   getConsumerBalance: promisify(consumerClient.GetConsumerPurchaseBalance.bind(consumerClient)),
