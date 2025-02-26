@@ -1,13 +1,19 @@
-// app/dashboard/dashboard1/components/UserTable.tsx
+// components/UsersDashboard/UserTable.tsx
 import { motion, AnimatePresence } from "framer-motion";
 import { formatProtobufTimestamp } from "@/lib/utils";
 import { User } from "@/types/grpc";
 
+interface UserTableUser extends User {
+  viewButton: React.ReactNode;
+} 
+
 interface UserTableProps {
-  users: User[];
+  users: UserTableUser[]; // Changed to User[] to accommodate the added viewButton
   loading: boolean;
   currentPage: number;
   pageSize: number;
+  selectedUserId?: string | null;
+  extraColumns?: { header: string; accessor: string }[];
 }
 
 export default function UserTable({
@@ -15,6 +21,7 @@ export default function UserTable({
   loading,
   currentPage,
   pageSize,
+  selectedUserId,
 }: UserTableProps) {
   return (
     <motion.div
@@ -53,6 +60,7 @@ export default function UserTable({
               <th scope="col" className="px-6 py-3 text-left text-sm font-semibold text-gray-900 bg-gray-50">Email</th>
               <th scope="col" className="px-6 py-3 text-left text-sm font-semibold text-gray-900 bg-gray-50">Created At</th>
               <th scope="col" className="px-6 py-3 text-left text-sm font-semibold text-gray-900 bg-gray-50">Country</th>
+              <th scope="col" className="px-6 py-3 text-left text-sm font-semibold text-gray-900 bg-gray-50">Actions</th>
             </tr>
           </thead>
 
@@ -69,7 +77,9 @@ export default function UserTable({
                     delay: index * 0.03,
                     ease: "easeOut"
                   }}
-                  className="hover:bg-gray-50"
+                  className={`hover:bg-gray-50 ${
+                    selectedUserId === user.userId ? "bg-blue-50" : ""
+                  }`}
                 >
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {(currentPage - 1) * pageSize + index + 1}
@@ -88,6 +98,9 @@ export default function UserTable({
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {user.country}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {user.viewButton}
                   </td>
                 </motion.tr>
               ))}

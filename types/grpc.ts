@@ -48,6 +48,7 @@ export interface User {
 // Consumer Purchase Service Types
 export interface ConsumerPurchaseServiceClient {
   GetConsumerPurchaseBalance: (params: BalanceRequest) => Promise<ConsumerBalanceResponse>;
+  GetConsumerPurchaseHistory: (params: ConsumerPurchaseHistoryRequest) => Promise<ConsumerPurchaseHistoryResponse>;
 }
 
 export interface BalanceRequest {
@@ -58,14 +59,54 @@ export interface ConsumerBalanceResponse {
   consumerPurchaseBalance: number;
 }
 
+export interface ConsumerPurchaseHistoryRequest {
+  userId: string;
+}
+
+export interface ConsumerPurchaseHistoryResponse {
+  consumerPurchaseHistory: PurchaseHistory[];
+}
+
+export interface PurchaseHistory {
+  transactionId: string;
+  offerName: string;
+  totalMinutes: number;
+  totalUnusedMinutes: number;
+  totalRefundAmount: number;
+  purchaseTimestamp: UserTimestamp;
+  purchaseAmount: number;
+  purchaseCurrency: string;
+  refundStatus: string;
+}
+
 // Provider Earning Service Types
 export interface ProviderEarningServiceClient {
   GetProviderEarningBalance: (params: BalanceRequest) => Promise<ProviderBalanceResponse>;
+  GetProviderEarningTransactions: (params: ProviderEarningTransactionsRequest) => Promise<ProviderEarningTransactionsResponse>;
 }
 
 export interface ProviderBalanceResponse {
   providerEarningBalance: number;
   currency: string;
+}
+
+export interface ProviderEarningTransactionsRequest {
+  userId: string;
+}
+
+export interface ProviderEarningTransactionsResponse {
+  providerTransactionHistory: ProviderEarningTransactions[];
+}
+
+export interface ProviderEarningTransactions {
+  transactionId: string;
+  transactionTimestamp: UserTimestamp;
+  callDuration: number;
+  rate: number;
+  currency: string;
+  amount: number;
+  transactionType: string;
+  status: string;
 }
 
 

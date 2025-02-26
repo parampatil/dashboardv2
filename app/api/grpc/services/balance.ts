@@ -1,4 +1,4 @@
-// api/grpc/services/balance.ts
+// app/api/grpc/services/balance.ts
 import { clients } from '../client';
 import { promisify } from 'util';
 import type { 
@@ -11,5 +11,7 @@ const providerClient = clients.providerEarning as unknown as ProviderEarningServ
 
 export const balanceService = {
   getConsumerBalance: promisify(consumerClient.GetConsumerPurchaseBalance.bind(consumerClient)),
-  getProviderBalance: promisify(providerClient.GetProviderEarningBalance.bind(providerClient))
+  getProviderBalance: promisify(providerClient.GetProviderEarningBalance.bind(providerClient)),
+  getConsumerPurchaseHistory: promisify(consumerClient.GetConsumerPurchaseHistory.bind(consumerClient)),
+  getProviderEarningTransactions: promisify(providerClient.GetProviderEarningTransactions.bind(providerClient))
 };

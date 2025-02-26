@@ -1,27 +1,30 @@
 // app/dashboard/users/find-user/page.tsx
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { formatProtobufTimestamp } from "@/lib/utils";
-import { UserDetailsResponse, ProviderBalanceResponse } from "@/types/grpc";
-
-interface UserSearchResult {
-  user: UserDetailsResponse['user'];
-  consumerPurchaseBalance: number;
-  providerBalance: ProviderBalanceResponse;
-}
+import { UserDetails } from "@/components/UsersDashboard/UserDetails";
+import { useSearchParams } from "next/navigation";
 
 export default function FindUser() {
   const [userId, setUserId] = useState("");
   const [loading, setLoading] = useState(false);
-  const [userData, setUserData] = useState<UserSearchResult | null>(null);
+  const [userData, setUserData] = useState(null);
   const { toast } = useToast();
+  const searchParams = useSearchParams();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // Check for userId in URL params and auto-search if present
+  useEffect(() => {
+    const userIdParam = searchParams.get('userId');
+    if (userIdParam) {
+      setUserId(userIdParam);
+      handleSearch(userIdParam);
+    }
+  }, [searchParams]);
+
+  const handleSearch = async (id: string) => {
     setLoading(true);
 
     try {
@@ -30,7 +33,7 @@ export default function FindUser() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ userId }),
+        body: JSON.stringify({ userId: id }),
       });
 
       if (!response.ok) {
@@ -38,7 +41,6 @@ export default function FindUser() {
       }
 
       const data = await response.json();
-      console.log(data);
       setUserData(data);
     } catch {
       toast({
@@ -49,6 +51,11 @@ export default function FindUser() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    handleSearch(userId);
   };
 
   return (
@@ -79,63 +86,7 @@ export default function FindUser() {
         </form>
       </div>
 
-      {userData && (
-        <motion.div
-          className="bg-white rounded-lg shadow-md p-6"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* User Details Section */}
-            <div className="space-y-4">
-              <h2 className="text-xl font-semibold">User Details</h2>
-              <div className="grid grid-cols-2 gap-4">
-                <InfoField label="Display Name" value={userData.user.displayName} />
-                <InfoField label="Email" value={userData.user.email} />
-                <InfoField label="User Type" value={userData.user.userType} />
-                <InfoField label="Country" value={userData.user.country} />
-                <InfoField label="Phone" value={userData.user.phoneNumber || "N/A"} />
-                <InfoField label="Username" value={userData.user.userName} />
-                <InfoField
-                  label="Created At"
-                  value={formatProtobufTimestamp(userData.user.createdTimestamp)}
-                />
-                <InfoField
-                  label="Updated At"
-                  value={formatProtobufTimestamp(userData.user.lastUpdatedTimestamp)}
-                />
-              </div>
-            </div>
-
-            {/* Balance Information Section */}
-            <div className="space-y-4">
-              <h2 className="text-xl font-semibold">Balance Information</h2>
-              <div className="grid grid-cols-1 gap-4">
-                <div className="p-4 bg-blue-50 rounded-lg">
-                  <p className="text-sm text-blue-600">Consumer Purchase Balance</p>
-                  <p className="text-2xl font-bold text-blue-700">
-                    {userData.consumerPurchaseBalance} Min
-                  </p>
-                </div>
-                <div className="p-4 bg-green-50 rounded-lg">
-                  <p className="text-sm text-green-600">Provider Earning Balance</p>
-                  <p className="text-2xl font-bold text-green-700">
-                    {userData.providerBalance.currency} {userData.providerBalance.providerEarningBalance}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </motion.div>
-      )}
+      {userData && <UserDetails userData={userData} />}
     </motion.div>
   );
 }
-
-// Helper component for displaying info fields
-const InfoField = ({ label, value }: { label: string; value: string }) => (
-  <div>
-    <p className="text-sm text-gray-500">{label}</p>
-    <p className="font-medium">{value}</p>
-  </div>
-);
