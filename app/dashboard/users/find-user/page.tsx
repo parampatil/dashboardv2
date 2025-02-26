@@ -1,28 +1,17 @@
 // app/dashboard/users/find-user/page.tsx
 "use client";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { UserDetails } from "@/components/UsersDashboard/UserDetails";
-import { useSearchParams } from "next/navigation";
 
-export default function FindUser() {
+export default function FindUserComponent() {
   const [userId, setUserId] = useState("");
   const [loading, setLoading] = useState(false);
   const [userData, setUserData] = useState(null);
   const { toast } = useToast();
-  const searchParams = useSearchParams();
-
-  // Check for userId in URL params and auto-search if present
-  useEffect(() => {
-    const userIdParam = searchParams.get('userId');
-    if (userIdParam) {
-      setUserId(userIdParam);
-      handleSearch(userIdParam);
-    }
-  }, [searchParams]);
 
   const handleSearch = async (id: string) => {
     setLoading(true);
