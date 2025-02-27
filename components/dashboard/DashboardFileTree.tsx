@@ -30,6 +30,14 @@ export function DashboardFileTree({ isCollapsed, allowedRoutes }: DashboardFileT
       route.path.startsWith("/dashboard/analytics/") && 
       Object.keys(allowedRoutes).includes(route.path)
     ),
+    rewards: ROUTES.PROTECTED.filter(route => 
+      route.path.startsWith("/dashboard/rewards/") && 
+      Object.keys(allowedRoutes).includes(route.path)
+    ),
+    ConsumerPurchase: ROUTES.PROTECTED.filter(route =>
+      route.path.startsWith("/dashboard/consumerpurchase/") &&
+      Object.keys(allowedRoutes).includes(route.path)
+    )
   };
 
   const treeElements = [
@@ -59,6 +67,23 @@ export function DashboardFileTree({ isCollapsed, allowedRoutes }: DashboardFileT
         {sections.users.length > 0 && (
           <Folder element="Users" value="users">
             {sections.users.map((route) => (
+              <Link key={route.path} href={route.path}>
+                <File
+                  value={route.path}
+                  isSelect={pathname === route.path}
+                  className="px-2 py-1"
+                >
+                  {!isCollapsed ? route.name : ""}
+                </File>
+              </Link>
+            ))}
+          </Folder>
+        )}
+
+        {/* Rewards Section */}
+        {sections.rewards.length > 0 && (
+          <Folder element="Rewards" value="rewards">
+            {sections.rewards.map((route) => (
               <Link key={route.path} href={route.path}>
                 <File
                   value={route.path}
@@ -122,6 +147,24 @@ export function DashboardFileTree({ isCollapsed, allowedRoutes }: DashboardFileT
             ))}
           </Folder>
         )}
+
+        {/* Customer Purchase Section */}
+        {sections.ConsumerPurchase.length > 0 && (
+          <Folder element="Consumer Purchase" value="ConsumerPurchase">
+            {sections.ConsumerPurchase.map((route) => (
+              <Link key={route.path} href={route.path}>
+                <File
+                  value={route.path}
+                  isSelect={pathname === route.path}
+                  className="px-2 py-1"
+                >
+                  {!isCollapsed ? route.name : ""}
+                </File>
+              </Link>
+            ))}
+          </Folder>
+        )}
+
       </Folder>
     </Tree>
   );

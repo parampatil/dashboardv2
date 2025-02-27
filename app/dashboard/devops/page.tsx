@@ -1,9 +1,11 @@
 "use client";
 import React from 'react'
 import { motion } from 'framer-motion'
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
 
 const Devops = () => {
   return (
+    <ProtectedRoute allowedRoutes={['/dashboard/devops']}>
     <motion.div
       className="space-y-6"
       initial={{ opacity: 0 }}
@@ -14,6 +16,7 @@ const Devops = () => {
         <p className="text-sm text-gray-500">This is the devops page</p>
       </div>
     </motion.div>
+    </ProtectedRoute>
   )
 }
 

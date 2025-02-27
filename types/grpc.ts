@@ -110,6 +110,24 @@ export interface ProviderEarningTransactions {
 }
 
 
+// Reward Service Types
+export interface RewardServiceClient {
+  GetAvailableRewards: ({}) => Promise<RewardResponse>;
+}
+
+export interface Reward {
+  rewardId: string;
+  rewardName: string;
+  rewardDescription: string;
+  amount: number;
+  currency: string;
+  rate: number;
+}
+
+export interface RewardResponse {
+  rewards: Reward[];
+}
+
 // Helper interface to format protobuf timestamp
 export interface UserTimestamp {
     seconds: string;

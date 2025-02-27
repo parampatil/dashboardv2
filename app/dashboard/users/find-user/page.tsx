@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { UserDetails } from "@/components/UsersDashboard/UserDetails";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
 
 export default function FindUserComponent() {
   const [userId, setUserId] = useState("");
@@ -48,6 +49,7 @@ export default function FindUserComponent() {
   };
 
   return (
+    <ProtectedRoute allowedRoutes={["/dashboard/users/find-user"]}>
     <motion.div
       className="space-y-6"
       initial={{ opacity: 0 }}
@@ -77,5 +79,6 @@ export default function FindUserComponent() {
 
       {userData && <UserDetails userData={userData} />}
     </motion.div>
+    </ProtectedRoute>
   );
 }

@@ -1,6 +1,7 @@
 // app/dashboard/users/all-users/page.tsx
 "use client";
 import { useState, useEffect } from "react";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import UserTable from "@/components/UsersDashboard/UserTable";
 import Pagination from "@/components/UsersDashboard/Pagination";
 import { PageSizeSelector } from "@/components/UsersDashboard/PageSizeSelector";
@@ -113,6 +114,7 @@ export default function Dashboard1() {
 
 
   return (
+    <ProtectedRoute allowedRoutes={["/dashboard/users/all-users"]}>
     <motion.div
       className="space-y-2 flex flex-col h-full w-full"
       initial={{ opacity: 0 }}
@@ -176,5 +178,6 @@ export default function Dashboard1() {
         </DrawerContent>
       </Drawer>
     </motion.div>
+    </ProtectedRoute>
   );
 }

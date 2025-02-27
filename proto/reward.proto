@@ -1,0 +1,66 @@
+syntax = "proto3";
+
+option go_package = "./rewards";
+
+service RewardService {
+    rpc CreateReward(CreateRewardRequest) returns (CreateRewardResponse);
+    rpc GetRewardDetails(GetRewardDetailsRequest) returns (GetRewardDetailsResponse);
+    rpc GetAvailableRewards(GetAvailableRewardsRequest) returns (GetAvailableRewardsResponse);
+    rpc CreateRewardTransactionWithClient(CreateRewardTransactionRequestWithClient) returns (CreateRewardTransactionResponseWithClient);
+
+}
+
+
+message CreateRewardRequest {
+    string rewardName = 1;
+    string rewardDescription = 2;
+    double amount = 3;
+    string currency = 4;
+    double rate = 5;
+}
+
+message CreateRewardResponse {
+    int64 rewardId = 1;
+    string message = 2;
+}
+
+message GetRewardDetailsRequest {
+    string RewardId = 1;
+}
+
+message GetRewardDetailsResponse {
+    int64 rewardId = 1;
+    string rewardName = 2;
+    string rewardDescription = 3;
+    double amount = 4;
+    string currency = 5;
+    double rate = 6;
+}
+
+message Reward {
+    int64 rewardId = 1;
+    string rewardName = 2;
+    string rewardDescription = 3;
+    double amount = 4;
+    string currency = 5;
+    double rate = 6;
+}
+
+message GetAvailableRewardsRequest {
+
+}
+
+message GetAvailableRewardsResponse {
+    repeated Reward rewards = 1;
+}
+
+message CreateRewardTransactionRequestWithClient {
+    int64 userId = 1;
+    int64 rewardId = 2;
+    double rate = 3;
+    double amount = 4;
+}
+
+message CreateRewardTransactionResponseWithClient {
+    int64 rewardTransactionId = 1;
+}

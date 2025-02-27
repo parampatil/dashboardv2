@@ -1,9 +1,11 @@
 "use client";
 import React from 'react'
 import { motion } from 'framer-motion'
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
 
 const CallHistoryTable = () => {
   return (
+    <ProtectedRoute allowedRoutes={['/dashboard/analytics/call-history-table']}>
     <motion.div
       className="space-y-6"
       initial={{ opacity: 0 }}
@@ -14,6 +16,7 @@ const CallHistoryTable = () => {
         <p className="text-sm text-gray-500">This is the call history table page</p>
       </div>
     </motion.div>
+    </ProtectedRoute>
   )
 }
 

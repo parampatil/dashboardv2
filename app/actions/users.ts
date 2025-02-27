@@ -1,7 +1,7 @@
 // app/actions/users.ts
 "use server";
 
-import { adminDb } from "@/lib/firebase-admin";
+import { adminDb, adminAuth } from "@/lib/firebase-admin";
 
 interface UserData {
   allowedRoutes: { [key: string]: string };
@@ -103,7 +103,13 @@ export async function removeRoleFromUser(userId: string, roleName: string) {
 
 export async function deleteUser(userId: string) {
   try {
+    // Delete user from Firebase Authentication
+    await adminAuth.deleteUser(userId);
+    
+    // Delete user from Firestore
     await adminDb.collection("users").doc(userId).delete();
+    
+    
     return { success: true };
   } catch (error) {
     console.error("Error deleting user:", error);

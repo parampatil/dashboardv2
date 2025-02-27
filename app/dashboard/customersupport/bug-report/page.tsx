@@ -1,9 +1,11 @@
 "use client";
 import React from 'react'
 import { motion } from 'framer-motion'
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
 
 const BugReport = () => {
   return (
+    <ProtectedRoute allowedRoutes={['/dashboard/customersupport/bug-report']}>
     <motion.div
       className="space-y-6"
       initial={{ opacity: 0 }}
@@ -14,6 +16,7 @@ const BugReport = () => {
         <p className="text-sm text-gray-500">This is the bug report page</p>
       </div>
     </motion.div>
+    </ProtectedRoute>
   )
 }
 
