@@ -6,7 +6,7 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "lh3.googleusercontent.com" },
     ],
   },
-  /* config options here */
+  output: 'standalone',
 };
 
 export default nextConfig;
