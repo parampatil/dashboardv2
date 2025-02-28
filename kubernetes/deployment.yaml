@@ -36,10 +36,6 @@ spec:
             privileged: false
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
-          volumeMounts:
-            - name: spanner-cred-vol
-              mountPath: "/app/secert"
-              readOnly: true
           ports:
           - containerPort: 3000
             name: http
