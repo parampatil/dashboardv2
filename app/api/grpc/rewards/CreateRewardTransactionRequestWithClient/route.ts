@@ -12,7 +12,7 @@ export async function POST(request: Request) {
     const { userId, rewardId } =
       (await request.json()) as CreateRewardTransactionRequest;
 
-    const rewardTransaction = (await rewardService.createRewardTransaction({
+    const rewardTransaction = (await rewardService.CreateRewardTransactionWithClient({
       userId,
       rewardId,
     })) as CreateRewardTransactionResponse;

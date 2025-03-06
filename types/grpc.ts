@@ -5,6 +5,7 @@ export interface ProfileServiceClient {
   GetTotalPageCount: (params: PageCountRequest) => Promise<PageCountResponse>;
   GetAllUsers: (params: UsersRequest) => Promise<UsersResponse>;
   GetUserDetailsByUserId: (params: UserDetailsRequest) => Promise<UserDetailsResponse>;
+  GetUserDetailsByEmail: (params: GetUserDetailsByEmailRequest) => Promise<GetUserDetailsByEmailResponse>;
 }
 
 export interface PageCountRequest {
@@ -31,6 +32,15 @@ export interface UserDetailsRequest {
 
 export interface UserDetailsResponse {
   user: User;
+}
+
+export interface GetUserDetailsByEmailRequest {
+  email_prefix: string;
+}
+
+export interface GetUserDetailsByEmailResponse {
+  users: User[];
+  total_count: number;
 }
 
 export interface User {
@@ -113,7 +123,7 @@ export interface ProviderEarningTransactions {
 // Reward Service Types
 export interface RewardServiceClient {
   GetAvailableRewards: ({}) => Promise<RewardResponse>;
-  CreateRewardTransaction: (params: CreateRewardTransactionRequest) => Promise<CreateRewardTransactionResponse>;
+  CreateRewardTransactionWithClient: (params: CreateRewardTransactionRequest) => Promise<CreateRewardTransactionResponse>;
 }
 
 export interface Reward {

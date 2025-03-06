@@ -5,6 +5,15 @@ import { motion } from "framer-motion";
 import { Reward } from "@/types/grpc";
 import { useToast } from "@/hooks/use-toast";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import { Button } from "@/components/ui/button";
+import { RewardForm } from "../RewardForm";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 export default function AvailableRewards() {
   const [rewards, setRewards] = useState<Reward[]>([]);
@@ -35,7 +44,6 @@ export default function AvailableRewards() {
     fetchRewards();
   }, [toast]);
 
-  // Container animation variants
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -92,7 +100,8 @@ export default function AvailableRewards() {
 }
 
 function RewardCard({ reward, index }: { reward: Reward; index: number }) {
-  // Item animation variants
+  const [isOpen, setIsOpen] = useState(false);
+
   const itemVariants = {
     hidden: { y: 20, opacity: 0 },
     visible: {
@@ -149,6 +158,18 @@ function RewardCard({ reward, index }: { reward: Reward; index: number }) {
         <div className="pt-2">
           <p className="text-xs text-gray-500">Reward ID: {reward.rewardId}</p>
         </div>
+
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+          <DialogTrigger asChild>
+            <Button className="w-full">Give Reward</Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Give Reward: {reward.rewardName}</DialogTitle>
+            </DialogHeader>
+            <RewardForm initialRewardId={reward.rewardId.toString()} onClose={() => setIsOpen(false)} />
+          </DialogContent>
+        </Dialog>
       </div>
     </motion.div>
   );

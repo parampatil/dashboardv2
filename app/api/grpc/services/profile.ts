@@ -8,5 +8,6 @@ const typedClient = clients.profile as unknown as ProfileServiceClient;
 export const profileService = {
   getTotalPageCount: promisify(typedClient.GetTotalPageCount.bind(typedClient)),
   getAllUsers: promisify(typedClient.GetAllUsers.bind(typedClient)),
-  getUserDetails: promisify(typedClient.GetUserDetailsByUserId.bind(typedClient))
+  getUserDetails: promisify(typedClient.GetUserDetailsByUserId.bind(typedClient)),
+  getUserDetailsByEmail: promisify(typedClient.GetUserDetailsByEmail.bind(typedClient))
 };

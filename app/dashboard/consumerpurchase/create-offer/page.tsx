@@ -1,3 +1,4 @@
+// app/dashboard/consumerpurchase/create-offer/page.tsx
 "use client";
 import React from 'react';
 import { motion } from 'framer-motion';
@@ -17,6 +18,7 @@ import {
 } from "@/components/ui/form";
 import { toast } from "@/hooks/use-toast";
 import { CreateOfferRequest } from '@/types/grpc';
+import { Tag } from 'lucide-react';
 
 const formSchema = z.object({
   country: z.string().min(2, "Country must be at least 2 characters"),
@@ -65,84 +67,65 @@ const CreateOffer = () => {
   return (
     <ProtectedRoute allowedRoutes={['/dashboard/consumerpurchase/create-offer']}>
       <motion.div
-        className="space-y-6 max-w-md mx-auto"
+        className="max-w-md mx-auto"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-2xl font-semibold text-gray-800 mb-6">Create Offer</h2>
+        <motion.div
+          className="bg-white rounded-lg shadow-md p-6 mb-6"
+          initial={{ scale: 0.95 }}
+          animate={{ scale: 1 }}
+          transition={{ duration: 0.3 }}
+        >
+          <motion.div
+            className="flex items-center mb-6"
+            initial={{ x: -20 }}
+            animate={{ x: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            <Tag className="h-8 w-8 text-blue-500 mr-3" />
+            <h1 className="text-2xl font-bold text-gray-800">Create Offer</h1>
+          </motion.div>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <FormField
-                control={form.control}
-                name="country"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Country</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Enter country" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="currency"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Currency</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Enter currency" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="numberOfMinutes"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Number of Minutes</FormLabel>
-                    <FormControl>
-                      <Input type="number" placeholder="Enter number of minutes" {...field} onChange={(e) => field.onChange(Number(e.target.value))} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="offerName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Offer Name</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Enter offer name" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="totalPrice"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Total Price</FormLabel>
-                    <FormControl>
-                      <Input type="number" placeholder="Enter total price" {...field} onChange={(e) => field.onChange(Number(e.target.value))} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button type="submit" className="w-full">Create Offer</Button>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              {['country', 'currency', 'numberOfMinutes', 'offerName', 'totalPrice'].map((field, index) => (
+                <motion.div
+                  key={field}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 + index * 0.1 }}
+                >
+                  <FormField
+                    control={form.control}
+                    name={field as keyof CreateOfferRequest}
+                    render={({ field: fieldProps }) => (
+                      <FormItem>
+                        <FormLabel>{field.charAt(0).toUpperCase() + field.slice(1)}</FormLabel>
+                        <FormControl>
+                          <Input
+                            type={['numberOfMinutes', 'totalPrice'].includes(field) ? 'number' : 'text'}
+                            placeholder={`Enter ${field}`}
+                            {...fieldProps}
+                            onChange={(e) => fieldProps.onChange(['numberOfMinutes', 'totalPrice'].includes(field) ? Number(e.target.value) : e.target.value)}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </motion.div>
+              ))}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.8 }}
+              >
+                <Button type="submit" className="w-full">Create Offer</Button>
+              </motion.div>
             </form>
           </Form>
-        </div>
+        </motion.div>
       </motion.div>
     </ProtectedRoute>
   );

@@ -11,6 +11,7 @@ service ProfileService {
     rpc UpdateUserDetails(UpdateUserDetailsRequest) returns (UpdateUserDetailsResponse);
     rpc UpdateUserCountry(UpdateUserCountryRequest) returns (UpdateUserCountryResponse);
     rpc GetTotalPageCount(GetTotalPageCountRequest) returns (GetTotalPageCountResponse);
+    rpc GetUserDetailsByEmail(GetUserDetailsByEmailRequest) returns (GetUserDetailsByEmailResponse);
 }
 
 message User {
@@ -110,4 +111,13 @@ message GetTotalPageCountRequest {
 message GetTotalPageCountResponse {
     int64 totalUserCount = 1;     // Total number of users in DB
     int64 totalPageCount = 2; // Computed total pages
+}
+
+message GetUserDetailsByEmailRequest {
+    string email_prefix = 1;
+}
+
+message GetUserDetailsByEmailResponse {
+    repeated User users = 1;
+    int64 total_count = 2;
 }

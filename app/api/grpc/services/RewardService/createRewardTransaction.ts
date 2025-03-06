@@ -6,7 +6,7 @@ import type { RewardServiceClient } from "@/types/grpc";
 const rewardsClient = clients.reward as unknown as RewardServiceClient;
 
 export const rewardService = {
-  createRewardTransaction: promisify(
-    rewardsClient.CreateRewardTransaction.bind(rewardsClient)
+  CreateRewardTransactionWithClient: promisify(
+    rewardsClient.CreateRewardTransactionWithClient.bind(rewardsClient)
   ),
 };
