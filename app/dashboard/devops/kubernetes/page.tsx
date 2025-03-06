@@ -15,6 +15,8 @@ const Kubernetes = () => {
             <h2 className="text-lg font-semibold text-gray-800">Kubernetes</h2>
             <p className="text-sm text-gray-500">This is the Kubernetes page</p>
         </div>
+        <iframe src="https://grafana-s1.360world.com/goto/pq26XvpNR?orgId=1" className='w-full h-[calc(100vh-4rem)] rounded-lg' />
+        {/* <iframe src="https://intra.360world.com/admin/k8s/#/workloads?namespace=prod-backend" className='w-full h-[calc(100vh-4rem)] rounded-lg' /> */}
     </motion.div>
     </ProtectedRoute>
   )

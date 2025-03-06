@@ -113,6 +113,7 @@ export interface ProviderEarningTransactions {
 // Reward Service Types
 export interface RewardServiceClient {
   GetAvailableRewards: ({}) => Promise<RewardResponse>;
+  CreateRewardTransaction: (params: CreateRewardTransactionRequest) => Promise<CreateRewardTransactionResponse>;
 }
 
 export interface Reward {
@@ -128,6 +129,14 @@ export interface RewardResponse {
   rewards: Reward[];
 }
 
+export interface CreateRewardTransactionRequest {
+  userId: number;
+  rewardId: number;
+}
+
+export interface CreateRewardTransactionResponse {
+  rewardTransactionId: number;
+}
 // Consumer Purchase Dev Service Types
 export interface ConsumerPurchaseDevServiceClient {
   AvailableOffers: (params: AvailableOffersRequest) => Promise<AvailableOffersResponse>;

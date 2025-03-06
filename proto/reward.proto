@@ -57,8 +57,6 @@ message GetAvailableRewardsResponse {
 message CreateRewardTransactionRequestWithClient {
     int64 userId = 1;
     int64 rewardId = 2;
-    double rate = 3;
-    double amount = 4;
 }
 
 message CreateRewardTransactionResponseWithClient {

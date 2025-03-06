@@ -62,7 +62,7 @@ export default function AvailableOffers() {
 
   useEffect(() => {
     fetchOffers(selectedCountry);
-  }, [selectedCountry, toast]);
+  }, [selectedCountry]);
 
   const handleCountryChange = (country: string) => {
     setSelectedCountry(country);
