@@ -69,4 +69,4 @@ spec:
   selector:
     k8s-app: admin-dashboard-omnipresence
   sessionAffinity: None
-  type: LoadBalancer
+  type: ClusterIP
