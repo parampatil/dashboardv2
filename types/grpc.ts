@@ -187,4 +187,4 @@ export interface CreateOfferResponse {
 export interface UserTimestamp {
     seconds: string;
     nanos: number;
-  }
+}
