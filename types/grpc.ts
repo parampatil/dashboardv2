@@ -127,7 +127,7 @@ export interface RewardServiceClient {
 }
 
 export interface Reward {
-  rewardId: string;
+  rewardId: number;
   rewardName: string;
   rewardDescription: string;
   amount: number;

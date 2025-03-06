@@ -133,9 +133,19 @@ export function UserDetails({ userData }: UserDetailsProps) {
           <div className="grid grid-cols-1 gap-4">
             <div className="p-4 bg-blue-50 rounded-lg">
               <p className="text-sm text-blue-600">Consumer Purchase Balance</p>
-              <p className="text-2xl font-bold text-blue-700">
-                {userData.consumerPurchaseBalance} Min
-              </p>
+              {(() => {
+                const totalMinutes = Math.floor(
+                  userData.consumerPurchaseBalance
+                );
+                const totalSeconds = Math.round(
+                  (userData.consumerPurchaseBalance - totalMinutes) * 60
+                );
+                return (
+                  <p className="text-2xl font-bold text-blue-700">
+                    {totalMinutes} Min {totalSeconds} Sec
+                  </p>
+                );
+              })()}
             </div>
             <div className="p-4 bg-green-50 rounded-lg">
               <p className="text-sm text-green-600">Provider Earning Balance</p>

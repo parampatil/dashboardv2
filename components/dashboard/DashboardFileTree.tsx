@@ -1,171 +1,134 @@
-// components/dashboard/DashboardFileTree.tsx
-import { Tree, File, Folder } from "@/components/ui/tree-view";
-import { ROUTES } from "@/config/routes";
+// app/components/dashboard/DashboardFileTree.tsx
+"use client";
+import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ChevronRight, ChevronDown, Folder, FolderOpen, File, FileText } from "lucide-react";
+import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 
-interface DashboardFileTreeProps {
-  isCollapsed: boolean;
-  allowedRoutes: { [key: string]: string };
+interface TreeNode {
+  name: string;
+  path: string;
+  children?: TreeNode[];
 }
 
-export function DashboardFileTree({ isCollapsed, allowedRoutes }: DashboardFileTreeProps) {
-  const pathname = usePathname();
+interface DashboardFileTreeProps {
+  allowedRoutes: { [key: string]: string };
+  isCollapsed: boolean;
+}
 
+export function DashboardFileTree({ allowedRoutes, isCollapsed }: DashboardFileTreeProps) {
   // Group routes by their sections
-  const sections = {
-    users: ROUTES.PROTECTED.filter(route => 
-      route.path.startsWith("/dashboard/users/") && 
-      Object.keys(allowedRoutes).includes(route.path)
-    ),
-    customerSupport: ROUTES.PROTECTED.filter(route => 
-      route.path.startsWith("/dashboard/customersupport/") && 
-      Object.keys(allowedRoutes).includes(route.path)
-    ),
-    devops: ROUTES.PROTECTED.filter(route => 
-      route.path.startsWith("/dashboard/devops/") && 
-      Object.keys(allowedRoutes).includes(route.path)
-    ),
-    analytics: ROUTES.PROTECTED.filter(route => 
-      route.path.startsWith("/dashboard/analytics/") && 
-      Object.keys(allowedRoutes).includes(route.path)
-    ),
-    rewards: ROUTES.PROTECTED.filter(route => 
-      route.path.startsWith("/dashboard/rewards/") && 
-      Object.keys(allowedRoutes).includes(route.path)
-    ),
-    ConsumerPurchase: ROUTES.PROTECTED.filter(route =>
-      route.path.startsWith("/dashboard/consumerpurchase/") &&
-      Object.keys(allowedRoutes).includes(route.path)
-    )
-  };
-
-  const treeElements = [
-    {
-      id: "dashboard",
-      name: "Dashboards",
-      children: Object.entries(sections).map(([section, routes]) => ({
-        id: section,
-        name: section.charAt(0).toUpperCase() + section.slice(1),
-        children: routes.map(route => ({
-          id: route.path,
-          name: route.name,
-          isSelectable: true
-        }))
-      }))
+  const sections = Object.entries(allowedRoutes).reduce((acc, [path, name]) => {
+    if (path.startsWith("/dashboard/")) {
+      const section = path.split("/")[2];
+      if (!acc[section]) {
+        acc[section] = [];
+      }
+      if (path !== `/dashboard/${section}`) {
+        acc[section].push({ path, name });
+      }
     }
-  ];
+    return acc;
+  }, {} as Record<string, { path: string; name: string }[]>);
+
+  const treeData = Object.entries(sections).map(([section, routes]) => ({
+    name: section.charAt(0).toUpperCase() + section.slice(1),
+    path: `/dashboard/${section}`,
+    children: routes
+  }));
+
+  if (isCollapsed) {
+    return null;
+  }
 
   return (
-    <Tree
-      className="h-[calc(100vh-12rem)]"
-      elements={treeElements}
-      initialExpandedItems={["dashboard"]}
+    <motion.div 
+      className="p-2 w-full max-w-xs lg:max-w-sm"
+      initial={{ opacity: 0, x: -20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.3 }}
     >
-      <Folder element="Dashboards" value="dashboard">
-        {/* Users Section */}
-        {sections.users.length > 0 && (
-          <Folder element="Users" value="users">
-            {sections.users.map((route) => (
-              <Link key={route.path} href={route.path}>
-                <File
-                  value={route.path}
-                  isSelect={pathname === route.path}
-                  className="px-2 py-1"
-                >
-                  {!isCollapsed ? route.name : ""}
-                </File>
-              </Link>
-            ))}
-          </Folder>
-        )}
+      {treeData.map((node, index) => (
+        <TreeNode key={index} node={node} level={0} />
+      ))}
+    </motion.div>
+  );
+}
 
-        {/* Rewards Section */}
-        {sections.rewards.length > 0 && (
-          <Folder element="Rewards" value="rewards">
-            {sections.rewards.map((route) => (
-              <Link key={route.path} href={route.path}>
-                <File
-                  value={route.path}
-                  isSelect={pathname === route.path}
-                  className="px-2 py-1"
-                >
-                  {!isCollapsed ? route.name : ""}
-                </File>
-              </Link>
-            ))}
-          </Folder>
-        )}
+function TreeNode({ node, level }: { node: TreeNode; level: number }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const router = useRouter();
+  const pathname = usePathname();
 
-        {/* Customer Support Section */}
-        {sections.customerSupport.length > 0 && (
-          <Folder element="Customer Support" value="customerSupport">
-            {sections.customerSupport.map((route) => (
-              <Link key={route.path} href={route.path}>
-                <File
-                  value={route.path}
-                  isSelect={pathname === route.path}
-                  className="px-2 py-1"
-                >
-                  {!isCollapsed ? route.name : ""}
-                </File>
-              </Link>
-            ))}
-          </Folder>
-        )}
+  const toggleOpen = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsOpen(!isOpen);
+  };
 
-        {/* DevOps Section */}
-        {sections.devops.length > 0 && (
-          <Folder element="DevOps" value="devops">
-            {sections.devops.map((route) => (
-              <Link key={route.path} href={route.path}>
-                <File
-                  value={route.path}
-                  isSelect={pathname === route.path}
-                  className="px-2 py-1"
-                >
-                  {!isCollapsed ? route.name : ""}
-                </File>
-              </Link>
-            ))}
-          </Folder>
-        )}
+  const handleFolderClick = () => {
+    router.push(node.path);
+  };
 
-        {/* Analytics Section */}
-        {sections.analytics.length > 0 && (
-          <Folder element="Analytics" value="analytics">
-            {sections.analytics.map((route) => (
-              <Link key={route.path} href={route.path}>
-                <File
-                  value={route.path}
-                  isSelect={pathname === route.path}
-                  className="px-2 py-1"
-                >
-                  {!isCollapsed ? route.name : ""}
-                </File>
-              </Link>
-            ))}
-          </Folder>
-        )}
+  const isActive = pathname === node.path;
 
-        {/* Customer Purchase Section */}
-        {sections.ConsumerPurchase.length > 0 && (
-          <Folder element="Consumer Purchase" value="ConsumerPurchase">
-            {sections.ConsumerPurchase.map((route) => (
-              <Link key={route.path} href={route.path}>
-                <File
-                  value={route.path}
-                  isSelect={pathname === route.path}
-                  className="px-2 py-1"
-                >
-                  {!isCollapsed ? route.name : ""}
-                </File>
-              </Link>
-            ))}
-          </Folder>
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.2, delay: level * 0.1 }}
+    >
+      <motion.div
+        className={`flex items-center py-2 px-3 rounded-md cursor-pointer ${
+          level === 0 ? "font-semibold" : ""
+        } ${isActive ? "bg-blue-100" : "hover:bg-gray-100"}`}
+        style={{ paddingLeft: `${level * 20 + 12}px` }}
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+      >
+        {node.children && (
+          <div onClick={toggleOpen}>
+            {isOpen ? (
+              <ChevronDown className="h-4 w-4 mr-1 text-gray-500" />
+            ) : (
+              <ChevronRight className="h-4 w-4 mr-1 text-gray-500" />
+            )}
+          </div>
         )}
-
-      </Folder>
-    </Tree>
+        {node.children && (
+          <div onClick={toggleOpen}>
+            {isOpen ? (
+              <FolderOpen className="h-4 w-4 mr-2 text-blue-500" />
+            ) : (
+              <Folder className="h-4 w-4 mr-2 text-blue-500" />
+            )}
+          </div>
+        )}
+        {!node.children && (
+          isActive ? (
+            <FileText className="h-4 w-4 mr-2 text-blue-500" />
+          ) : (
+            <File className="h-4 w-4 mr-2 text-gray-500" />
+          )
+        )}
+        <Link href={node.path} onClick={node.children ? handleFolderClick : undefined}>
+          <span className="text-sm md:text-base truncate">{node.name}</span>
+        </Link>
+      </motion.div>
+      <AnimatePresence>
+        {isOpen && node.children && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            {node.children.map((child, index) => (
+              <TreeNode key={index} node={child} level={level + 1} />
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 }
