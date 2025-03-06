@@ -98,7 +98,7 @@ function TreeNode({ node, level }: { node: TreeNode; level: number }) {
         {node.children && (
           <div onClick={toggleOpen}>
             {isOpen ? (
-              <FolderOpen className="h-4 w-4 mr-2 text-blue-500" />
+              <FolderOpen className="h-4 w-4 mr-2 text-blue-600" />
             ) : (
               <Folder className="h-4 w-4 mr-2 text-blue-500" />
             )}
@@ -106,7 +106,7 @@ function TreeNode({ node, level }: { node: TreeNode; level: number }) {
         )}
         {!node.children && (
           isActive ? (
-            <FileText className="h-4 w-4 mr-2 text-blue-500" />
+            <FileText className="h-4 w-4 mr-2 text-green-600" />
           ) : (
             <File className="h-4 w-4 mr-2 text-gray-500" />
           )

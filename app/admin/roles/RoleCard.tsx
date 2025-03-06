@@ -135,7 +135,7 @@ export function RoleCard({
                   <p className="font-medium">{route.name}</p>
                 )}
                 {viewMode !== "names" && (
-                  <p className="text-sm text-gray-500">{route.path}</p>
+                  <p className="text-sm text-gray-500 break-all">{route.path}</p>
                 )}
               </div>
               <Switch

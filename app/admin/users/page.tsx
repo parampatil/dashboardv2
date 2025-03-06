@@ -123,7 +123,7 @@ export default function UserManagement() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
     >
-      <div className="max-w-7xl mx-auto">
+      <div className="mx-auto">
         <motion.div
           className="bg-white rounded-xl shadow-sm"
           initial={{ y: -20 }}

@@ -32,7 +32,7 @@ export function RolesList({ roles, loading, editingRole, setEditingRole }: Roles
 
   return (
     <motion.div className="space-y-4">
-    <motion.div layout className="relative">
+    <motion.div layout className="relative bg-white">
       <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
       <Input
         placeholder="Search roles..."

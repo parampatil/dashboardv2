@@ -31,11 +31,11 @@ export default function RolesManagement() {
 
   return (
     <motion.div 
-      className="min-h-screen bg-gray-50 p-8"
+      className="min-h-screen bg-gray-100 p-8"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
     >
-      <div className="max-w-7xl mx-auto space-y-8">
+      <div className=" mx-auto space-y-8">
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-bold text-gray-900">Role Management</h1>
         </div>
