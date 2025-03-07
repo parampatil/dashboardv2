@@ -49,17 +49,16 @@ export function RewardForm({ initialRewardId, onClose }: RewardFormProps) {
     const fetchRewards = async () => {
       try {
         const response = await fetch("/api/grpc/rewards/available");
-        if (!response.ok) {
-          throw new Error("Failed to fetch rewards");
-        }
         const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.error.details || data.error.errorMessage);
+        }
         setRewards(data.rewards || []);
       } catch (error) {
-        console.error("Error fetching rewards:", error);
         toast({
           variant: "destructive",
-          title: "Error",
-          description: "Failed to fetch available rewards",
+          title: "Failed to fetch available rewards",
+          description: (error as Error).message,
         });
       }
     };
@@ -80,18 +79,21 @@ export function RewardForm({ initialRewardId, onClose }: RewardFormProps) {
         body: JSON.stringify(payload),
       });
       
-      if (!response.ok) throw new Error('Network response was not ok');
-      
       const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result.error.details || result.error.errorMessage);
+      }
+      
       toast({
         title: "Reward Given",
         description: `Reward transaction created with ID: ${result.rewardTransactionId}`,
+        variant: "success",
       });
       if (onClose) onClose();
-    } catch {
+    } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to give reward. Please try again.",
+        title: "Failed to give reward. Please try again.",
+        description: (error as Error).message,
         variant: "destructive",
       });
     }

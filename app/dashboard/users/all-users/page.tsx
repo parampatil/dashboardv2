@@ -47,8 +47,16 @@ export default function Dashboard1() {
           setUsers(data.users);
           setTotalPages(data.totalPages);
         }
+
+        if (!response.ok) {
+          throw new Error(data.error.details || data.error.errorMessage);
+        }
       } catch (error) {
-        console.error("Failed to fetch users:", error);
+        toast({
+          variant: "destructive",
+          title: "Failed to fetch users",
+          description: (error as Error).message,
+        });
       }
       if (mounted) setLoading(false);
     };
@@ -80,17 +88,17 @@ export default function Dashboard1() {
         body: JSON.stringify({ userId }),
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to fetch user details");
-      }
-
+      
       const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error.details || data.error.errorMessage);
+      }
       setUserDetails(data);
-    } catch {
+    } catch (error) {
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "Failed to fetch user details",
+        title: "Failed to fetch user details",
+        description: (error as Error).message,
       });
       setDrawerOpen(false);
     } finally {

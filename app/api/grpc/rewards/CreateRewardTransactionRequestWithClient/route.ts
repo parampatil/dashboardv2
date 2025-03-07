@@ -22,7 +22,7 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("API error:", error);
     return NextResponse.json(
-      { error: "Failed to create reward transaction" },
+      { error:error, message: "Failed to create reward transaction" },
       { status: 500 }
     );
   }

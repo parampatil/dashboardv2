@@ -40,15 +40,19 @@ export default function FindUserComponent() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId }),
       });
-      if (!response.ok) throw new Error("Failed to fetch user");
       const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error.details || data.error.errorMessage);
+      }
+
       setUsers([data.user]);
     } catch (error) {
       console.error("Error fetching user:", error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to fetch user",
+        description: (error as Error).message,
       });
     } finally {
       setLoading(false);
@@ -64,15 +68,19 @@ export default function FindUserComponent() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email_prefix: prefix }),
       });
-      if (!response.ok) throw new Error("Failed to fetch users");
       const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error.details || data.error.errorMessage);
+      }
+
       setUsers(data.users);
     } catch (error) {
       console.error("Error fetching users:", error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to fetch users",
+        description: (error as Error).message,
       });
     } finally {
       setLoading(false);
@@ -105,18 +113,18 @@ export default function FindUserComponent() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId }),
       });
+      const data = await response.json();
 
       if (!response.ok) {
-        throw new Error("Failed to fetch user details");
+        throw new Error(data.error.details || data.error.errorMessage)
       }
 
-      const data = await response.json();
       setUserDetails(data);
-    } catch {
+    } catch (error) {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to fetch user details",
+        description: (error as Error).message,
       });
       setDrawerOpen(false);
     } finally {

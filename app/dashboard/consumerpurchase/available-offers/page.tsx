@@ -42,18 +42,17 @@ export default function AvailableOffers() {
         body: JSON.stringify({ country })
       });
       
+      const data = await response.json();
       if (!response.ok) {
-        throw new Error("Failed to fetch offers");
+        throw new Error(data.error.details || data.error.errorMessage);
       }
 
-      const data = await response.json();
       setOffers(data.offers);
     } catch (error) {
-      console.error("Error fetching offers:", error);
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "Failed to fetch available offers",
+        title: "Failed to fetch available offers",
+        description: (error as Error).message,
       });
     } finally {
       setLoading(false);

@@ -48,17 +48,19 @@ const CreateOffer = () => {
         body: JSON.stringify(data),
       });
       
-      if (!response.ok) throw new Error('Network response was not ok');
-      
       const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result.error.details || result.error.errorMessage);
+      }
+      
       toast({
         title: "Offer Created",
         description: `Offer created with ID: ${result.offerId}`,
       });
-    } catch {
+    } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to create offer. Please try again.",
+        title: "Failed to create offer. Please try again.",
+        description: (error as Error).message,
         variant: "destructive",
       });
     }

@@ -24,17 +24,16 @@ export default function AvailableRewards() {
     const fetchRewards = async () => {
       try {
         const response = await fetch("/api/grpc/rewards/available");
-        if (!response.ok) {
-          throw new Error("Failed to fetch rewards");
-        }
         const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.error.details || data.error.errorMessage);
+        }
         setRewards(data.rewards || []);
       } catch (error) {
-        console.error("Error fetching rewards:", error);
         toast({
           variant: "destructive",
-          title: "Error",
-          description: "Failed to fetch available rewards",
+          title: "Failed to fetch available rewards",
+          description: (error as Error).message,
         });
       } finally {
         setLoading(false);

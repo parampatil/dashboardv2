@@ -82,7 +82,7 @@ function TreeNode({ node, level }: { node: TreeNode; level: number }) {
         className={`flex items-center py-2 px-3 rounded-md cursor-pointer ${
           level === 0 ? "font-semibold" : ""
         } ${isActive ? "bg-blue-100" : "hover:bg-gray-100"}`}
-        style={{ paddingLeft: `${level * 20 + 12}px` }}
+        style={{ paddingLeft: `${level * 30 + 12}px` }}
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
       >
@@ -112,7 +112,7 @@ function TreeNode({ node, level }: { node: TreeNode; level: number }) {
           )
         )}
         <Link href={node.path} onClick={node.children ? handleFolderClick : undefined}>
-          <span className="text-sm md:text-base truncate">{node.name}</span>
+          <span className="text-sm md:text-base break-words">{node.name}</span>
         </Link>
       </motion.div>
       <AnimatePresence>
