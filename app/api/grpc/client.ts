@@ -5,9 +5,9 @@ import path from 'path';
 
 const SERVICE_URLS = {
   PROFILE: 'api.360world.com:32394',
-  CONSUMER_PURCHASE: 'api.360world.com:31128',
+  CONSUMER_PURCHASE: 'api.360world.com:31451', // Fix this port duplication
   CONSUMER_PURCHASE_DEV: 'api.360world.com:31451',
-  PROVIDER_BALANCE: 'api.360world.com:30116',
+  PROVIDER_BALANCE: 'api.360world.com:31060',
   REWARD: 'api.360world.com:32064'
 } as const;
 
