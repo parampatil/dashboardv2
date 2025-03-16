@@ -16,6 +16,9 @@ export async function createNewUser(userData: {
       allowedRoutes: {
         '/profile': 'Profile' // Default route access
       },
+      allowedEnvironments: {
+        'dev': 'Development' // Default environment access
+      },
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };

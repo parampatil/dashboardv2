@@ -5,7 +5,8 @@ import { useAuth } from "@/context/AuthContext";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import { useState } from "react";
-import { UserNav } from "@/components/Layout/UserNav"
+import { UserNav } from "@/components/Layout/UserNav";
+import { EnvironmentSelector } from "@/components/Layout/EnvironmentSelector";
 
 const Navbar = () => {
   const { user, loading } = useAuth();
@@ -14,7 +15,7 @@ const Navbar = () => {
 
   if (loading) {
     return (
-      <motion.div 
+      <motion.div
         className="h-16 bg-white border-b border-gray-200"
         initial={{ opacity: 0 }}
         animate={{ opacity: 0.5 }}
@@ -29,16 +30,18 @@ const Navbar = () => {
     const items = [];
     const allowedRoutes = user.allowedRoutes || {};
 
-    if (Object.keys(allowedRoutes).some(route => route.startsWith('/dashboard'))) {
+    if (
+      Object.keys(allowedRoutes).some((route) => route.startsWith("/dashboard"))
+    ) {
       items.push({ path: "/dashboard", name: "Dashboard" });
     }
 
-    if (allowedRoutes['/admin']) {
+    if (allowedRoutes["/admin"]) {
       items.push({ path: "/admin/roles", name: "Roles" });
       items.push({ path: "/admin/users", name: "Users" });
     }
 
-    if (allowedRoutes['/profile']) {
+    if (allowedRoutes["/profile"]) {
       items.push({ path: "/profile", name: "Profile" });
     }
 
@@ -48,17 +51,14 @@ const Navbar = () => {
   const navItems = getNavItems();
 
   return (
-    <motion.nav 
+    <motion.nav
       className="sticky top-0 z-50 h-16 border-b border-gray-200 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60"
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={{ type: "spring", stiffness: 300, damping: 30 }}
     >
       <div className="container mx-auto h-full flex items-center justify-between">
-        <motion.div
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-        >
+        <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
           <Link href="/" className="font-semibold text-lg text-gray-900">
             360 Omnipresence
           </Link>
@@ -73,15 +73,19 @@ const Navbar = () => {
                   onMouseLeave={() => setHoveredPath(pathname)}
                   className="relative px-3 py-2 rounded-md"
                 >
-                  <span className={`relative z-10 ${
-                    pathname === item.path || pathname?.startsWith(item.path + '/') 
-                      ? "text-blue-600 font-medium" 
-                      : "text-gray-600 hover:text-gray-900"
-                  }`}>
+                  <span
+                    className={`relative z-10 ${
+                      pathname === item.path ||
+                      pathname?.startsWith(item.path + "/")
+                        ? "text-blue-600 font-medium"
+                        : "text-gray-600 hover:text-gray-900"
+                    }`}
+                  >
                     {item.name}
                   </span>
-                  
-                  {(item.path === hoveredPath || pathname?.startsWith(item.path + '/')) && (
+
+                  {(item.path === hoveredPath ||
+                    pathname?.startsWith(item.path + "/")) && (
                     <motion.div
                       className="absolute inset-0 bg-gray-200/80 rounded-md -z-0"
                       layoutId="navbar-hover"
@@ -90,7 +94,7 @@ const Navbar = () => {
                         bounce: 0.25,
                         stiffness: 130,
                         damping: 12,
-                        duration: 0.3
+                        duration: 0.3,
                       }}
                     />
                   )}
@@ -100,9 +104,10 @@ const Navbar = () => {
           </div>
 
           {user && (
-            <>
+            <div className="flex items-center gap-4">
+              <EnvironmentSelector />
               <UserNav />
-            </>
+            </div>
           )}
         </div>
       </div>

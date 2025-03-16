@@ -10,6 +10,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Trash2, AlertCircle } from "lucide-react";
 import { RoleSelector } from "@/components/admin/RoleSelector";
 import { useToast } from "@/hooks/use-toast";
+import EnvironmentSelector from "@/components/admin/EnvironmentAccessSelector";
 
 import {
   Dialog,
@@ -24,6 +25,8 @@ import {
   assignRoleToUser,
   removeRoleFromUser,
   deleteUser,
+  addEnvironmentToUser,
+  removeEnvironmentFromUser,
 } from "@/app/actions/users";
 
 export default function UserManagement() {
@@ -100,6 +103,38 @@ export default function UserManagement() {
     await removeRoleFromUser(userId, roleName);
   };
 
+  const handleAddEnvironment = async (userId: string, envKey: string, envName: string) => {
+    try {
+      await addEnvironmentToUser(userId, envKey, envName);
+      toast({
+        title: "Environment Added",
+        description: `Environment "${envName}" has been added successfully.`,
+      });
+    } catch {
+      toast({
+        variant: "destructive",
+        title: "Environment Addition Failed",
+        description: "Failed to add the environment.",
+      });
+    }
+  };
+
+  const handleRemoveEnvironment = async (userId: string, envKey: string) => {
+    try {
+      await removeEnvironmentFromUser(userId, envKey);
+      toast({
+        title: "Environment Removed",
+        description: "Environment has been removed successfully.",
+      });
+    } catch {
+      toast({
+        variant: "destructive",
+        title: "Environment Removal Failed",
+        description: "Failed to remove the environment.",
+      });
+    }
+  };
+
   const handleDeleteUser = async () => {
     try {
       await deleteUser(deleteConfirm!);
@@ -154,6 +189,9 @@ export default function UserManagement() {
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Allowed Routes
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Environments
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Actions
@@ -223,6 +261,17 @@ export default function UserManagement() {
                                 )
                               )}
                             </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <EnvironmentSelector
+                              allowedEnvironments={user.allowedEnvironments || {}}
+                              onAddEnvironment={(envKey, envName) =>
+                                handleAddEnvironment(user.uid, envKey, envName)
+                              }
+                              onRemoveEnvironment={(envKey) =>
+                                handleRemoveEnvironment(user.uid, envKey)
+                              }
+                            />
                           </td>
                           <td className="px-6 py-4">
                             <Button

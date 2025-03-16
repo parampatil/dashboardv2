@@ -11,6 +11,7 @@ import {
   ProviderEarningTransactions,
 } from "@/types/grpc";
 import { useToast } from "@/hooks/use-toast";
+import { useApi } from "@/hooks/useApi";
 
 import { TransactionHistorySection } from "./TransactionHistorySection";
 
@@ -32,13 +33,14 @@ export function UserDetails({ userData }: UserDetailsProps) {
   const [loadingHistory, setLoadingHistory] = useState(false);
   const [loadingTransactions, setLoadingTransactions] = useState(false);
   const { toast } = useToast();
+  const api = useApi();
 
   const fetchPurchaseHistory = async () => {
     if (!userData.user.userId) return;
     setLoadingHistory(true);
 
     try {
-      const response = await fetch("/api/grpc/users/purchase-history", {
+      const response = await api.fetch("/api/grpc/users/purchase-history", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -68,7 +70,7 @@ export function UserDetails({ userData }: UserDetailsProps) {
     setLoadingTransactions(true);
 
     try {
-      const response = await fetch("/api/grpc/users/earning-transactions", {
+      const response = await api.fetch("/api/grpc/users/earning-transactions", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

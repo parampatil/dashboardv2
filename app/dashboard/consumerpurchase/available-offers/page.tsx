@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { useToast } from "@/hooks/use-toast";
+import { useApi } from "@/hooks/useApi";
 import { Offer } from "@/types/grpc";
 import { DollarSign, Clock, Tag, Globe } from "lucide-react";
 import { 
@@ -19,6 +20,7 @@ export default function AvailableOffers() {
   const [loading, setLoading] = useState(true);
   const [selectedCountry, setSelectedCountry] = useState("US");
   const { toast } = useToast();
+  const api = useApi();
 
   const countries = [
     { code: "US", name: "United States" },
@@ -34,7 +36,7 @@ export default function AvailableOffers() {
   const fetchOffers = async (country: string) => {
     setLoading(true);
     try {
-      const response = await fetch("/api/grpc/consumerpurchasedev/getAvailableOffers", {
+      const response = await api.fetch("/api/grpc/consumerpurchase/available-offers", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -121,14 +123,14 @@ export default function AvailableOffers() {
 function OfferCard({ offer }: { offer: Offer }) {
   return (
     <motion.div
-      className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden"
+      className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden transition-shadow duration-300"
       whileHover={{
         y: -5,
         boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
       }}
       transition={{
         type: "spring",
-        stiffness: 400,
+        stiffness: 200,
         damping: 10,
       }}
     >

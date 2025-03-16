@@ -8,6 +8,9 @@ export interface User {
   allowedRoutes: {
     [key: string]: string; // route path -> route name
   };
+  allowedEnvironments: {
+    [key: string]: string; // environment key -> environment display name
+  };
   createdAt: string;
   updatedAt: string;
 }

@@ -42,7 +42,7 @@ const CreateOffer = () => {
 
   const onSubmit = async (data: CreateOfferRequest) => {
     try {
-      const response = await fetch('/api/grpc/consumerpurchasedev/createOffer', {
+      const response = await fetch('/api/grpc/consumerpurchase/create-offer', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),

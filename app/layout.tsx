@@ -4,6 +4,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Layout/Navbar";
 import { Toaster } from "@/components/ui/toaster";
+import { EnvironmentProvider } from "@/context/EnvironmentContext";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -21,8 +22,10 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <AuthProvider>
+          <EnvironmentProvider>
           <Navbar />
           {children}
+          </EnvironmentProvider>
         </AuthProvider>
         <Toaster />
       </body>

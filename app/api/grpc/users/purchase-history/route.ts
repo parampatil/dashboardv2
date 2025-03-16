@@ -1,13 +1,25 @@
 // app/api/grpc/users/purchase-history/route.ts
 import { NextResponse } from 'next/server';
-import { balanceService } from '../../services/balance';
+import { createServiceClients, getEnvironmentFromRequest } from '@/app/api/grpc/client';
+import { promisify } from 'util';
 import { ConsumerPurchaseHistoryResponse } from '@/types/grpc';
 
 export async function POST(request: Request) {
   try {
     const { userId } = await request.json();
+    
+    // Get environment from request header
+    const environment = getEnvironmentFromRequest(request);
+    
+    // Create clients for the specified environment
+    const clients = createServiceClients(environment);
+    
+    // Create service with promisified methods
+    const consumerPurchaseService = {
+      getConsumerPurchaseHistory: promisify(clients.consumerPurchase.GetConsumerPurchaseHistory.bind(clients.consumerPurchase))
+    };
 
-    const purchaseHistory = await balanceService.getConsumerPurchaseHistory({ userId }) as ConsumerPurchaseHistoryResponse;
+    const purchaseHistory = await consumerPurchaseService.getConsumerPurchaseHistory({ userId }) as ConsumerPurchaseHistoryResponse;
 
     return NextResponse.json({
       consumerPurchaseHistory: purchaseHistory.consumerPurchaseHistory

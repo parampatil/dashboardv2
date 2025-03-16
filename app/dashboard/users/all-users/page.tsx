@@ -10,6 +10,7 @@ import { UserDetails } from "@/components/UsersDashboard/UserDetails";
 import { Button } from "@/components/ui/button";
 import { Eye } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useApi } from "@/hooks/useApi";
 import {
   Drawer,
   DrawerClose,
@@ -33,6 +34,8 @@ export default function Dashboard1() {
   const [userDetails, setUserDetails] = useState(null);
   const [loadingDetails, setLoadingDetails] = useState(false);
   const { toast } = useToast();
+  const api = useApi();
+
 
   useEffect(() => {
     // Add a cleanup function
@@ -41,7 +44,7 @@ export default function Dashboard1() {
     const fetchUsers = async () => {
       setLoading(true);
       try {
-        const response = await fetch(`/api/grpc/users?page=${currentPage}&pageSize=${pageSize}`);
+        const response = await api.fetch(`/api/grpc/users/all-users/?page=${currentPage}&pageSize=${pageSize}`);
         const data = await response.json();
         if (mounted) {
           setUsers(data.users);
@@ -80,7 +83,7 @@ export default function Dashboard1() {
     setDrawerOpen(true);
 
     try {
-      const response = await fetch("/api/grpc/users/details", {
+      const response = await api.fetch("/api/grpc/users/details", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -162,7 +165,7 @@ export default function Dashboard1() {
 
       {/* User Details Drawer */}
       <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
-        <DrawerContent className="max-h-[80vh]">
+        <DrawerContent>
           <DrawerHeader className="bg-cyan-100">
             <DrawerTitle>User Details</DrawerTitle>
             <DrawerDescription>

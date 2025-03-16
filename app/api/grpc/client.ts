@@ -1,31 +1,40 @@
-// api/grpc/client.ts
+// app/api/grpc/client.ts
 import * as protoLoader from '@grpc/proto-loader';
 import * as grpc from '@grpc/grpc-js';
 import path from 'path';
+import { environments } from '@/config/environments';
 
-const SERVICE_URLS = {
-  PROFILE: 'api.360world.com:32394',
-  CONSUMER_PURCHASE: 'api.360world.com:31451', // Fix this port duplication
-  CONSUMER_PURCHASE_DEV: 'api.360world.com:31451',
-  PROVIDER_BALANCE: 'api.360world.com:31060',
-  REWARD: 'api.360world.com:32064'
-} as const;
+// Default environment if not specified
+const DEFAULT_ENV = process.env.API_ENVIRONMENT as 'dev' | 'preprod' | 'prod' || 'dev';
 
 const PROTO_PATHS = {
   PROFILE: path.resolve('./proto/profile.proto'),
   CONSUMER_PURCHASE: path.resolve('./proto/consumerPurchase.proto'),
-  CONSUMER_PURCHASE_DEV: path.resolve('./proto/consumerPurchaseDev.proto'),
   PROVIDER_EARNING: path.resolve('./proto/providerEarning.proto'),
   REWARD: path.resolve('./proto/reward.proto')
 };
 
-// Create and export service clients
-export const clients = {
-  profile: createServiceClient('ProfileService', PROTO_PATHS.PROFILE, SERVICE_URLS.PROFILE),
-  consumerPurchase: createServiceClient('ConsumerPurchaseService', PROTO_PATHS.CONSUMER_PURCHASE, SERVICE_URLS.CONSUMER_PURCHASE),
-  consumerPurchaseDev: createServiceClient('ConsumerPurchaseService', PROTO_PATHS.CONSUMER_PURCHASE_DEV, SERVICE_URLS.CONSUMER_PURCHASE_DEV),
-  providerEarning: createServiceClient('ProviderEarningService', PROTO_PATHS.PROVIDER_EARNING, SERVICE_URLS.PROVIDER_BALANCE),
-  reward: createServiceClient('RewardService', PROTO_PATHS.REWARD, SERVICE_URLS.REWARD)
+// Get environment from request header or use default
+export const getEnvironmentFromRequest = (req?: Request): 'dev' | 'preprod' | 'prod' => {
+  if (req) {
+    const envHeader = req.headers.get('x-environment');
+    if (envHeader && ['dev', 'preprod', 'prod'].includes(envHeader)) {
+      return envHeader as 'dev' | 'preprod' | 'prod';
+    }
+  }
+  return DEFAULT_ENV;
+};
+
+// Create and export service clients for a specific environment
+export const createServiceClients = (environment: 'dev' | 'preprod' | 'prod' = DEFAULT_ENV) => {
+  const SERVICE_URLS = environments[environment].serviceUrls;
+  
+  return {
+    profile: createServiceClient('ProfileService', PROTO_PATHS.PROFILE, SERVICE_URLS.PROFILE),
+    consumerPurchase: createServiceClient('ConsumerPurchaseService', PROTO_PATHS.CONSUMER_PURCHASE, SERVICE_URLS.CONSUMER_PURCHASE),
+    providerEarning: createServiceClient('ProviderEarningService', PROTO_PATHS.PROVIDER_EARNING, SERVICE_URLS.PROVIDER_EARNING),
+    reward: createServiceClient('RewardService', PROTO_PATHS.REWARD, SERVICE_URLS.REWARD)
+  };
 };
 
 function createServiceClient(serviceName: string, protoPath: string, serviceUrl: string) {
@@ -41,7 +50,6 @@ function createServiceClient(serviceName: string, protoPath: string, serviceUrl:
     [key: string]: typeof grpc.Client;
     ProfileService: typeof grpc.Client;
     ConsumerPurchaseService: typeof grpc.Client;
-    ConsumerPurchaseDevService: typeof grpc.Client; 
     ProviderEarningService: typeof grpc.Client;
     RewardService: typeof grpc.Client;
   }
