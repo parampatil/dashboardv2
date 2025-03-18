@@ -8,7 +8,7 @@ import Link from "next/link";
 import { DashboardFileTree } from "./DashboardFileTree";
 
 const sidebarVariants = {
-  expanded: { width: "16rem" },
+  expanded: { width: "18rem" },
   collapsed: { width: "4rem" }
 };
 

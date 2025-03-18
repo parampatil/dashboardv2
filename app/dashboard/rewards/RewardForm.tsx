@@ -20,6 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
+import { useApi } from "@/hooks/useApi";
 import { Reward, CreateRewardTransactionRequest } from "@/types/grpc";
 
 const formSchema = z.object({
@@ -36,6 +37,7 @@ interface RewardFormProps {
 
 export function RewardForm({ initialRewardId, onClose }: RewardFormProps) {
   const [rewards, setRewards] = useState<Reward[]>([]);
+  const api = useApi();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -48,7 +50,7 @@ export function RewardForm({ initialRewardId, onClose }: RewardFormProps) {
   useEffect(() => {
     const fetchRewards = async () => {
       try {
-        const response = await fetch("/api/grpc/rewards/available");
+        const response = await api.fetch("/api/grpc/rewards/available");
         const data = await response.json();
         if (!response.ok) {
           throw new Error(data.error.details || data.error.errorMessage);
@@ -73,7 +75,7 @@ export function RewardForm({ initialRewardId, onClose }: RewardFormProps) {
     };
 
     try {
-      const response = await fetch('/api/grpc/rewards/give-reward', {
+      const response = await api.fetch('/api/grpc/rewards/give-reward', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),

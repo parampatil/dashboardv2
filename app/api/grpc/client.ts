@@ -1,3 +1,4 @@
+// app/api/grpc/client.ts (update)
 import * as protoLoader from '@grpc/proto-loader';
 import * as grpc from '@grpc/grpc-js';
 import path from 'path';
@@ -6,7 +7,8 @@ import {
   ProfileServiceClient, 
   ConsumerPurchaseServiceClient,
   RewardServiceClient,
-  ProviderEarningServiceClient 
+  ProviderEarningServiceClient,
+  LocationServiceClient 
 } from '@/types/grpc';
 
 // Default environment if not specified
@@ -16,7 +18,8 @@ const PROTO_PATHS = {
   PROFILE: path.resolve('./proto/profile.proto'),
   CONSUMER_PURCHASE: path.resolve('./proto/consumerPurchase.proto'),
   PROVIDER_EARNING: path.resolve('./proto/providerEarning.proto'),
-  REWARD: path.resolve('./proto/reward.proto')
+  REWARD: path.resolve('./proto/reward.proto'),
+  LOCATION: path.resolve('./proto/location.proto')
 };
 
 // Get environment from request header or use default
@@ -38,7 +41,8 @@ export const createServiceClients = (environment: 'dev' | 'preprod' | 'prod' = D
     profile: createServiceClient<ProfileServiceClient>('ProfileService', PROTO_PATHS.PROFILE, SERVICE_URLS.PROFILE),
     consumerPurchase: createServiceClient<ConsumerPurchaseServiceClient>('ConsumerPurchaseService', PROTO_PATHS.CONSUMER_PURCHASE, SERVICE_URLS.CONSUMER_PURCHASE),
     providerEarning: createServiceClient<ProviderEarningServiceClient>('ProviderEarningService', PROTO_PATHS.PROVIDER_EARNING, SERVICE_URLS.PROVIDER_EARNING),
-    reward: createServiceClient<RewardServiceClient>('RewardService', PROTO_PATHS.REWARD, SERVICE_URLS.REWARD)
+    reward: createServiceClient<RewardServiceClient>('RewardService', PROTO_PATHS.REWARD, SERVICE_URLS.REWARD),
+    location: createServiceClient<LocationServiceClient>('LocationService', PROTO_PATHS.LOCATION, SERVICE_URLS.LOCATION)
   };
 };
 
@@ -57,6 +61,7 @@ function createServiceClient<T>(serviceName: string, protoPath: string, serviceU
     ConsumerPurchaseService: typeof grpc.Client;
     ProviderEarningService: typeof grpc.Client;
     RewardService: typeof grpc.Client;
+    LocationService: typeof grpc.Client;
   }
   
   const protoDescriptor = grpc.loadPackageDefinition(packageDefinition) as unknown as ProtoGrpcType;

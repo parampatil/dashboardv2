@@ -1,6 +1,6 @@
 // app/components/dashboard/DashboardFileTree.tsx
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronRight, ChevronDown, Folder, FolderOpen, File, FileText } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
@@ -18,6 +18,8 @@ interface DashboardFileTreeProps {
 }
 
 export function DashboardFileTree({ allowedRoutes, isCollapsed }: DashboardFileTreeProps) {
+  const pathname = usePathname();
+  
   // Group routes by their sections
   const sections = Object.entries(allowedRoutes).reduce((acc, [path, name]) => {
     if (path.startsWith("/dashboard/")) {
@@ -32,15 +34,28 @@ export function DashboardFileTree({ allowedRoutes, isCollapsed }: DashboardFileT
     return acc;
   }, {} as Record<string, { path: string; name: string }[]>);
 
-  const treeData = Object.entries(sections).map(([section, routes]) => ({
-    name: section.charAt(0).toUpperCase() + section.slice(1),
-    path: `/dashboard/${section}`,
-    children: routes
-  }));
+  // Sort sections alphabetically
+  const sortedSections = Object.keys(sections).sort();
+  
+  const treeData = sortedSections.map(section => {
+    // Sort children alphabetically by name
+    const sortedChildren = [...sections[section]].sort((a, b) => 
+      a.name.localeCompare(b.name)
+    );
+    
+    return {
+      name: section.charAt(0).toUpperCase() + section.slice(1),
+      path: `/dashboard/${section}`,
+      children: sortedChildren
+    };
+  });
 
   if (isCollapsed) {
     return null;
   }
+
+  // Determine which section is active based on the current pathname
+  const activeSection = pathname.split('/')[2];
 
   return (
     <motion.div 
@@ -50,16 +65,47 @@ export function DashboardFileTree({ allowedRoutes, isCollapsed }: DashboardFileT
       transition={{ duration: 0.3 }}
     >
       {treeData.map((node, index) => (
-        <TreeNode key={index} node={node} level={0} />
+        <TreeNode 
+          key={index} 
+          node={node} 
+          level={0} 
+          activeSection={activeSection}
+          currentPath={pathname}
+        />
       ))}
     </motion.div>
   );
 }
 
-function TreeNode({ node, level }: { node: TreeNode; level: number }) {
-  const [isOpen, setIsOpen] = useState(false);
+function TreeNode({ 
+  node, 
+  level, 
+  activeSection,
+  currentPath
+}: { 
+  node: TreeNode; 
+  level: number;
+  activeSection: string;
+  currentPath: string;
+}) {
+  // Determine if this node should be open initially
+  const shouldBeOpen = () => {
+    // If it's a top-level node (section), check if it matches the active section
+    if (level === 0) {
+      return node.path.includes(`/dashboard/${activeSection}`);
+    }
+    // For child nodes, check if the current path starts with this node's path
+    // or if this node's path is part of the current path
+    return currentPath.startsWith(node.path) || node.path === currentPath;
+  };
+
+  const [isOpen, setIsOpen] = useState(shouldBeOpen());
   const router = useRouter();
-  const pathname = usePathname();
+  
+  // Update open state when active section changes
+  useEffect(() => {
+    setIsOpen(shouldBeOpen());
+  }, [activeSection, currentPath]);
 
   const toggleOpen = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -70,7 +116,7 @@ function TreeNode({ node, level }: { node: TreeNode; level: number }) {
     router.push(node.path);
   };
 
-  const isActive = pathname === node.path;
+  const isActive = currentPath === node.path;
 
   return (
     <motion.div
@@ -124,7 +170,13 @@ function TreeNode({ node, level }: { node: TreeNode; level: number }) {
             transition={{ duration: 0.3 }}
           >
             {node.children.map((child, index) => (
-              <TreeNode key={index} node={child} level={level + 1} />
+              <TreeNode 
+                key={index} 
+                node={child} 
+                level={level + 1} 
+                activeSection={activeSection}
+                currentPath={currentPath}
+              />
             ))}
           </motion.div>
         )}

@@ -185,6 +185,27 @@ export interface CreateRewardTransactionResponse {
   rewardTransactionId: number;
 }
 
+// Location Service Types
+export interface LocationServiceClient {
+  GetAllActiveUserIds: (request: GetAllActiveUserIdsRequest, callback: (error: Error, response: GetAllActiveUserIdsResponse) => void) => void;
+}
+
+export type GetAllActiveUserIdsRequest = Record<string, never>;
+
+export interface GetAllActiveUserIdsResponse {
+  caches: Record<number, ArrayCacheDetails>;
+}
+
+export interface ArrayCacheDetails {
+  locations: Record<number, ArrayLocationData>;
+}
+
+export interface ArrayLocationData {
+  latitude: number;
+  longitude: number;
+  providerIds: string[];
+}
+
 // Helper interface to format protobuf timestamp
 export interface UserTimestamp {
     seconds: string;

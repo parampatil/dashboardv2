@@ -17,6 +17,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { toast } from "@/hooks/use-toast";
+import { useApi } from "@/hooks/useApi";
 import { CreateOfferRequest } from '@/types/grpc';
 import { Tag } from 'lucide-react';
 
@@ -29,6 +30,7 @@ const formSchema = z.object({
 });
 
 const CreateOffer = () => {
+  const api = useApi();
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -42,7 +44,7 @@ const CreateOffer = () => {
 
   const onSubmit = async (data: CreateOfferRequest) => {
     try {
-      const response = await fetch('/api/grpc/consumerpurchase/create-offer', {
+      const response = await api.fetch('/api/grpc/consumerpurchase/create-offer', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),

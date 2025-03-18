@@ -8,6 +8,7 @@ export const environments = {
       CONSUMER_PURCHASE: "api.360world.com:31128",
       PROVIDER_EARNING: "api.360world.com:30116",
       REWARD: "api.360world.com:32064",
+      LOCATION: "api.360world.com:32461",
     },
   },
   preprod: {
@@ -18,6 +19,7 @@ export const environments = {
       CONSUMER_PURCHASE: "api.360world.com:31451",
       PROVIDER_EARNING: "api.360world.com:31060",
       REWARD: "api.360world.com:32064",
+      LOCATION: "api.360world.com:32461",
     },
   },
   prod: {
@@ -28,6 +30,7 @@ export const environments = {
       CONSUMER_PURCHASE: "api.360world.com:31451",
       PROVIDER_EARNING: "api.360world.com:31060",
       REWARD: "api.360world.com:32064",
+      LOCATION: "api.360world.com:32461",
     },
   },
 };
@@ -51,6 +54,7 @@ export const defaultEnvironment =  {
       CONSUMER_PURCHASE: "api.360world.com:31451",
       PROVIDER_EARNING: "api.360world.com:31060",
       REWARD: "api.360world.com:32064",
+      LOCATION: "api.360world.com:32461",
     },
   },
 }

@@ -25,6 +25,8 @@ export const ROUTES = {
     { path: '/dashboard/consumerpurchase', name: 'Consumer Purchase Dashboard' },
     { path: '/dashboard/consumerpurchase/available-offers', name: 'Available Offers' },
     { path: '/dashboard/consumerpurchase/create-offer', name: 'Create Offer' },
+    { path: '/dashboard/location', name: 'Location Dashboard' },
+    { path: '/dashboard/location/active-user-ids', name: 'Active User IDs' },
     { path: '/profile', name: 'Profile' },
     { path: '/admin', name: 'Admin Panel' },
     { path: '/admin/roles', name: 'Roles' },

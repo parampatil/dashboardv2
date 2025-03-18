@@ -11,7 +11,8 @@ import {
   HeadphonesIcon, 
   Terminal, 
   BarChart3, 
-  ChevronRight 
+  ChevronRight,
+  MapPin
 } from "lucide-react";
 
 const MainDashboard = () => {
@@ -40,7 +41,7 @@ const MainDashboard = () => {
         icon: <Users className="h-5 w-5" />,
         color: "bg-blue-500",
         routes: [
-          { path: '/dashboard/users', name: 'Users Dashboard' },
+          // { path: '/dashboard/users', name: 'Users Dashboard' },
           { path: '/dashboard/users/all-users', name: 'All Users' },
           { path: '/dashboard/users/find-user', name: 'Find User' },
         ]
@@ -50,9 +51,28 @@ const MainDashboard = () => {
         icon: <Award className="h-5 w-5" />,
         color: "bg-amber-500",
         routes: [
-          { path: '/dashboard/rewards', name: 'Rewards Dashboard' },
+          // { path: '/dashboard/rewards', name: 'Rewards Dashboard' },
           { path: '/dashboard/rewards/available-rewards', name: 'Available Rewards' },
           { path: '/dashboard/rewards/give-rewards', name: 'Give Rewards' },
+        ]
+      },
+      {
+        name: "Location",
+        icon: <MapPin className="h-5 w-5" />,
+        color: "bg-teal-500",
+        routes: [
+          // { path: '/dashboard/location', name: 'Location Dashboard' },
+          { path: '/dashboard/location/active-user-ids', name: 'Active User IDs'}
+        ]
+      },
+      {
+        name: "Consumer Purchase",
+        icon: <Award className="h-5 w-5" />,
+        color: "bg-yellow-500",
+        routes: [
+          // { path: '/dashboard/consumerpurchase', name: 'Consumer Purchase Dashboard' },
+          { path: '/dashboard/consumerpurchase/available-offers', name: 'Available Offers' },
+          { path: '/dashboard/consumerpurchase/create-offer', name: 'Create Offer' },
         ]
       },
       {
@@ -60,7 +80,7 @@ const MainDashboard = () => {
         icon: <HeadphonesIcon className="h-5 w-5" />,
         color: "bg-green-500",
         routes: [
-          { path: '/dashboard/customersupport', name: 'Customer Support Dashboard' },
+          // { path: '/dashboard/customersupport', name: 'Customer Support Dashboard' },
           { path: '/dashboard/customersupport/bug-report', name: 'Bug Report' },
         ]
       },
@@ -69,7 +89,7 @@ const MainDashboard = () => {
         icon: <Terminal className="h-5 w-5" />,
         color: "bg-purple-500",
         routes: [
-          { path: '/dashboard/devops', name: 'DevOps Dashboard' },
+          // { path: '/dashboard/devops', name: 'DevOps Dashboard' },
           { path: '/dashboard/devops/kubernetes', name: 'Kubernetes Dashboard' },
         ]
       },
@@ -78,23 +98,13 @@ const MainDashboard = () => {
         icon: <BarChart3 className="h-5 w-5" />,
         color: "bg-red-500",
         routes: [
-          { path: '/dashboard/analytics', name: 'Analytics Dashboard' },
+          // { path: '/dashboard/analytics', name: 'Analytics Dashboard' },
           { path: '/dashboard/analytics/grafana', name: 'Grafana Dashboard' },
           { path: '/dashboard/analytics/call-history-table', name: 'Call History Table' },
           { path: '/dashboard/analytics/call-history-analytics', name: 'Call History Analytics' },
           { path: '/dashboard/analytics/active-user-analytics', name: 'Active User Analytics' },
         ]
       },
-      {
-        name: "Consumer Purchase",
-        icon: <Award className="h-5 w-5" />,
-        color: "bg-yellow-500",
-        routes: [
-          { path: '/dashboard/consumerpurchase', name: 'Consumer Purchase Dashboard' },
-          { path: '/dashboard/consumerpurchase/available-offers', name: 'Available Offers' },
-          { path: '/dashboard/consumerpurchase/create-offer', name: 'Create Offer' },
-        ]
-      }
     ];
 
     // Filter categories to only include those with at least one allowed route

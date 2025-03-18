@@ -1,0 +1,95 @@
+syntax = "proto3";
+
+option go_package = "./location";
+
+service LocationService {
+    rpc GetAllActiveUsers(GetAllActiveUsersRequest) returns (GetAllActiveUsersResponse);
+    rpc RegisterActiveUser(RegisterActiveUserRequest) returns (RegisterActiveUserResponse);
+    rpc GetAllActiveUserIds(GetAllActiveUserIdsRequest) returns (GetAllActiveUserIdsResponse);
+    rpc GetAllActiveUserIdsV2(GetAllActiveUserIdsV2Request) returns (GetAllActiveUserIdsV2Response);
+    rpc GetProvidersForCall(GetProvidersForCallRequest) returns (GetProvidersForCallResponse);
+    rpc GetAllActiveUsersCount(GetAllActiveUsersCountRequest) returns (GetAllActiveUsersCountResponse);
+
+}
+
+enum Availability {
+    AVAILABLE = 0;
+    UNAVAILABLE = 1;
+    BUSY = 2;
+}
+
+message GetAllActiveUsersRequest {
+}
+
+message GetAllActiveUsersResponse {
+    map<int32, CacheDetails> caches = 1;  // Mapping cache_id to CacheDetails
+}
+
+message CacheDetails {
+    map<int64, LocationData> locations = 1;  // Mapping id to LocationData, changed int64 to string
+}
+
+message LocationData {
+    double latitude = 1;  // Latitude of the location
+    double longitude = 2; // Longitude of the location
+    int64 count = 3;      // Count or other metric
+}
+
+message RegisterActiveUserRequest {
+    int64 providerId = 1;  // Changed from int64 to string
+    double latitude = 2;
+    double longitude = 3;
+    Availability isAvailable = 4; // Changed from bool to enum
+}
+
+message RegisterActiveUserResponse {
+    string message = 1;
+}
+
+message GetAllActiveUserIdsRequest {
+}
+
+message GetAllActiveUserIdsResponse {
+    map<int32, ArrayCacheDetails> caches = 1;  // Mapping cache_id to ArrayCacheDetails
+}
+
+message ArrayCacheDetails {
+    map<int64, ArrayLocationData> locations = 1;  // Mapping id to ArrayLocationData, changed int64 to string
+}
+
+message ArrayLocationData {
+    double latitude = 1;  // Latitude of the location
+    double longitude = 2; // Longitude of the location
+    repeated int64 providerIds = 3;  // Changed from repeated int64 to repeated string
+}
+
+message GetAllActiveUserIdsV2Request {
+
+}
+
+message GetAllActiveUserIdsV2Response {
+    map<int64, ArrayUserIdsData> locations = 1;  // Mapping id to ArrayUserIdsData
+}
+
+message ArrayUserIdsData {
+    repeated int64 providerIds = 3;  // Changed from repeated int64 to repeated string
+}
+
+message GetProvidersForCallRequest{
+    int64 hash = 1; //hash id pointing to geoHash
+    int32 precision = 2; //Value of precision
+}
+
+message GetProvidersForCallResponse {
+    repeated int64 userIds = 1; // Array of 10 or less highest frequency marching user ids in descending order
+}
+
+message GetAllActiveUsersCountRequest {
+    // double latitude = 1;  // Latitude of the location
+    // double longitude = 2; // Longitude of the location
+    int64 userId = 1; // User id
+}
+
+message GetAllActiveUsersCountResponse {
+    map<int32, CacheDetails> caches = 1;  // Mapping cache_id to CacheDetails
+}
