@@ -1,8 +1,13 @@
-// app/api/grpc/client.ts
 import * as protoLoader from '@grpc/proto-loader';
 import * as grpc from '@grpc/grpc-js';
 import path from 'path';
 import { environments } from '@/config/environments';
+import { 
+  ProfileServiceClient, 
+  ConsumerPurchaseServiceClient,
+  RewardServiceClient,
+  ProviderEarningServiceClient 
+} from '@/types/grpc';
 
 // Default environment if not specified
 const DEFAULT_ENV = process.env.DEFAULT_API_ENVIRONMENT as 'dev' | 'preprod' | 'prod' || 'dev';
@@ -30,14 +35,14 @@ export const createServiceClients = (environment: 'dev' | 'preprod' | 'prod' = D
   const SERVICE_URLS = environments[environment].serviceUrls;
   
   return {
-    profile: createServiceClient('ProfileService', PROTO_PATHS.PROFILE, SERVICE_URLS.PROFILE),
-    consumerPurchase: createServiceClient('ConsumerPurchaseService', PROTO_PATHS.CONSUMER_PURCHASE, SERVICE_URLS.CONSUMER_PURCHASE),
-    providerEarning: createServiceClient('ProviderEarningService', PROTO_PATHS.PROVIDER_EARNING, SERVICE_URLS.PROVIDER_EARNING),
-    reward: createServiceClient('RewardService', PROTO_PATHS.REWARD, SERVICE_URLS.REWARD)
+    profile: createServiceClient<ProfileServiceClient>('ProfileService', PROTO_PATHS.PROFILE, SERVICE_URLS.PROFILE),
+    consumerPurchase: createServiceClient<ConsumerPurchaseServiceClient>('ConsumerPurchaseService', PROTO_PATHS.CONSUMER_PURCHASE, SERVICE_URLS.CONSUMER_PURCHASE),
+    providerEarning: createServiceClient<ProviderEarningServiceClient>('ProviderEarningService', PROTO_PATHS.PROVIDER_EARNING, SERVICE_URLS.PROVIDER_EARNING),
+    reward: createServiceClient<RewardServiceClient>('RewardService', PROTO_PATHS.REWARD, SERVICE_URLS.REWARD)
   };
 };
 
-function createServiceClient(serviceName: string, protoPath: string, serviceUrl: string) {
+function createServiceClient<T>(serviceName: string, protoPath: string, serviceUrl: string): T {
   const packageDefinition = protoLoader.loadSync(protoPath, {
     keepCase: true,
     longs: String,
@@ -54,9 +59,9 @@ function createServiceClient(serviceName: string, protoPath: string, serviceUrl:
     RewardService: typeof grpc.Client;
   }
   
-  const protoDescriptor = grpc.loadPackageDefinition(packageDefinition);
-  return new (protoDescriptor as unknown as ProtoGrpcType)[serviceName](
+  const protoDescriptor = grpc.loadPackageDefinition(packageDefinition) as unknown as ProtoGrpcType;
+  return new protoDescriptor[serviceName](
     serviceUrl,
     grpc.credentials.createInsecure()
-  );
+  ) as unknown as T;
 }

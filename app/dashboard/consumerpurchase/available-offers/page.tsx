@@ -35,35 +35,37 @@ export default function AvailableOffers() {
     { code: "JP", name: "Japan" }
   ];
 
-  const fetchOffers = async (country: string) => {
-    setLoading(true);
-    try {
-      const response = await api.fetch("/api/grpc/consumerpurchase/available-offers", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ country })
-      });
-      
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.error.details || data.error.errorMessage);
-      }
-
-      setOffers(data.offers);
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Failed to fetch available offers",
-        description: (error as Error).message,
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+  
 
   useEffect(() => {
+    const fetchOffers = async (country: string) => {
+      setLoading(true);
+      try {
+        const response = await api.fetch("/api/grpc/consumerpurchase/available-offers", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ country })
+        });
+        
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.error.details || data.error.errorMessage);
+        }
+  
+        setOffers(data.offers);
+      } catch (error) {
+        toast({
+          variant: "destructive",
+          title: "Failed to fetch available offers",
+          description: (error as Error).message,
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchOffers(selectedCountry);
   }, [selectedCountry, currentEnvironment]);
 

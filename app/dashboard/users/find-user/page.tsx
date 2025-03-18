@@ -34,7 +34,7 @@ export default function FindUserComponent() {
   const { toast } = useToast();
   const api = useApi();
 
-  const fetchUserById = async (userId: string) => {
+  const fetchUserById = useCallback(async (userId: string) => {
     setLoading(true);
     try {
       const response = await api.fetch("/api/grpc/users/details", {
@@ -43,11 +43,11 @@ export default function FindUserComponent() {
         body: JSON.stringify({ userId }),
       });
       const data = await response.json();
-
+  
       if (!response.ok) {
         throw new Error(data.error.details || data.error.errorMessage);
       }
-
+  
       setUsers([data.user]);
     } catch (error) {
       console.error("Error fetching user:", error);
@@ -59,7 +59,7 @@ export default function FindUserComponent() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   const fetchUsersByEmail = useCallback(async (prefix: string) => {
     if (prefix.length < 3) return;
@@ -71,11 +71,11 @@ export default function FindUserComponent() {
         body: JSON.stringify({ email_prefix: prefix }),
       });
       const data = await response.json();
-
+  
       if (!response.ok) {
         throw new Error(data.error.details || data.error.errorMessage);
       }
-
+  
       setUsers(data.users);
     } catch (error) {
       console.error("Error fetching users:", error);
@@ -87,12 +87,11 @@ export default function FindUserComponent() {
     } finally {
       setLoading(false);
     }
-  }, [toast]);
+  }, []);
 
-  const debouncedFetchUsers = useCallback(
-    debounce((prefix: string) => fetchUsersByEmail(prefix), 300),
-    [fetchUsersByEmail]
-  );
+  const debouncedFetchUsers = useCallback((prefix: string) => {
+    debounce(() => fetchUsersByEmail(prefix), 300)();
+  }, [fetchUsersByEmail]);
 
   useEffect(() => {
     if (searchMethod === "email" && searchInput.length >= 3) {
@@ -102,7 +101,7 @@ export default function FindUserComponent() {
     } else {
       setUsers([]);
     }
-  }, [searchInput, searchMethod, debouncedFetchUsers]);
+  }, [searchInput, searchMethod, debouncedFetchUsers, fetchUserById]);
 
   const handleViewUserDetails = async (userId: string) => {
     setSelectedUserId(userId);

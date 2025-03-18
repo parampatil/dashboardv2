@@ -59,7 +59,7 @@ const Navbar = () => {
     >
       <div className="container mx-auto h-full flex items-center justify-between">
         <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-          <Link href="/" className="font-semibold text-lg text-gray-900">
+          <Link href="/dashboard" className="font-semibold text-lg text-gray-900">
             360 Omnipresence
           </Link>
         </motion.div>

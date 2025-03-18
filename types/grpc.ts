@@ -1,11 +1,13 @@
 // types/grpc.ts
+import * as grpc from '@grpc/grpc-js';
 
 // Profile Service Types
-export interface ProfileServiceClient {
-  GetTotalPageCount: (params: PageCountRequest) => Promise<PageCountResponse>;
-  GetAllUsers: (params: UsersRequest) => Promise<UsersResponse>;
-  GetUserDetailsByUserId: (params: UserDetailsRequest) => Promise<UserDetailsResponse>;
-  GetUserDetailsByEmail: (params: GetUserDetailsByEmailRequest) => Promise<GetUserDetailsByEmailResponse>;
+export interface ProfileServiceClient extends grpc.Client {
+  GetUserDetailsByEmail: (request: GetUserDetailsByEmailRequest, callback: (error: Error | null, response: GetUserDetailsByEmailResponse) => void) => void;
+  GetAllUsers: (request: UsersRequest, callback: (error: Error | null, response: UsersResponse) => void) => void;
+  GetUserDetailsByUserId: (request: UserDetailsRequest, callback: (error: Error | null, response: UserDetailsResponse) => void) => void;
+  GetTotalPageCount: (request: PageCountRequest, callback: (error: Error | null, response: PageCountResponse) => void) => void;
+  // Add other methods as needed
 }
 
 export interface PageCountRequest {
@@ -56,11 +58,12 @@ export interface User {
 }
 
 // Consumer Purchase Service Types
-export interface ConsumerPurchaseServiceClient {
-  GetConsumerPurchaseBalance: (params: BalanceRequest) => Promise<ConsumerBalanceResponse>;
-  GetConsumerPurchaseHistory: (params: ConsumerPurchaseHistoryRequest) => Promise<ConsumerPurchaseHistoryResponse>;
-  AvailableOffers: (params: AvailableOffersRequest) => Promise<AvailableOffersResponse>;
-  CreateOffer: (params: CreateOfferRequest) => Promise<CreateOfferResponse>;
+export interface ConsumerPurchaseServiceClient extends grpc.Client {
+  AvailableOffers: (request: AvailableOffersRequest, callback: (error: Error | null, response: AvailableOffersResponse) => void) => void;
+  CreateOffer: (request: CreateOfferRequest, callback: (error: Error | null, response: CreateOfferResponse) => void) => void;
+  GetConsumerPurchaseBalance: (request: BalanceRequest, callback: (error: Error | null, response: ConsumerBalanceResponse) => void) => void;
+  GetConsumerPurchaseHistory: (request: ConsumerPurchaseHistoryRequest, callback: (error: Error | null, response: ConsumerPurchaseHistoryResponse) => void) => void;
+  // Add other methods as needed
 }
 
 export interface BalanceRequest {
@@ -122,9 +125,10 @@ export interface CreateOfferResponse {
 }
 
 // Provider Earning Service Types
-export interface ProviderEarningServiceClient {
-  GetProviderEarningBalance: (params: BalanceRequest) => Promise<ProviderBalanceResponse>;
-  GetProviderEarningTransactions: (params: ProviderEarningTransactionsRequest) => Promise<ProviderEarningTransactionsResponse>;
+export interface ProviderEarningServiceClient extends grpc.Client {
+  GetProviderEarningBalance: (request: BalanceRequest, callback: (error: Error | null, response: ProviderBalanceResponse) => void) => void;
+  GetProviderEarningTransactions: (request: ProviderEarningTransactionsRequest, callback: (error: Error | null, response: ProviderEarningTransactionsResponse) => void) => void;
+  // Add other methods as needed
 }
 
 export interface ProviderBalanceResponse {
@@ -153,9 +157,10 @@ export interface ProviderEarningTransactions {
 
 
 // Reward Service Types
-export interface RewardServiceClient {
-  GetAvailableRewards: ({}) => Promise<RewardResponse>;
-  CreateRewardTransactionWithClient: (params: CreateRewardTransactionRequest) => Promise<CreateRewardTransactionResponse>;
+export interface RewardServiceClient extends grpc.Client {
+  getAvailableRewards: (request: Record<string, never>, callback: (error: Error | null, response: RewardResponse) => void) => void;
+  CreateRewardTransactionWithClient: (request: CreateRewardTransactionRequest, callback: (error: Error | null, response: CreateRewardTransactionResponse) => void) => void;
+  // Add other methods as needed
 }
 
 export interface Reward {

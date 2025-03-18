@@ -27,7 +27,6 @@ export default function AvailableRewards() {
 
 
   useEffect(() => {
-    console.log("Current Environment:", currentEnvironment);
     const fetchRewards = async () => {
       try {
         const response = await api.fetch("/api/grpc/rewards/available");
@@ -46,6 +45,7 @@ export default function AvailableRewards() {
         setLoading(false);
       }
     };
+    
     fetchRewards();
   }, [currentEnvironment]);
 
