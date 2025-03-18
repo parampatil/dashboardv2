@@ -165,7 +165,7 @@ export default function Dashboard1() {
 
       {/* User Details Drawer */}
       <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
-        <DrawerContent>
+        <DrawerContent className="max-h-[80vh]">
           <DrawerHeader className="bg-cyan-100">
             <DrawerTitle>User Details</DrawerTitle>
             <DrawerDescription>

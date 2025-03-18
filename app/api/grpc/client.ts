@@ -8,7 +8,8 @@ import {
   ConsumerPurchaseServiceClient,
   RewardServiceClient,
   ProviderEarningServiceClient,
-  LocationServiceClient 
+  LocationServiceClient, 
+  CallManagementServiceClient
 } from '@/types/grpc';
 
 // Default environment if not specified
@@ -19,7 +20,8 @@ const PROTO_PATHS = {
   CONSUMER_PURCHASE: path.resolve('./proto/consumerPurchase.proto'),
   PROVIDER_EARNING: path.resolve('./proto/providerEarning.proto'),
   REWARD: path.resolve('./proto/reward.proto'),
-  LOCATION: path.resolve('./proto/location.proto')
+  LOCATION: path.resolve('./proto/location.proto'),
+  CALL_MANAGEMENT: path.resolve('./proto/callManagementService.proto')
 };
 
 // Get environment from request header or use default
@@ -42,7 +44,8 @@ export const createServiceClients = (environment: 'dev' | 'preprod' | 'prod' = D
     consumerPurchase: createServiceClient<ConsumerPurchaseServiceClient>('ConsumerPurchaseService', PROTO_PATHS.CONSUMER_PURCHASE, SERVICE_URLS.CONSUMER_PURCHASE),
     providerEarning: createServiceClient<ProviderEarningServiceClient>('ProviderEarningService', PROTO_PATHS.PROVIDER_EARNING, SERVICE_URLS.PROVIDER_EARNING),
     reward: createServiceClient<RewardServiceClient>('RewardService', PROTO_PATHS.REWARD, SERVICE_URLS.REWARD),
-    location: createServiceClient<LocationServiceClient>('LocationService', PROTO_PATHS.LOCATION, SERVICE_URLS.LOCATION)
+    location: createServiceClient<LocationServiceClient>('LocationService', PROTO_PATHS.LOCATION, SERVICE_URLS.LOCATION),
+    callManagement: createServiceClient<CallManagementServiceClient>('CallManagementService', PROTO_PATHS.CALL_MANAGEMENT, SERVICE_URLS.CALL_MANAGEMENT)
   };
 };
 

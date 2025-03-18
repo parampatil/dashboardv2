@@ -206,6 +206,47 @@ export interface ArrayLocationData {
   providerIds: string[];
 }
 
+// Call Management Service
+export interface CallManagementServiceClient {
+  GetConsumerCallHistory: (
+    request: GetConsumerCallHistoryRequest,
+    callback: (error: Error | null, response: GetConsumerCallHistoryResponse) => void
+  ) => void;
+  
+  GetProviderCallHistory: (
+    request: GetProviderCallHistoryRequest,
+    callback: (error: Error | null, response: GetProviderCallHistoryResponse) => void
+  ) => void;
+}
+
+export interface CallTransaction {
+  callId: number;
+  location: string;
+  context: string;
+  durationSeconds: number;
+  charge: number;
+  timestamp: {
+    seconds: number;
+    nanos: number;
+  };
+}
+
+export interface GetConsumerCallHistoryRequest {
+  consumerId: number;
+}
+
+export interface GetConsumerCallHistoryResponse {
+  callHistory: CallTransaction[];
+}
+
+export interface GetProviderCallHistoryRequest {
+  providerId: number;
+}
+
+export interface GetProviderCallHistoryResponse {
+  callHistory: CallTransaction[];
+}
+
 // Helper interface to format protobuf timestamp
 export interface UserTimestamp {
     seconds: string;

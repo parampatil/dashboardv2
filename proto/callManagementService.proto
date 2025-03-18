@@ -1,0 +1,127 @@
+syntax = "proto3";
+
+option go_package = "./callManagementService";
+
+import "google/protobuf/timestamp.proto";
+
+enum CallOperator {
+    get_stream = 0;
+    
+}
+
+service CallManagementService {
+    rpc CreateCall(CreateCallRequest) returns (CreateCallResponse);
+    rpc CreateCallV2(CreateCallV2Request) returns (CreateCallV2Response);
+    rpc CreateCallV3(CreateCallV3Request) returns (CreateCallV3Response);
+    rpc CreateUserToken(CreateUserTokenRequest) returns (CreateUserTokenResponse);
+    rpc GetConsumerCallHistory(GetConsumerCallHistoryRequest) returns (GetConsumerCallHistoryResponse);
+    rpc RateUserExperience(RateUserExperienceRequest) returns (RateUserExperienceResponse);
+    rpc GetProviderCallHistory(GetProviderCallHistoryRequest) returns (GetProviderCallHistoryResponse);
+    rpc EndCall(EndCallRequest) returns (EndCallResponse);
+    rpc GetCityName(GetCityNameRequest) returns (GetCityNameResponse);
+}
+
+
+message CreateCallRequest {
+    int64 consumerId = 1; //Id initiating the call
+    int64 providerId = 2; // Id getting the call
+    string callContext = 3; // Conext of the call
+}
+
+message CreateCallResponse {
+    // string token = 1;  //Returning the call token
+    string cid = 1; //Returning call cid
+    CallOperator callOperator = 2; //Enum of which operator the token belongs to.
+}
+
+message CreateCallV2Request {
+    int64 consumerId = 1;
+    int64 providerId = 2;
+    string callContext = 3;
+}
+
+message CreateCallV2Response {
+    string cid = 1;
+    CallOperator callOperator = 2;
+    bool balanceInsufficient = 3;
+}  
+
+message CreateCallV3Request {
+    int64 consumerId = 1;
+    int64 providerId = 2;
+    string callContext = 3;
+}
+
+message CreateCallV3Response {
+    string cid = 1;
+    CallOperator callOperator = 2;
+    bool balanceInsufficient = 3;
+    float providerRate = 4;
+}
+
+
+message CreateUserTokenRequest {
+    int64 userId = 1; //Id of the user
+    CallOperator callOperator = 2; //Enum of which operator the token belongs to.
+}
+
+message CreateUserTokenResponse {
+    string token = 1; //Returning the token
+}
+
+message GetConsumerCallHistoryRequest {
+    int64 consumerId = 1; //Id of the consumer
+}
+
+message GetConsumerCallHistoryResponse {
+    repeated CallTransaction callHistory = 1; //List of call history
+}
+
+message CallTransaction {
+    int64 callId = 1;
+    string location = 2;
+    string context = 3;
+    int64 durationSeconds = 4;
+    int64 charge = 5;
+    google.protobuf.Timestamp timestamp = 6; 
+} 
+
+message RateUserExperienceRequest {
+    string callId = 1;
+    int64 userId = 2;
+    string questionOne = 3;
+    int64 ratingOne = 4;
+    string questionTwo = 5;
+    int64 ratingTwo = 6;
+    string questionThree = 7;
+    int64 ratingThree = 8;
+}
+
+message RateUserExperienceResponse {
+    string message = 1;
+}
+
+message GetProviderCallHistoryRequest {
+    int64 providerId = 1;
+}
+
+message GetProviderCallHistoryResponse {
+    repeated CallTransaction callHistory = 1;
+}
+
+message EndCallRequest {
+    string callId = 1;
+}
+
+message EndCallResponse {
+    string message = 1;
+}
+
+message GetCityNameRequest {
+    double latitude = 1;
+    double longitude = 2;
+}
+
+message GetCityNameResponse {
+    string cityName = 1;
+}

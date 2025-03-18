@@ -9,6 +9,7 @@ export const environments = {
       PROVIDER_EARNING: "api.360world.com:30116",
       REWARD: "api.360world.com:32064",
       LOCATION: "api.360world.com:32461",
+      CALL_MANAGEMENT: "api.360world.com:30111",
     },
   },
   preprod: {
@@ -20,6 +21,7 @@ export const environments = {
       PROVIDER_EARNING: "api.360world.com:31060",
       REWARD: "api.360world.com:32064",
       LOCATION: "api.360world.com:32461",
+      CALL_MANAGEMENT: "api.360world.com:30111",
     },
   },
   prod: {
@@ -31,6 +33,7 @@ export const environments = {
       PROVIDER_EARNING: "api.360world.com:31060",
       REWARD: "api.360world.com:32064",
       LOCATION: "api.360world.com:32461",
+      CALL_MANAGEMENT: "api.360world.com:30111",
     },
   },
 };

@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useApi } from "@/hooks/useApi";
 
 import { TransactionHistorySection } from "./TransactionHistorySection";
+import { CallHistoryTabs } from "@/components/UsersDashboard/CallHistoryTabs";
 
 interface UserDetailsProps {
   userData: {
@@ -185,6 +186,12 @@ export function UserDetails({ userData }: UserDetailsProps) {
         loadingHistory={loadingHistory}
         loadingTransactions={loadingTransactions}
       />
+
+      {/* Call History Tabs */}
+      <div className="mt-6">
+  <h3 className="text-lg font-medium mb-4">Call History</h3>
+  <CallHistoryTabs userId={userData.user.userId} />
+</div>
     </motion.div>
   );
 }
