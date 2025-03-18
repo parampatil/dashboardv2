@@ -36,6 +36,7 @@ export default function ActiveUserIds() {
   const [availablePages, setAvailablePages] = useState<string[]>([]);
   const [autoRefresh, setAutoRefresh] = useState(false);
   const [timeUntilRefresh, setTimeUntilRefresh] = useState(5);
+  const [allCachesData, setAllCachesData] = useState<GetAllActiveUserIdsResponse | null>(null);
   
   const autoRefreshIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -54,6 +55,7 @@ export default function ActiveUserIds() {
       }
       
       const data: GetAllActiveUserIdsResponse = await response.json();
+      setAllCachesData(data);
       
       // Get available pages from cache keys
       const pages = Object.keys(data.caches || {}).sort((a, b) => parseInt(a) - parseInt(b));
@@ -64,19 +66,7 @@ export default function ActiveUserIds() {
         setCurrentPage(pages[0]);
       }
       
-      // Transform the data for the current page into an array format for the table
-      if (data.caches[currentPage]?.locations) {
-        const locationsArray = Object.entries(data.caches[currentPage].locations).map(([key, location]) => ({
-          key,
-          ...location,
-          // Convert providerIds to strings if they aren't already
-          providerIds: location.providerIds.map(id => id.toString())
-        }));
-        
-        setLocations(locationsArray);
-      } else {
-        setLocations([]);
-      }
+      updateLocationsForCurrentPage(data, currentPage);
     } catch (error) {
       toast({
         variant: "destructive",
@@ -86,6 +76,24 @@ export default function ActiveUserIds() {
     } finally {
       setLoading(false);
       setRefreshing(false);
+    }
+  };
+
+  const updateLocationsForCurrentPage = (data: GetAllActiveUserIdsResponse | null, page: string) => {
+    if (!data) return;
+    
+    // Transform the data for the current page into an array format for the table
+    if (data.caches[page]?.locations) {
+      const locationsArray = Object.entries(data.caches[page].locations).map(([key, location]) => ({
+        key,
+        ...location,
+        // Convert providerIds to strings if they aren't already
+        providerIds: location.providerIds.map(id => id.toString())
+      }));
+      
+      setLocations(locationsArray);
+    } else {
+      setLocations([]);
     }
   };
 
@@ -102,7 +110,12 @@ export default function ActiveUserIds() {
         clearInterval(timerIntervalRef.current);
       }
     };
-  }, [currentPage, currentEnvironment]);
+  }, [currentEnvironment]);
+
+  // Update locations when page changes
+  useEffect(() => {
+    updateLocationsForCurrentPage(allCachesData, currentPage);
+  }, [currentPage, allCachesData]);
 
   // Handle auto-refresh toggle
   useEffect(() => {
@@ -221,19 +234,14 @@ export default function ActiveUserIds() {
                       transition={{ duration: 0.2 }}
                     >
                       <Clock className="h-3 w-3 mr-1" />
-                      <AnimatePresence mode="wait">
-                        <motion.span
-                          key={timeUntilRefresh}
-                          initial={{opacity: 0, y: -10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.2 }}
-                          exit={{opacity: 0, y: 10 }}
-                          className="min-w-2 text-center"
-                        >
-                          {timeUntilRefresh}
-                        </motion.span>
-                      </AnimatePresence>
-                      s
+                      <motion.span
+                        key={timeUntilRefresh}
+                        initial={{ scale: 1.5, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        {timeUntilRefresh}s
+                      </motion.span>
                     </motion.div>
                   )}
                 </Label>
@@ -278,18 +286,18 @@ export default function ActiveUserIds() {
                 transition={{ delay: 0.3 }}
               >
                 <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
+                  <thead className="bg-blue-100">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
                         Key
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
                         Provider IDs
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
                         Latitude
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
                         Longitude
                       </th>
                     </tr>
@@ -309,7 +317,7 @@ export default function ActiveUserIds() {
                             {location.key}
                           </td>
                           <td className="px-6 py-4 text-sm text-gray-500">
-                            <div className="max-h-40 overflow-y-auto">
+                            <div className="max-h-80 overflow-y-auto">
                               {location.providerIds.map((id, idx) => (
                                 <motion.div 
                                   key={idx} 

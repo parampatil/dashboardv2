@@ -19,7 +19,6 @@ export async function GET(request: Request) {
 
     // Call the service with empty request
     const response = await locationService.getAllActiveUserIds({}) as GetAllActiveUserIdsResponse;
-    console.log('Response:', response.caches[1].locations);
     
     return NextResponse.json(response);
   } catch (error) {
