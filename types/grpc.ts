@@ -59,6 +59,8 @@ export interface User {
 export interface ConsumerPurchaseServiceClient {
   GetConsumerPurchaseBalance: (params: BalanceRequest) => Promise<ConsumerBalanceResponse>;
   GetConsumerPurchaseHistory: (params: ConsumerPurchaseHistoryRequest) => Promise<ConsumerPurchaseHistoryResponse>;
+  AvailableOffers: (params: AvailableOffersRequest) => Promise<AvailableOffersResponse>;
+  CreateOffer: (params: CreateOfferRequest) => Promise<CreateOfferResponse>;
 }
 
 export interface BalanceRequest {
@@ -87,6 +89,36 @@ export interface PurchaseHistory {
   purchaseAmount: number;
   purchaseCurrency: string;
   refundStatus: string;
+}
+
+export interface Offer {
+  offerId: string;
+  offerName: string;
+  numberOfMinutes: number;
+  totalPrice: number;
+  pricePerMinute: number;
+  currency: string;
+  country: string;
+}
+
+export interface AvailableOffersRequest {
+  country: string;
+}
+
+export interface AvailableOffersResponse {
+  offers: Offer[];
+}
+
+export interface CreateOfferRequest {
+  country: string;
+  currency: string;
+  numberOfMinutes: number;
+  offerName: string;
+  totalPrice: number;
+}
+
+export interface CreateOfferResponse {
+  offerId: number;
 }
 
 // Provider Earning Service Types
@@ -146,41 +178,6 @@ export interface CreateRewardTransactionRequest {
 
 export interface CreateRewardTransactionResponse {
   rewardTransactionId: number;
-}
-// Consumer Purchase Dev Service Types
-export interface ConsumerPurchaseDevServiceClient {
-  AvailableOffers: (params: AvailableOffersRequest) => Promise<AvailableOffersResponse>;
-  CreateOffer: (params: CreateOfferRequest) => Promise<CreateOfferResponse>;
-}
-
-export interface Offer {
-  offerId: string;
-  offerName: string;
-  numberOfMinutes: number;
-  totalPrice: number;
-  pricePerMinute: number;
-  currency: string;
-  country: string;
-}
-
-export interface AvailableOffersRequest {
-  country: string;
-}
-
-export interface AvailableOffersResponse {
-  offers: Offer[];
-}
-
-export interface CreateOfferRequest {
-  country: string;
-  currency: string;
-  numberOfMinutes: number;
-  offerName: string;
-  totalPrice: number;
-}
-
-export interface CreateOfferResponse {
-  offerId: number;
 }
 
 // Helper interface to format protobuf timestamp

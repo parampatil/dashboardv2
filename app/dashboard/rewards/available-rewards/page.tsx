@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Reward } from "@/types/grpc";
 import { useToast } from "@/hooks/use-toast";
+import { useApi } from "@/hooks/useApi";
+import { useEnvironment } from "@/context/EnvironmentContext";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { Button } from "@/components/ui/button";
 import { RewardForm } from "../RewardForm";
@@ -19,11 +21,16 @@ export default function AvailableRewards() {
   const [rewards, setRewards] = useState<Reward[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const api = useApi();
+  const {currentEnvironment} = useEnvironment();
+
+
 
   useEffect(() => {
+    console.log("Current Environment:", currentEnvironment);
     const fetchRewards = async () => {
       try {
-        const response = await fetch("/api/grpc/rewards/available");
+        const response = await api.fetch("/api/grpc/rewards/available");
         const data = await response.json();
         if (!response.ok) {
           throw new Error(data.error.details || data.error.errorMessage);
@@ -39,9 +46,8 @@ export default function AvailableRewards() {
         setLoading(false);
       }
     };
-
     fetchRewards();
-  }, [toast]);
+  }, [currentEnvironment]);
 
   const containerVariants = {
     hidden: { opacity: 0 },

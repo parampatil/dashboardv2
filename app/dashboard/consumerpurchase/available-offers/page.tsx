@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { useToast } from "@/hooks/use-toast";
 import { useApi } from "@/hooks/useApi";
+import { useEnvironment } from "@/context/EnvironmentContext";
 import { Offer } from "@/types/grpc";
 import { DollarSign, Clock, Tag, Globe } from "lucide-react";
 import { 
@@ -21,6 +22,7 @@ export default function AvailableOffers() {
   const [selectedCountry, setSelectedCountry] = useState("US");
   const { toast } = useToast();
   const api = useApi();
+  const {currentEnvironment} = useEnvironment();
 
   const countries = [
     { code: "US", name: "United States" },
@@ -63,7 +65,7 @@ export default function AvailableOffers() {
 
   useEffect(() => {
     fetchOffers(selectedCountry);
-  }, [selectedCountry]);
+  }, [selectedCountry, currentEnvironment]);
 
   const handleCountryChange = (country: string) => {
     setSelectedCountry(country);

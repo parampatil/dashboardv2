@@ -32,6 +32,29 @@ export const environments = {
   },
 };
 
+export const defaultEnvironment =  {
+  // dev: {
+  //   name: "Default (Dev)",
+  //   apiBaseUrl: "https://api.360world.com",
+  //   serviceUrls: {
+  //     PROFILE: "api.360world.com:32394",
+  //     CONSUMER_PURCHASE: "api.360world.com:31128",
+  //     PROVIDER_EARNING: "api.360world.com:30116",
+  //     REWARD: "api.360world.com:32064",
+  //   },
+  // },
+  prod: {
+    name: "Default (Prod)",
+    apiBaseUrl: "https://api.360world.com",
+    serviceUrls: {
+      PROFILE: "api.360world.com:32394",
+      CONSUMER_PURCHASE: "api.360world.com:31451",
+      PROVIDER_EARNING: "api.360world.com:31060",
+      REWARD: "api.360world.com:32064",
+    },
+  },
+}
+
 export const environmentsList = {
   dev: "Development",
   preprod: "Pre-Production",

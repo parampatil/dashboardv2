@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { useApi } from "@/hooks/useApi";
 import { UserDetails } from "@/components/UsersDashboard/UserDetails";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import UserTable from "@/components/UsersDashboard/UserTable";
@@ -31,11 +32,12 @@ export default function FindUserComponent() {
   const [userDetails, setUserDetails] = useState(null);
   const [loadingDetails, setLoadingDetails] = useState(false);
   const { toast } = useToast();
+  const api = useApi();
 
   const fetchUserById = async (userId: string) => {
     setLoading(true);
     try {
-      const response = await fetch("/api/grpc/users/details", {
+      const response = await api.fetch("/api/grpc/users/details", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId }),
@@ -63,7 +65,7 @@ export default function FindUserComponent() {
     if (prefix.length < 3) return;
     setLoading(true);
     try {
-      const response = await fetch("/api/grpc/profile/getUserDetailsByEmail", {
+      const response = await api.fetch("/api/grpc/profile/getUserDetailsByEmail", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email_prefix: prefix }),
@@ -108,7 +110,7 @@ export default function FindUserComponent() {
     setDrawerOpen(true);
 
     try {
-      const response = await fetch("/api/grpc/users/details", {
+      const response = await api.fetch("/api/grpc/users/details", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId }),

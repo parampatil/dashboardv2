@@ -14,7 +14,7 @@ export async function GET(request: Request) {
     
     // Create service with promisified methods
     const rewardService = {
-      getAvailableRewards: promisify(clients.reward.GetAvailableRewards.bind(clients.reward))
+      getAvailableRewards: promisify(clients.reward.getAvailableRewards.bind(clients.reward))
     };
 
     const rewardsResponse = (await rewardService.getAvailableRewards({})) as RewardResponse;

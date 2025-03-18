@@ -5,7 +5,7 @@ import path from 'path';
 import { environments } from '@/config/environments';
 
 // Default environment if not specified
-const DEFAULT_ENV = process.env.API_ENVIRONMENT as 'dev' | 'preprod' | 'prod' || 'dev';
+const DEFAULT_ENV = process.env.DEFAULT_API_ENVIRONMENT as 'dev' | 'preprod' | 'prod' || 'dev';
 
 const PROTO_PATHS = {
   PROFILE: path.resolve('./proto/profile.proto'),
