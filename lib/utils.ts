@@ -1,3 +1,4 @@
+// lib/utils.ts
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 import { format } from "date-fns";
@@ -58,4 +59,15 @@ export function formatDuration(seconds: number): string {
   } else {
     return `${remainingSeconds}s`;
   }
+}
+
+export function dateToProtobufTimestamp(date: Date): { seconds: number; nanos: number } {
+  return {
+    seconds: Math.floor(date.getTime() / 1000),
+    nanos: (date.getTime() % 1000) * 1000000,
+  };
+}
+
+export function protobufTimestampToDate(timestamp: { seconds: number; nanos: number }): Date {
+  return new Date(timestamp.seconds * 1000 + timestamp.nanos / 1000000);
 }

@@ -39,7 +39,7 @@ export function UserNav() {
           whileTap={{ scale: 0.95 }}
         >
           <Avatar>
-            {user?.imageUrl && <Image src={user.imageUrl} alt={user.name || user.email} fill={true} />}
+            {user?.imageUrl && <Image src={user.imageUrl} alt={user.name || user.email} fill={true} sizes="40px"/>}
             <AvatarFallback className="bg-gray-100 text-gray-600">
               {user?.name ? getInitials(user.name) : user?.email?.[0].toUpperCase()}
             </AvatarFallback>

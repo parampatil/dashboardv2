@@ -1,12 +1,27 @@
 // types/grpc.ts
-import * as grpc from '@grpc/grpc-js';
+import * as grpc from "@grpc/grpc-js";
 
 // Profile Service Types
 export interface ProfileServiceClient extends grpc.Client {
-  GetUserDetailsByEmail: (request: GetUserDetailsByEmailRequest, callback: (error: Error | null, response: GetUserDetailsByEmailResponse) => void) => void;
-  GetAllUsers: (request: UsersRequest, callback: (error: Error | null, response: UsersResponse) => void) => void;
-  GetUserDetailsByUserId: (request: UserDetailsRequest, callback: (error: Error | null, response: UserDetailsResponse) => void) => void;
-  GetTotalPageCount: (request: PageCountRequest, callback: (error: Error | null, response: PageCountResponse) => void) => void;
+  GetUserDetailsByEmail: (
+    request: GetUserDetailsByEmailRequest,
+    callback: (
+      error: Error | null,
+      response: GetUserDetailsByEmailResponse
+    ) => void
+  ) => void;
+  GetAllUsers: (
+    request: UsersRequest,
+    callback: (error: Error | null, response: UsersResponse) => void
+  ) => void;
+  GetUserDetailsByUserId: (
+    request: UserDetailsRequest,
+    callback: (error: Error | null, response: UserDetailsResponse) => void
+  ) => void;
+  GetTotalPageCount: (
+    request: PageCountRequest,
+    callback: (error: Error | null, response: PageCountResponse) => void
+  ) => void;
   // Add other methods as needed
 }
 
@@ -59,10 +74,25 @@ export interface User {
 
 // Consumer Purchase Service Types
 export interface ConsumerPurchaseServiceClient extends grpc.Client {
-  AvailableOffers: (request: AvailableOffersRequest, callback: (error: Error | null, response: AvailableOffersResponse) => void) => void;
-  CreateOffer: (request: CreateOfferRequest, callback: (error: Error | null, response: CreateOfferResponse) => void) => void;
-  GetConsumerPurchaseBalance: (request: BalanceRequest, callback: (error: Error | null, response: ConsumerBalanceResponse) => void) => void;
-  GetConsumerPurchaseHistory: (request: ConsumerPurchaseHistoryRequest, callback: (error: Error | null, response: ConsumerPurchaseHistoryResponse) => void) => void;
+  AvailableOffers: (
+    request: AvailableOffersRequest,
+    callback: (error: Error | null, response: AvailableOffersResponse) => void
+  ) => void;
+  CreateOffer: (
+    request: CreateOfferRequest,
+    callback: (error: Error | null, response: CreateOfferResponse) => void
+  ) => void;
+  GetConsumerPurchaseBalance: (
+    request: BalanceRequest,
+    callback: (error: Error | null, response: ConsumerBalanceResponse) => void
+  ) => void;
+  GetConsumerPurchaseHistory: (
+    request: ConsumerPurchaseHistoryRequest,
+    callback: (
+      error: Error | null,
+      response: ConsumerPurchaseHistoryResponse
+    ) => void
+  ) => void;
   // Add other methods as needed
 }
 
@@ -126,8 +156,17 @@ export interface CreateOfferResponse {
 
 // Provider Earning Service Types
 export interface ProviderEarningServiceClient extends grpc.Client {
-  GetProviderEarningBalance: (request: BalanceRequest, callback: (error: Error | null, response: ProviderBalanceResponse) => void) => void;
-  GetProviderEarningTransactions: (request: ProviderEarningTransactionsRequest, callback: (error: Error | null, response: ProviderEarningTransactionsResponse) => void) => void;
+  GetProviderEarningBalance: (
+    request: BalanceRequest,
+    callback: (error: Error | null, response: ProviderBalanceResponse) => void
+  ) => void;
+  GetProviderEarningTransactions: (
+    request: ProviderEarningTransactionsRequest,
+    callback: (
+      error: Error | null,
+      response: ProviderEarningTransactionsResponse
+    ) => void
+  ) => void;
   // Add other methods as needed
 }
 
@@ -155,11 +194,19 @@ export interface ProviderEarningTransactions {
   status: string;
 }
 
-
 // Reward Service Types
 export interface RewardServiceClient extends grpc.Client {
-  getAvailableRewards: (request: Record<string, never>, callback: (error: Error | null, response: RewardResponse) => void) => void;
-  CreateRewardTransactionWithClient: (request: CreateRewardTransactionRequest, callback: (error: Error | null, response: CreateRewardTransactionResponse) => void) => void;
+  getAvailableRewards: (
+    request: Record<string, never>,
+    callback: (error: Error | null, response: RewardResponse) => void
+  ) => void;
+  CreateRewardTransactionWithClient: (
+    request: CreateRewardTransactionRequest,
+    callback: (
+      error: Error | null,
+      response: CreateRewardTransactionResponse
+    ) => void
+  ) => void;
   // Add other methods as needed
 }
 
@@ -187,7 +234,10 @@ export interface CreateRewardTransactionResponse {
 
 // Location Service Types
 export interface LocationServiceClient {
-  GetAllActiveUserIds: (request: GetAllActiveUserIdsRequest, callback: (error: Error, response: GetAllActiveUserIdsResponse) => void) => void;
+  GetAllActiveUserIds: (
+    request: GetAllActiveUserIdsRequest,
+    callback: (error: Error, response: GetAllActiveUserIdsResponse) => void
+  ) => void;
 }
 
 export type GetAllActiveUserIdsRequest = Record<string, never>;
@@ -210,13 +260,23 @@ export interface ArrayLocationData {
 export interface CallManagementServiceClient {
   GetConsumerCallHistory: (
     request: GetConsumerCallHistoryRequest,
-    callback: (error: Error | null, response: GetConsumerCallHistoryResponse) => void
+    callback: (
+      error: Error | null,
+      response: GetConsumerCallHistoryResponse
+    ) => void
   ) => void;
-  
+
   GetProviderCallHistory: (
     request: GetProviderCallHistoryRequest,
-    callback: (error: Error | null, response: GetProviderCallHistoryResponse) => void
+    callback: (
+      error: Error | null,
+      response: GetProviderCallHistoryResponse
+    ) => void
   ) => void;
+
+  GetAllUsersCallTime: (
+    request: GetAllUsersCallTimeRequest,
+  ) => Promise<GetAllUsersCallTimeResponse>;
 }
 
 export interface CallTransaction {
@@ -247,8 +307,32 @@ export interface GetProviderCallHistoryResponse {
   callHistory: CallTransaction[];
 }
 
+export interface GetAllUsersCallTimeRequest {
+  startTime: {
+    seconds: number;
+    nanos: number;
+  };
+  endTime: {
+    seconds: number;
+    nanos: number;
+  };
+}
+
+export interface UserCallTime {
+  userId: number;
+  userName: string;
+  numberOfCalls: number;
+  totalCallTime: number;
+  callTimeAsProvider: number;
+  callTimeAsConsumer: number;
+}
+
+export interface GetAllUsersCallTimeResponse {
+  userCallTime: UserCallTime[];
+}
+
 // Helper interface to format protobuf timestamp
 export interface UserTimestamp {
-    seconds: string;
-    nanos: number;
+  seconds: string;
+  nanos: number;
 }

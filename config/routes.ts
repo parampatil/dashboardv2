@@ -21,7 +21,7 @@ export const ROUTES = {
     { path: '/dashboard/analytics/grafana', name: 'Grafana Dashboard' },
     { path: '/dashboard/analytics/call-history-table', name: 'Call History Table' },
     { path: '/dashboard/analytics/call-history-analytics', name: 'Call History Analytics' },
-    { path: '/dashboard/analytics/active-user-analytics', name: 'Active-user-analytics' },
+    { path: '/dashboard/analytics/active-user-analytics', name: 'Active User Analytics' },
     { path: '/dashboard/consumerpurchase', name: 'Consumer Purchase Dashboard' },
     { path: '/dashboard/consumerpurchase/available-offers', name: 'Available Offers' },
     { path: '/dashboard/consumerpurchase/create-offer', name: 'Create Offer' },

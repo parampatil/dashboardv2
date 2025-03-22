@@ -19,6 +19,9 @@ service CallManagementService {
     rpc GetProviderCallHistory(GetProviderCallHistoryRequest) returns (GetProviderCallHistoryResponse);
     rpc EndCall(EndCallRequest) returns (EndCallResponse);
     rpc GetCityName(GetCityNameRequest) returns (GetCityNameResponse);
+
+    // Analytics
+    rpc GetAllUsersCallTime(GetAllUsersCallTimeRequest) returns (GetAllUsersCallTimeResponse);
 }
 
 
@@ -124,4 +127,22 @@ message GetCityNameRequest {
 
 message GetCityNameResponse {
     string cityName = 1;
+}
+
+message GetAllUsersCallTimeRequest {
+    google.protobuf.Timestamp startTime = 1;
+    google.protobuf.Timestamp endTime = 2;
+}
+
+message UserCallTime {
+    int64 userId = 1;
+    string userName = 2;
+    int64 numberOfCalls = 3;
+    int64 totalCallTime = 4;
+    int64 callTimeAsProvider = 5;
+    int64 callTimeAsConsumer = 6;
+}
+
+message GetAllUsersCallTimeResponse {
+    repeated UserCallTime userCallTime = 1;
 }
