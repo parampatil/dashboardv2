@@ -25,6 +25,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
+import { CallHistoryAnalyticsDashboard } from "@/components/AnalyticsDashboard/CallHistoryAnalyticsDashboard";
 
 interface UserCallTime {
   userId: number;
@@ -35,7 +36,11 @@ interface UserCallTime {
   callTimeAsConsumer: number;
 }
 
-type SortField = "numberOfCalls" | "totalCallTime" | "callTimeAsProvider" | "callTimeAsConsumer";
+type SortField =
+  | "numberOfCalls"
+  | "totalCallTime"
+  | "callTimeAsProvider"
+  | "callTimeAsConsumer";
 type SortDirection = "asc" | "desc";
 
 export default function CallHistoryAnalytics() {
@@ -77,20 +82,27 @@ export default function CallHistoryAnalytics() {
         nanos: (endDate.getTime() % 1000) * 1000000,
       };
 
-      const response = await api.fetch("/api/grpc/analytics/call-history-analytics", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          startTime: startTimestamp,
-          endTime: endTimestamp,
-        }),
-      });
+      const response = await api.fetch(
+        "/api/grpc/analytics/call-history-analytics",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            startTime: startTimestamp,
+            endTime: endTimestamp,
+          }),
+        }
+      );
 
       const data = await response.json();
       if (!response.ok) {
-        throw new Error(data.error?.details || data.message || "Failed to fetch call time data");
+        throw new Error(
+          data.error?.details ||
+            data.message ||
+            "Failed to fetch call time data"
+        );
       }
 
       setUserCallTimes(data.userCallTime || []);
@@ -125,7 +137,7 @@ export default function CallHistoryAnalytics() {
       filtered.sort((a, b) => {
         const aValue = a[sortField];
         const bValue = b[sortField];
-        
+
         if (sortDirection === "asc") {
           return aValue - bValue;
         } else {
@@ -154,7 +166,9 @@ export default function CallHistoryAnalytics() {
   };
 
   return (
-    <ProtectedRoute allowedRoutes={["/dashboard/analytics/call-history-analytics"]}>
+    <ProtectedRoute
+      allowedRoutes={["/dashboard/analytics/call-history-analytics"]}
+    >
       <motion.div
         className="space-y-6"
         initial={{ opacity: 0 }}
@@ -178,7 +192,11 @@ export default function CallHistoryAnalytics() {
                     )}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {startDate ? format(startDate, "PPP") : <span>Pick a date</span>}
+                    {startDate ? (
+                      format(startDate, "PPP")
+                    ) : (
+                      <span>Pick a date</span>
+                    )}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0">
@@ -204,7 +222,11 @@ export default function CallHistoryAnalytics() {
                     )}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {endDate ? format(endDate, "PPP") : <span>Pick a date</span>}
+                    {endDate ? (
+                      format(endDate, "PPP")
+                    ) : (
+                      <span>Pick a date</span>
+                    )}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0">
@@ -219,8 +241,8 @@ export default function CallHistoryAnalytics() {
             </div>
 
             <div className="flex items-end">
-              <Button 
-                onClick={fetchCallTimeData} 
+              <Button
+                onClick={fetchCallTimeData}
                 className="w-full"
                 disabled={loading || !startDate || !endDate}
               >
@@ -310,13 +332,20 @@ export default function CallHistoryAnalytics() {
                         <TableCell>{user.userName}</TableCell>
                         <TableCell>{user.numberOfCalls}</TableCell>
                         <TableCell>{formatTime(user.totalCallTime)}</TableCell>
-                        <TableCell>{formatTime(user.callTimeAsProvider)}</TableCell>
-                        <TableCell>{formatTime(user.callTimeAsConsumer)}</TableCell>
+                        <TableCell>
+                          {formatTime(user.callTimeAsProvider)}
+                        </TableCell>
+                        <TableCell>
+                          {formatTime(user.callTimeAsConsumer)}
+                        </TableCell>
                       </TableRow>
                     ))
                   ) : (
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center py-6 text-gray-500">
+                      <TableCell
+                        colSpan={6}
+                        className="text-center py-6 text-gray-500"
+                      >
                         No data available
                       </TableCell>
                     </TableRow>
@@ -324,6 +353,15 @@ export default function CallHistoryAnalytics() {
                 </TableBody>
               </Table>
             </div>
+          )}
+        </div>
+
+        <div className="bg-white rounded-lg shadow-md p-6">
+          {!loading && filteredData.length > 0 && (
+            <CallHistoryAnalyticsDashboard
+              data={filteredData}
+              formatTime={formatTime}
+            />
           )}
         </div>
       </motion.div>
