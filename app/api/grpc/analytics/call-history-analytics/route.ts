@@ -16,7 +16,7 @@ export async function POST(request: Request) {
     };
 
     const response = await callManagementService.getAllUsersCallTime({ startTime, endTime }) as GetAllUsersCallTimeResponse;
-    console.log('API response:', response);
+
     return NextResponse.json(response);
   } catch (error) {
     console.error('API error:', error);
