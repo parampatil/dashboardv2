@@ -310,35 +310,47 @@ export interface CallManagementServiceClient {
 
   GetAllUsersCallTime: (
     request: GetAllUsersCallTimeRequest,
-  ) => Promise<GetAllUsersCallTimeResponse>;
+    callback: (
+      error: Error | null,
+      response: GetAllUsersCallTimeResponse
+    ) => void
+  ) => void;
 }
 
-export interface CallTransaction {
-  callId: number;
+// Consumer Call History
+export interface ConsumerCallHistory {
+  callId: string;
   location: string;
   context: string;
-  durationSeconds: number;
-  charge: number;
-  timestamp: {
-    seconds: number;
-    nanos: number;
-  };
+  durationSeconds: string;
+  charge: string; // in seconds, will be converted to minutes
+  timestamp: { seconds?: string; nanos?: number };
 }
 
 export interface GetConsumerCallHistoryRequest {
-  consumerId: number;
+  consumerId: string;
 }
 
 export interface GetConsumerCallHistoryResponse {
-  callHistory: CallTransaction[];
+  callHistory: ConsumerCallHistory[];
+}
+
+// Provider Call History
+export interface ProviderCallHistory {
+  callId: string;
+  location: string;
+  context: string;
+  durationSeconds: string;
+  charge: string; // in cents, will be converted to dollars
+  timestamp: { seconds?: string; nanos?: number };
 }
 
 export interface GetProviderCallHistoryRequest {
-  providerId: number;
+  providerId: string;
 }
 
 export interface GetProviderCallHistoryResponse {
-  callHistory: CallTransaction[];
+  callHistory: ProviderCallHistory[];
 }
 
 export interface GetAllUsersCallTimeRequest {
@@ -364,6 +376,7 @@ export interface UserCallTime {
 export interface GetAllUsersCallTimeResponse {
   userCallTime: UserCallTime[];
 }
+
 
 // MP2 Service Types
 export interface MPSquareServiceClient {

@@ -2,169 +2,269 @@
 "use client";
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
+import { ConsumerCallHistory, ProviderCallHistory } from "@/types/grpc";
 import { useToast } from "@/hooks/use-toast";
 import { useApi } from "@/hooks/useApi";
-import { CallTransaction } from "@/types/grpc";
-import { Phone, Clock, MapPin, Tag, DollarSign } from "lucide-react";
-import { formatDuration } from "@/lib/utils";
 
 interface CallHistoryTabsProps {
+  consumerCallHistory?: ConsumerCallHistory[];
+  providerCallHistory?: ProviderCallHistory[];
   userId: string;
 }
 
-export function CallHistoryTabs({ userId }: CallHistoryTabsProps) {
-  const [consumerCalls, setConsumerCalls] = useState<CallTransaction[]>([]);
-  const [providerCalls, setProviderCalls] = useState<CallTransaction[]>([]);
-  const [loadingConsumer, setLoadingConsumer] = useState(false);
-  const [loadingProvider, setLoadingProvider] = useState(false);
+export function CallHistoryTabs({
+  consumerCallHistory: initialConsumerCallHistory = [],
+  providerCallHistory: initialProviderCallHistory = [],
+  userId,
+}: CallHistoryTabsProps) {
+  const [consumerCallHistory, setConsumerCallHistory] = useState<ConsumerCallHistory[]>(initialConsumerCallHistory || []);
+  const [providerCallHistory, setProviderCallHistory] = useState<ProviderCallHistory[]>(initialProviderCallHistory || []);
+  const [isLoadingConsumer, setIsLoadingConsumer] = useState(false);
+  const [isLoadingProvider, setIsLoadingProvider] = useState(false);
+  
   const { toast } = useToast();
   const api = useApi();
 
+  // Sort call histories by date in descending order
+  const sortedConsumerHistory = [...consumerCallHistory].sort((a, b) => {
+    const dateA = new Date(
+      a.timestamp?.seconds ? parseInt(a.timestamp.seconds) * 1000 : 0
+    );
+    const dateB = new Date(
+      b.timestamp?.seconds ? parseInt(b.timestamp.seconds) * 1000 : 0
+    );
+    return dateB.getTime() - dateA.getTime();
+  });
+
+  const sortedProviderHistory = [...providerCallHistory].sort((a, b) => {
+    const dateA = new Date(
+      a.timestamp?.seconds ? parseInt(a.timestamp.seconds) * 1000 : 0
+    );
+    const dateB = new Date(
+      b.timestamp?.seconds ? parseInt(b.timestamp.seconds) * 1000 : 0
+    );
+    return dateB.getTime() - dateA.getTime();
+  });
+
+  // Format timestamp to readable date
+  const formatTimestamp = (timestamp: { seconds?: string; nanos?: number }) => {
+    if (!timestamp || !timestamp.seconds) return "N/A";
+    const date = new Date(parseInt(timestamp.seconds) * 1000);
+    return format(date, "MMM dd, yyyy HH:mm:ss");
+  };
+
+  // Convert cents to dollars for provider charge
+  const centsToDollars = (cents: string | number) => {
+    if (!cents) return "$0.00";
+    const numCents = typeof cents === "string" ? parseInt(cents) : cents;
+    return `$${(numCents / 100).toFixed(2)}`;
+  };
+
+  // Fetch consumer call history
   const fetchConsumerCallHistory = async () => {
-    setLoadingConsumer(true);
+    if (!userId) return;
+    
+    setIsLoadingConsumer(true);
     try {
       const response = await api.fetch("/api/grpc/users/consumer-call-history", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ consumerId: parseInt(userId) }),
+        body: JSON.stringify({ consumerId: userId }),
       });
-
+      
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to fetch consumer call history");
+        throw new Error("Failed to fetch consumer call history");
       }
-
+      
       const data = await response.json();
-      setConsumerCalls(data.callHistory || []);
+      setConsumerCallHistory(data.callHistory || []);
+      toast({
+        title: "Success",
+        description: "Consumer call history refreshed",
+      });
     } catch (error) {
       toast({
         variant: "destructive",
-        title: "Failed to fetch consumer call history",
-        description: (error as Error).message,
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to fetch consumer call history",
       });
     } finally {
-      setLoadingConsumer(false);
+      setIsLoadingConsumer(false);
     }
   };
 
+  // Fetch provider call history
   const fetchProviderCallHistory = async () => {
-    setLoadingProvider(true);
+    if (!userId) return;
+    
+    setIsLoadingProvider(true);
     try {
       const response = await api.fetch("/api/grpc/users/provider-call-history", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ providerId: parseInt(userId) }),
+        body: JSON.stringify({ providerId: userId }),
       });
-
+      
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to fetch provider call history");
+        throw new Error("Failed to fetch provider call history");
       }
-
+      
       const data = await response.json();
-      setProviderCalls(data.callHistory || []);
+      setProviderCallHistory(data.callHistory || []);
+      toast({
+        title: "Success",
+        description: "Provider call history refreshed",
+      });
     } catch (error) {
       toast({
         variant: "destructive",
-        title: "Failed to fetch provider call history",
-        description: (error as Error).message,
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to fetch provider call history",
       });
     } finally {
-      setLoadingProvider(false);
+      setIsLoadingProvider(false);
     }
+  };
+
+  const formatDuration = (seconds: string | number) => {
+    if (!seconds) return "0m 0s";
+    const numSeconds = typeof seconds === "string" ? parseInt(seconds) : seconds;
+    const minutes = Math.floor(numSeconds / 60);
+    const remainingSeconds = numSeconds % 60;
+    return `${minutes}m ${remainingSeconds}s`;
   };
 
   useEffect(() => {
     if (userId) {
+      // Load consumer call history
       fetchConsumerCallHistory();
+      
+      // Load provider call history
       fetchProviderCallHistory();
     }
   }, [userId]);
 
-  const renderCallHistory = (calls: CallTransaction[], isLoading: boolean) => {
-    if (isLoading) {
-      return (
-        <div className="flex justify-center items-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
-        </div>
-      );
-    }
-
-    if (calls.length === 0) {
-      return (
-        <div className="text-center py-8 text-gray-500">
-          No call history found.
-        </div>
-      );
-    }
-
-    return (
-      <div className="space-y-4">
-        {calls.map((call, index) => (
-          <div
-            key={index}
-            // key={call.callId} ! // Uncomment this line if callId is unique and available
-            className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
-          >
-            <div className="flex justify-between items-start mb-2">
-              <div className="flex items-center">
-                <Phone className="h-5 w-5 text-blue-500 mr-2" />
-                <span className="font-medium">Call ID: {call.callId}</span>
-              </div>
-              <span className="text-sm text-gray-500">
-                {format(
-                  new Date(
-                    call.timestamp.seconds * 1000 +
-                      call.timestamp.nanos / 1000000
-                  ),
-                  "MMM d, yyyy h:mm a"
-                )}
-              </span>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-3">
-              <div className="flex items-center text-sm">
-                <Clock className="h-4 w-4 text-gray-500 mr-2" />
-                <span>{formatDuration(call.durationSeconds)}</span>
-              </div>
-              <div className="flex items-center text-sm">
-                <MapPin className="h-4 w-4 text-gray-500 mr-2" />
-                <span>{call.location || "Unknown location"}</span>
-              </div>
-              <div className="flex items-center text-sm">
-                <Tag className="h-4 w-4 text-gray-500 mr-2" />
-                <span>{call.context || "No context"}</span>
-              </div>
-              <div className="flex items-center text-sm">
-                <DollarSign className="h-4 w-4 text-gray-500 mr-2" />
-                <span>{call.charge} credits</span>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    );
-  };
-
   return (
     <Tabs defaultValue="consumer" className="w-full">
-      <TabsList className="grid w-full grid-cols-2">
+      <TabsList className="mb-4">
         <TabsTrigger value="consumer">
-          Consumer Calls ({consumerCalls.length})
+          Consumer Calls ({consumerCallHistory.length})
         </TabsTrigger>
         <TabsTrigger value="provider">
-          Provider Calls ({providerCalls.length})
+          Provider Calls ({providerCallHistory.length})
         </TabsTrigger>
       </TabsList>
-      <TabsContent value="consumer" className="mt-4">
-        {renderCallHistory(consumerCalls, loadingConsumer)}
+
+      <TabsContent value="consumer">
+        <div className="bg-white rounded-lg shadow p-4">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-semibold">Consumer Call History</h3>
+            <Button 
+              onClick={fetchConsumerCallHistory} 
+              disabled={isLoadingConsumer}
+              variant="outline"
+            >
+              {isLoadingConsumer ? "Loading..." : "Refresh Call History"}
+            </Button>
+          </div>
+
+          {sortedConsumerHistory.length > 0 ? (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Call ID</TableHead>
+                    <TableHead>Location</TableHead>
+                    <TableHead>Context</TableHead>
+                    <TableHead>Duration</TableHead>
+                    <TableHead>Charge (Minutes)</TableHead>
+                    <TableHead>Date & Time</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {sortedConsumerHistory.map((call) => (
+                    <TableRow key={call.callId + (call.timestamp?.seconds || '')}>
+                      <TableCell>{call.callId}</TableCell>
+                      <TableCell>{call.location}</TableCell>
+                      <TableCell>{call.context}</TableCell>
+                      <TableCell>{formatDuration(call.durationSeconds)}</TableCell>
+                      <TableCell>{formatDuration(call.charge)}</TableCell>
+                      <TableCell>{formatTimestamp(call.timestamp)}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          ) : (
+            <div className="text-center py-8 text-gray-500">
+              No consumer call history available
+            </div>
+          )}
+        </div>
       </TabsContent>
-      <TabsContent value="provider" className="mt-4">
-        {renderCallHistory(providerCalls, loadingProvider)}
+
+      <TabsContent value="provider">
+        <div className="bg-white rounded-lg shadow p-4">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-semibold">Provider Call History</h3>
+            <Button 
+              onClick={fetchProviderCallHistory} 
+              disabled={isLoadingProvider}
+              variant="outline"
+            >
+              {isLoadingProvider ? "Loading..." : "Refresh Call History"}
+            </Button>
+          </div>
+
+          {sortedProviderHistory.length > 0 ? (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Call ID</TableHead>
+                    <TableHead>Location</TableHead>
+                    <TableHead>Context</TableHead>
+                    <TableHead>Duration</TableHead>
+                    <TableHead>Earnings (Dollars)</TableHead>
+                    <TableHead>Date & Time</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {sortedProviderHistory.map((call) => (
+                    <TableRow key={call.callId + (call.timestamp?.seconds || '')}>
+                      <TableCell>{call.callId}</TableCell>
+                      <TableCell>{call.location}</TableCell>
+                      <TableCell>{call.context}</TableCell>
+                      <TableCell>{formatDuration(call.durationSeconds)}</TableCell>
+                      <TableCell>
+                        {centsToDollars(call.charge)}
+                      </TableCell>
+                      <TableCell>{formatTimestamp(call.timestamp)}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          ) : (
+            <div className="text-center py-8 text-gray-500">
+              No provider call history available
+            </div>
+          )}
+        </div>
       </TabsContent>
     </Tabs>
   );
