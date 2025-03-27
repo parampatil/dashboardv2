@@ -1,0 +1,167 @@
+syntax = "proto3";
+
+package MPSquare;
+
+option go_package = "git.360world.com/mp-quare"; 
+
+service MPSquare {
+    // Check if a word is associated with a crime
+    rpc CheckCrimeWord (CheckCrimeWordRequest) returns (CheckCrimeWordResponse);
+
+    // Add a new crime-related word
+    rpc AddCrimeWord (AddCrimeWordRequest) returns (AddCrimeWordResponse);
+
+    // Deactivate a crime-related word
+    rpc DeactivateCrimeWord (DeactivateCrimeWordRequest) returns (DeactivateCrimeWordResponse);
+
+    // Get all crime-related words in a category
+    rpc GetCrimeWordsByCategory (GetCrimeWordsByCategoryRequest) returns (GetCrimeWordsByCategoryResponse);
+
+    // Add a word variant (like misspellings or leetspeak)
+    rpc AddCrimeWordVariant (AddCrimeWordVariantRequest) returns (AddCrimeWordVariantResponse);
+
+    // Update the user's score based on how many crime words they have used
+    rpc UpdateUserScore (UpdateUserScoreRequest) returns (UpdateUserScoreResponse);
+
+    // Set jail time for a user, preventing them from texting for a certain period
+    rpc SetUserJailTime (SetUserJailTimeRequest) returns (SetUserJailTimeResponse);
+
+    // Retrieve a list of users currently in jail or with remaining jail time
+    rpc GetIncarceratedUsers (GetIncarceratedUsersRequest) returns (GetIncarceratedUsersResponse);
+
+    // Jailbreak a user, removing their jail time
+    rpc JailbreakUser (JailbreakUserRequest) returns (JailbreakUserResponse);
+
+    // Check the user's status or jail time
+    rpc CheckUserStatus (CheckUserStatusRequest) returns (CheckUserStatusResponse);
+}
+
+message IncarceratedUser {
+    int64 user_id = 1;          // The user's unique identifier
+    string first_name = 3;       // The user's first name
+    string last_name = 4;        // The user's last name
+    string email_address = 5;    // The user's email address
+    string jail_time_end = 6 [json_name = "jailTimeEnd"]; // The end time of the jail period as a Spanner timestamp
+}
+
+message PoliteSentence{
+    string polite_sentence = 1;
+}
+// Request to check if a word is associated with a crime
+message CheckCrimeWordRequest {
+    string word = 2; // The word to check
+}
+// Request to retrieve a list of users currently in jail or with remaining jail time
+message GetIncarceratedUsersRequest {
+    // No fields required for this request
+}
+
+// Response with a list of users currently in jail or with remaining jail time
+message GetIncarceratedUsersResponse {
+
+    repeated IncarceratedUser users = 1; // A list of users currently in jail
+}
+// Request to jailbreak a user, removing their jail time
+message JailbreakUserRequest {
+    int64 user_id = 1; // The user's unique identifier
+}
+
+// Response after jailbreaking a user
+message JailbreakUserResponse {
+    bool success = 1; // Indicates whether the user was successfully jailbroken
+    string message = 2; // Additional message (e.g., "User jailbroken successfully")
+}
+
+// Response after checking if the word is related to crime
+message CheckCrimeWordResponse {
+    bool is_crime_related = 1;  // true if the word is related to crime, false otherwise
+    string message = 2; // Additional message or description
+    string category_name = 3; // The category of the crime-related word (e.g., "Fraud")
+    int32 severity_level = 4; // The severity level of the crime-related word
+    PoliteSentence polite_sentence = 5; // A polite sentence to replace the crime-related word 
+}
+
+// Request to add a new crime-related word
+message AddCrimeWordRequest {
+    string word = 1;            // The crime-related word to add
+    string category_name = 2;   // The category of the crime-related word (e.g., "Fraud")
+    int32 severity_level = 3;   // The severity level of the crime-related word
+}
+
+// Response after adding a crime-related word
+message AddCrimeWordResponse {
+    bool success = 1; // Indicates whether the word was added successfully
+    string message = 2; // Additional information (e.g., success or failure message)
+}
+
+// Request to deactivate a crime-related word
+message DeactivateCrimeWordRequest {
+    string word = 1;  // The word to deactivate
+}
+
+// Response after deactivating a crime-related word
+message DeactivateCrimeWordResponse {
+    bool success = 1; // Indicates whether the word was deactivated successfully
+    string message = 2; // Additional message (e.g., "Word deactivated")
+}
+
+// Request to get all crime-related words by category
+message GetCrimeWordsByCategoryRequest {
+    string category_name = 1; // The category to filter by
+}
+
+// Response with a list of crime-related words in a specific category
+message GetCrimeWordsByCategoryResponse {
+    repeated string crime_words = 1; // A list of crime-related words in the specified category
+}
+
+// Request to add a word variant (for handling misspellings, leetspeak, etc.)
+message AddCrimeWordVariantRequest {
+    string word = 1;          // The original crime-related word
+    string variant = 2;       // The variant (e.g., "gr8" for "great")
+}
+
+// Response after adding a word variant
+message AddCrimeWordVariantResponse {
+    bool success = 1;         // Indicates whether the variant was added successfully
+    string message = 2;       // Additional message
+}
+
+// Request to update a user's score based on the number of crime words used
+message UpdateUserScoreRequest {
+    int64 user_id = 1;             // The user's unique identifier
+    int32 crime_word_count = 2;     // The number of crime-related words used by the user
+}
+
+// Response after updating the user's score
+message UpdateUserScoreResponse {
+    bool success = 1;              // Indicates whether the user's score was updated successfully
+    string message = 2;            // Additional message (e.g., "Score updated successfully")
+    int64 new_score = 3;           // The user's new score after the update
+    int64 jail_time_remaining = 4; // The remaining jail time (in seconds), 0 if no jail time
+}
+
+// Request to set jail time for a user
+message SetUserJailTimeRequest {
+    int64 user_id = 1;        // The user's unique identifier
+    int32 jail_time_seconds = 2;  // The jail time in seconds (how long the user is restricted)
+}
+
+// Response after setting the jail time for a user
+message SetUserJailTimeResponse {
+    bool success = 1;           // Indicates whether the jail time was successfully set
+    string message = 2;         // A message, such as "User is now in jail for X seconds"
+    int32 jail_time_remaining = 3; // Remaining jail time for the user (in seconds)
+}
+
+// Request to check the user's status or jail time
+message CheckUserStatusRequest {
+    int64 user_id = 1; // The user's unique identifier
+}
+
+// Response with the user's status or jail time
+message CheckUserStatusResponse {
+    bool is_in_jail = 1; // Indicates whether the user is currently in jail
+    int32 jail_time_remaining = 2; // The remaining jail time (in seconds), 0 if no jail time
+    string message = 3; // Additional message or description
+}

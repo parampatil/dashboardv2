@@ -2,11 +2,11 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { formatProtobufTimestamp } from "@/lib/utils";
-import { PurchaseHistory, ProviderEarningTransactions } from "@/types/grpc";
+import { ConsumerPurchaseTransaction, ProviderEarningTransaction, TransactionStatus, RefundStatus, ProviderEarningPayoutStatus } from "@/types/grpc";
 
 interface TransactionHistorySectionProps {
-  purchaseHistory: PurchaseHistory[] | null;
-  earningTransactions: ProviderEarningTransactions[] | null;
+  purchaseHistory: ConsumerPurchaseTransaction[] | null;
+  earningTransactions: ProviderEarningTransaction[] | null;
   loadingHistory: boolean;
   loadingTransactions: boolean;
 }
@@ -35,7 +35,7 @@ export function TransactionHistorySection({
   );
 }
 
-function PurchaseHistoryTable({ purchases, loadingHistory }: { purchases: PurchaseHistory[] | null, loadingHistory: boolean }) {
+function PurchaseHistoryTable({ purchases, loadingHistory }: { purchases: ConsumerPurchaseTransaction[] | null, loadingHistory: boolean }) {
   return (
     <div className="rounded-md border">
       <ScrollArea className="h-[400px]">
@@ -46,13 +46,10 @@ function PurchaseHistoryTable({ purchases, loadingHistory }: { purchases: Purcha
                 Transaction ID
               </th>
               <th className="p-3 text-left text-sm font-medium text-gray-500">
-                Offer
+                Offer Name
               </th>
               <th className="p-3 text-left text-sm font-medium text-gray-500">
-                Amount
-              </th>
-              <th className="p-3 text-left text-sm font-medium text-gray-500">
-                Minutes
+                Total Minutes
               </th>
               <th className="p-3 text-left text-sm font-medium text-gray-500">
                 Unused Minutes
@@ -61,10 +58,16 @@ function PurchaseHistoryTable({ purchases, loadingHistory }: { purchases: Purcha
                 Refund Amount
               </th>
               <th className="p-3 text-left text-sm font-medium text-gray-500">
-                Date
+                Purchase Amount
               </th>
               <th className="p-3 text-left text-sm font-medium text-gray-500">
-                Status
+                Purchase Date
+              </th>
+              <th className="p-3 text-left text-sm font-medium text-gray-500">
+                Transaction Status
+              </th>
+              <th className="p-3 text-left text-sm font-medium text-gray-500">
+                Refund Status
               </th>
             </tr>
           </thead>
@@ -78,15 +81,13 @@ function PurchaseHistoryTable({ purchases, loadingHistory }: { purchases: Purcha
                   >
                     <td className="p-3 text-sm">{item.transactionId}</td>
                     <td className="p-3 text-sm">{item.offerName}</td>
-                    <td className="p-3 text-sm">
-                      {item.purchaseAmount} {item.purchaseCurrency}
-                    </td>
                     <td className="p-3 text-sm">{item.totalMinutes} min</td>
-                    <td className="p-3 text-sm">
-                      {item.totalUnusedMinutes} min
-                    </td>
+                    <td className="p-3 text-sm">{item.totalUnusedMinutes} min</td>
                     <td className="p-3 text-sm">
                       {item.totalRefundAmount} {item.purchaseCurrency}
+                    </td>
+                    <td className="p-3 text-sm">
+                      {item.purchaseAmount} {item.purchaseCurrency}
                     </td>
                     <td className="p-3 text-sm">
                       {formatProtobufTimestamp(item.purchaseTimestamp)}
@@ -94,51 +95,47 @@ function PurchaseHistoryTable({ purchases, loadingHistory }: { purchases: Purcha
                     <td className="p-3 text-sm">
                       <span
                         className={`px-2 py-1 rounded-full text-xs ${
-                          item.refundStatus === "succeeded"
+                          item.transactionStatus === TransactionStatus.SUCCESS
                             ? "bg-green-100 text-green-800"
-                            : item.refundStatus === "failed" ||
-                              item.refundStatus === "canceled" ||
-                              item.refundStatus === "refund_available" ||
-                              item.refundStatus === "reward"
-                            ? "bg-yellow-100 text-yellow-800"
-                            : "bg-red-100 text-red-800"
+                            : item.transactionStatus === TransactionStatus.FAILED
+                            ? "bg-red-100 text-red-800"
+                            : "bg-yellow-100 text-yellow-800"
                         }`}
                       >
-                        {item.refundStatus === "created" ||
-                        item.refundStatus === "pending" ||
-                        item.refundStatus === "in_transit"
-                          ? "Refunding"
-                          : item.refundStatus === "succeeded"
-                          ? "Refunded"
-                          : item.refundStatus === "not_applicable"
-                          ? "Used"
-                          : item.refundStatus === "failed" ||
-                            item.refundStatus === "canceled" ||
-                            item.refundStatus === "refund_available"
-                          ? "Refund"
-                          : item.refundStatus === "reward"
-                          ? "Reward"
-                          : item.refundStatus}
+                        {item.transactionStatus}
+                      </span>
+                    </td>
+                    <td className="p-3 text-sm">
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs ${
+                          item.refundStatus === RefundStatus.SUCCESS
+                            ? "bg-green-100 text-green-800"
+                            : item.refundStatus === RefundStatus.UNAVAILABLE
+                            ? "bg-red-100 text-red-800"
+                            : "bg-yellow-100 text-yellow-800"
+                        }`}
+                      >
+                        {item.refundStatus}
                       </span>
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={8} className="p-3 text-sm text-center">
+                  <td colSpan={9} className="p-3 text-sm text-center">
                     No purchase history found
                   </td>
                 </tr>
               )
             ) : (
               <tr>
-                <td colSpan={8} className="p-3 text-sm text-center">
+                <td colSpan={9} className="p-3 text-sm text-center">
                   Click the fetch button
                 </td>
               </tr>
             )) : (
                 <tr>
-                    <td colSpan={8} className="p-3 text-sm text-center">
+                    <td colSpan={9} className="p-3 text-sm text-center">
                     <div className="flex justify-center items-center h-64">
                         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
                     </div>
@@ -154,10 +151,10 @@ function PurchaseHistoryTable({ purchases, loadingHistory }: { purchases: Purcha
 
 function EarningTransactionsTable({
   transactions,
-    loadingTransactions,
+  loadingTransactions,
 }: {
-  transactions: ProviderEarningTransactions[] | null;
-    loadingTransactions: boolean;
+  transactions: ProviderEarningTransaction[] | null;
+  loadingTransactions: boolean;
 }) {
   return (
     <div className="rounded-md border">
@@ -172,16 +169,16 @@ function EarningTransactionsTable({
                 Timestamp
               </th>
               <th className="p-3 text-left text-sm font-medium text-gray-500">
-                Call Duration
+                Call Duration (sec)
               </th>
               <th className="p-3 text-left text-sm font-medium text-gray-500">
-                Rate
+                Rate (per sec)
               </th>
               <th className="p-3 text-left text-sm font-medium text-gray-500">
                 Amount
               </th>
               <th className="p-3 text-left text-sm font-medium text-gray-500">
-                Type
+                Transaction Type
               </th>
               <th className="p-3 text-left text-sm font-medium text-gray-500">
                 Status
@@ -189,61 +186,63 @@ function EarningTransactionsTable({
             </tr>
           </thead>
           <tbody>
-            {!loadingTransactions ? (transactions ? (
-              transactions.length > 0 ? (
-                transactions.map((item) => (
-                  <tr
-                    key={item.transactionId}
-                    className="border-b hover:bg-gray-50"
-                  >
-                    <td className="p-3 text-sm">{item.transactionId}</td>
-                    <td className="p-3 text-sm">
-                      {formatProtobufTimestamp(item.transactionTimestamp)}
-                    </td>
-                    <td className="p-3 text-sm">{item.callDuration} sec</td>
-                    <td className="p-3 text-sm">
-                      {item.rate} {item.currency}/sec
-                    </td>
-                    <td className="p-3 text-sm">
-                      {item.amount} {item.currency}
-                    </td>
-                    <td className="p-3 text-sm">{item.transactionType}</td>
-                    <td className="p-3 text-sm">
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs ${
-                          item.status === "paid"
-                            ? "bg-green-100 text-green-800"
-                            : item.status === "failed"
-                            ? "bg-red-100 text-red-800"
-                            : "bg-yellow-100 text-yellow-800"
-                        }`}
-                      >
-                        {item.status}
-                      </span>
+            {!loadingTransactions ? (
+              transactions ? (
+                transactions.length > 0 ? (
+                  transactions.map((item) => (
+                    <tr
+                      key={item.transactionId}
+                      className="border-b hover:bg-gray-50"
+                    >
+                      <td className="p-3 text-sm">{item.transactionId}</td>
+                      <td className="p-3 text-sm">
+                        {formatProtobufTimestamp(item.transactionTimestamp)}
+                      </td>
+                      <td className="p-3 text-sm">{item.callDuration}</td>
+                      <td className="p-3 text-sm">
+                        {item.rate} {item.currency}
+                      </td>
+                      <td className="p-3 text-sm">
+                        {item.amount} {item.currency}
+                      </td>
+                      <td className="p-3 text-sm">{item.transactionType}</td>
+                      <td className="p-3 text-sm">
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs ${
+                            item.status === ProviderEarningPayoutStatus.PAID
+                              ? "bg-green-100 text-green-800"
+                              : item.status === ProviderEarningPayoutStatus.FAILED
+                              ? "bg-red-100 text-red-800"
+                              : "bg-yellow-100 text-yellow-800"
+                          }`}
+                        >
+                          {item.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={7} className="p-3 text-sm text-center">
+                      No earning transactions found
                     </td>
                   </tr>
-                ))
+                )
               ) : (
                 <tr>
                   <td colSpan={7} className="p-3 text-sm text-center">
-                    No earning transactions found
+                    Click the fetch button
                   </td>
                 </tr>
               )
             ) : (
               <tr>
                 <td colSpan={7} className="p-3 text-sm text-center">
-                  Click the fetch button
+                  <div className="flex justify-center items-center h-64">
+                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+                  </div>
                 </td>
               </tr>
-            )) : (
-                <tr>
-                    <td colSpan={7} className="p-3 text-sm text-center">
-                    <div className="flex justify-center items-center h-64">
-                        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-                    </div>
-                    </td>
-                </tr>
             )}
           </tbody>
         </table>

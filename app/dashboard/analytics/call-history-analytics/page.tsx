@@ -49,10 +49,16 @@ export default function CallHistoryAnalytics() {
   const [loading, setLoading] = useState(false);
   const [userIdFilter, setUserIdFilter] = useState("");
   const [userNameFilter, setUserNameFilter] = useState("");
-  const [startDate, setStartDate] = useState<Date | undefined>(
-    new Date(new Date().setMonth(new Date().getMonth() - 1))
-  );
-  const [endDate, setEndDate] = useState<Date | undefined>(new Date());
+  const [startDate, setStartDate] = useState<Date | undefined>(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return today;
+  });
+  const [endDate, setEndDate] = useState<Date | undefined>(() => {
+    const today = new Date();
+    today.setHours(23, 59, 59, 999);
+    return today;
+  });
   const [sortField, setSortField] = useState<SortField | null>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
 
@@ -161,8 +167,28 @@ export default function CallHistoryAnalytics() {
   const formatTime = (seconds: number) => {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
-    const secs = seconds % 60;
+    const secs = (seconds % 60).toFixed(0);
     return `${hours}h ${minutes}m ${secs}s`;
+  };
+
+  const handleStartDateChange = (date: Date | undefined) => {
+    if (date) {
+      const newDate = new Date(date);
+      newDate.setHours(0, 0, 0, 0);
+      setStartDate(newDate);
+    } else {
+      setStartDate(undefined);
+    }
+  };
+
+  const handleEndDateChange = (date: Date | undefined) => {
+    if (date) {
+      const newDate = new Date(date);
+      newDate.setHours(23, 59, 59, 999);
+      setEndDate(newDate);
+    } else {
+      setEndDate(undefined);
+    }
   };
 
   return (
@@ -203,7 +229,7 @@ export default function CallHistoryAnalytics() {
                   <Calendar
                     mode="single"
                     selected={startDate}
-                    onSelect={setStartDate}
+                    onSelect={handleStartDateChange}
                     initialFocus
                   />
                 </PopoverContent>
@@ -233,7 +259,7 @@ export default function CallHistoryAnalytics() {
                   <Calendar
                     mode="single"
                     selected={endDate}
-                    onSelect={setEndDate}
+                    onSelect={handleEndDateChange}
                     initialFocus
                   />
                 </PopoverContent>

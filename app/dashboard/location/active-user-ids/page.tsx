@@ -184,6 +184,21 @@ export default function ActiveUserIds() {
     setAutoRefresh(!autoRefresh);
   };
 
+  function convertInt64BinaryToBigInt(binaryData: WithImplicitCoercion<string> | { [Symbol.toPrimitive](hint: "string"): string; }) {
+    try {
+      const buffer = Buffer.from(binaryData, 'binary');
+      let bigIntValue = BigInt(0);
+      for (let i = 7; i >= 0; i--) {
+          bigIntValue = (bigIntValue << BigInt(8)) + BigInt(buffer[i]);
+      }
+        return bigIntValue.toString();
+    } catch (error) {
+        console.error('Error converting int64 binary:', error);
+        return null;
+    }
+}
+  
+
   return (
     <ProtectedRoute allowedRoutes={["/dashboard/location/active-user-ids"]}>
       <motion.div
@@ -314,7 +329,7 @@ export default function ActiveUserIds() {
                           transition={{ delay: index * 0.03, duration: 0.2 }}
                         >
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                            {location.key}
+                            {convertInt64BinaryToBigInt(location.key)}
                           </td>
                           <td className="px-6 py-4 text-sm text-gray-500">
                             <div className="max-h-80 overflow-y-auto">

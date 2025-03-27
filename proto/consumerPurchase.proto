@@ -19,19 +19,42 @@ service ConsumerPurchaseService {
     rpc CreateRewardTransaction(CreateRewardTransactionRequest) returns (CreateRewardTransactionResponse);
     rpc InitiatePurchaseTransaction (InitiatePurchaseTransactionRequest) returns (InitiatePurchaseTransactionResponse);
     rpc GetPurchaseTransactionInfo (GetPurchaseTransactionInfoRequest) returns (GetPurchaseTransactionInfoResponse);
+    rpc CreateCallTransaction(CreateCallTransactionRequest) returns (CreateCallTransactionResponse);
+
     }
 
+    // Purchase Status
+    // Success, InProgress, Failed, Reward
+    
+    // Refund
+    // Unavailable, Available, InProgress, Success
+
 enum Transaction_Status {
-    created = 0; // Not available => Refunding
-    pending = 1; // Not available => Refunding
-    in_transit = 2; // Not available => Refunding
-    succeeded = 3; // Not available => Refunded
-    failed = 4; // Available => Refund
-    canceled = 5; // Available => Refund
-    not_applicable = 6; // Minutes already consumed => Used
-    refund_available = 7; // Available => Refund
-    reward = 8; // Available => Reward need ui
+    transaction_success = 0;
+    transaction_in_progress = 1;
+    transaction_failed = 2;
+    transaction_reward = 3;
 }
+
+enum Refund_Status {
+    refund_success = 0;
+    refund_in_progress = 1;
+    refund_unavailable = 2;
+    refund_available = 3;
+}
+
+// enum Transaction_Status {
+//     created = 0; // Not available => Refunding
+//     pending = 1; // Not available => Refunding
+//     in_transit = 2; // Not available => Refunding
+//     succeeded = 3; // Not available => Refunded
+//     failed = 4; // Available => Refund
+//     canceled = 5; // Available => Refund
+//     not_applicable = 6; // Minutes already consumed => Used
+//     refund_available = 7; // Available => Refund
+//     reward = 8; // Available => Reward need ui
+// }
+
 enum PaymentPlatform {
     stripe = 0;
     razorpay = 1;
@@ -63,7 +86,8 @@ message Purchase {
     google.protobuf.Timestamp purchaseTimestamp = 6;
     double purchaseAmount = 7;
     string purchaseCurrency = 8;
-    Transaction_Status refundStatus = 9;
+    Transaction_Status transactionStatus = 9;
+    Refund_Status refundStatus = 10;
 }
 
 message GetConsumerPurchaseHistoryRequest {
@@ -220,4 +244,11 @@ message GetPurchaseTransactionInfoResponse {
     string status = 3;
 }
 
+message CreateCallTransactionRequest {
+    int64 userId = 1;
+    int64 Duration = 2;
+}
 
+message CreateCallTransactionResponse {
+    string message = 1;
+}

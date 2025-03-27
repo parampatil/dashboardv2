@@ -6,9 +6,9 @@ import { Button } from "@/components/ui/button";
 import { formatProtobufTimestamp } from "@/lib/utils";
 import {
   UserDetailsResponse,
-  ProviderBalanceResponse,
-  PurchaseHistory,
-  ProviderEarningTransactions,
+  GetProviderEarningBalanceResponse,
+  ConsumerPurchaseTransaction,
+  ProviderEarningTransaction,
 } from "@/types/grpc";
 import { useToast } from "@/hooks/use-toast";
 import { useApi } from "@/hooks/useApi";
@@ -20,16 +20,16 @@ interface UserDetailsProps {
   userData: {
     user: UserDetailsResponse["user"];
     consumerPurchaseBalance: number;
-    providerBalance: ProviderBalanceResponse;
+    providerBalance: GetProviderEarningBalanceResponse;
   };
 }
 
 export function UserDetails({ userData }: UserDetailsProps) {
   const [purchaseHistory, setPurchaseHistory] = useState<
-    PurchaseHistory[] | null
+    ConsumerPurchaseTransaction[] | null
   >(null);
   const [earningTransactions, setEarningTransactions] = useState<
-    ProviderEarningTransactions[] | null
+    ProviderEarningTransaction[] | null
   >(null);
   const [loadingHistory, setLoadingHistory] = useState(false);
   const [loadingTransactions, setLoadingTransactions] = useState(false);
@@ -85,7 +85,6 @@ export function UserDetails({ userData }: UserDetailsProps) {
 
       const data = await response.json();
       setEarningTransactions(data.providerEarningTransactions || []);
-      console.log(data);
     } catch {
       toast({
         variant: "destructive",

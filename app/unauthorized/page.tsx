@@ -58,7 +58,7 @@ const Unauthorized = () => {
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.7 }}
         >
-          You don&apos;t have permission to access this page. Please contact your administrator for access.
+          You don&apos;t have permission to access this page. Please contact your administrator at <a href="mailto:param.patil@360world.com" className="text-blue-500 underline">param.patil@360world.com</a> for access.
         </motion.p>
 
 
@@ -72,15 +72,6 @@ const Unauthorized = () => {
           Return to Home
         </motion.button>
 
-        {/* Additional Info */}
-        <motion.p 
-          className="mt-6 text-sm text-gray-500"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.8 }}
-        >
-          If you believe this is a mistake, please reference ID: #ACCESS-{Math.random().toString(36).substr(2, 9)}
-        </motion.p>
       </motion.div>
     </motion.div>
   );

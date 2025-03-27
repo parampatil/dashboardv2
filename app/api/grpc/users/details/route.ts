@@ -2,7 +2,7 @@
 import { NextResponse } from 'next/server';
 import { createServiceClients, getEnvironmentFromRequest } from '@/app/api/grpc/client';
 import { promisify } from 'util';
-import { UserDetailsResponse, ConsumerBalanceResponse, ProviderBalanceResponse } from '@/types/grpc';
+import { UserDetailsResponse, GetConsumerPurchaseBalanceResponse , GetProviderEarningBalanceResponse } from '@/types/grpc';
 
 export async function POST(request: Request) {
   try {
@@ -24,19 +24,16 @@ export async function POST(request: Request) {
       getProviderBalance: promisify(clients.providerEarning.GetProviderEarningBalance.bind(clients.providerEarning))
     };
 
-    const [userDetails, consumerBalance, providerBalance] : [UserDetailsResponse, ConsumerBalanceResponse, ProviderBalanceResponse] = await Promise.all([
+    const [userDetails, consumerBalance, providerBalance] : [UserDetailsResponse, GetConsumerPurchaseBalanceResponse, GetProviderEarningBalanceResponse] = await Promise.all([
       profileService.getUserDetails({ userId }) as Promise<UserDetailsResponse>,
-      balanceService.getConsumerBalance({ userId }) as Promise<ConsumerBalanceResponse>,
-      balanceService.getProviderBalance({ userId }) as Promise<ProviderBalanceResponse>
+      balanceService.getConsumerBalance({ userId }) as Promise<GetConsumerPurchaseBalanceResponse>,
+      balanceService.getProviderBalance({ userId }) as Promise<GetProviderEarningBalanceResponse>
     ]);
 
     return NextResponse.json({
       user: userDetails.user,
       consumerPurchaseBalance: consumerBalance.consumerPurchaseBalance,
-      providerBalance: {
-        providerEarningBalance: providerBalance.providerEarningBalance,
-        currency: providerBalance.currency
-      }
+      providerBalance: providerBalance
     });
   } catch (error) {
     console.error('API error:', error);

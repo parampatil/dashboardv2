@@ -10,7 +10,9 @@ export const environments = {
       REWARD: "api.360world.com:32064",
       LOCATION: "api.360world.com:32461",
       CALL_MANAGEMENT: "api.360world.com:30111",
+      MPSQUARE: "api.360world.com:32545",
     },
+    bearerToken: process.env.MPSQUARE_BEARER_TOKEN,
   },
   preprod: {
     name: "Pre-Production",
@@ -22,7 +24,9 @@ export const environments = {
       REWARD: "api.360world.com:32064",
       LOCATION: "api.360world.com:32461",
       CALL_MANAGEMENT: "api.360world.com:30111",
+      MPSQUARE: "api.360world.com:32545",
     },
+    bearerToken: process.env.MPSQUARE_BEARER_TOKEN,
   },
   prod: {
     name: "Production",
@@ -34,7 +38,9 @@ export const environments = {
       REWARD: "api.360world.com:32064",
       LOCATION: "api.360world.com:32461",
       CALL_MANAGEMENT: "api.360world.com:30111",
+      MPSQUARE: "api.360world.com:32545",
     },
+    bearerToken: process.env.MPSQUARE_BEARER_TOKEN,
   },
 };
 
