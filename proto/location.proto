@@ -8,8 +8,15 @@ service LocationService {
     rpc GetAllActiveUserIds(GetAllActiveUserIdsRequest) returns (GetAllActiveUserIdsResponse);
     rpc GetAllActiveUserIdsV2(GetAllActiveUserIdsV2Request) returns (GetAllActiveUserIdsV2Response);
     rpc GetProvidersForCall(GetProvidersForCallRequest) returns (GetProvidersForCallResponse);
+    rpc GetProvidersForCallV2(GetProvidersForCallV2Request) returns (GetProvidersForCallV2Response);
     rpc GetAllActiveUsersCount(GetAllActiveUsersCountRequest) returns (GetAllActiveUsersCountResponse);
-
+    rpc GetUserLocation(GetUserLocationRequest) returns (GetUserLocationResponse);
+    rpc BlacklistUser(BlacklistUserRequest) returns (BlacklistUserResponse);
+    rpc UnblacklistUser(UnblacklistUserRequest) returns (UnblacklistUserResponse);
+    rpc GetAllBlacklistedUsers(GetAllBlacklistedUsersRequest) returns (GetAllBlacklistedUsersResponse);
+    rpc UpdateUserPriorityPositive(UpdateUserPriorityPositiveRequest) returns (UpdateUserPriorityPositiveResponse);
+    rpc UpdateUserPriorityNegative(UpdateUserPriorityNegativeRequest) returns (UpdateUserPriorityNegativeResponse);
+    rpc GetAllPriorityList(GetAllPriorityListRequest) returns (GetAllPriorityListResponse);
 }
 
 enum Availability {
@@ -84,6 +91,17 @@ message GetProvidersForCallResponse {
     repeated int64 userIds = 1; // Array of 10 or less highest frequency marching user ids in descending order
 }
 
+message GetProvidersForCallV2Request {
+    int64 hash = 1; //hash id pointing to geoHash
+    int32 precision = 2; //Value of precision
+    int64 userId = 3; //User id
+}
+
+message GetProvidersForCallV2Response {
+    repeated int64 userIds = 1; // Array of 10 or less highest frequency marching user ids in descending order
+}
+
+
 message GetAllActiveUsersCountRequest {
     // double latitude = 1;  // Latitude of the location
     // double longitude = 2; // Longitude of the location
@@ -92,4 +110,59 @@ message GetAllActiveUsersCountRequest {
 
 message GetAllActiveUsersCountResponse {
     map<int32, CacheDetails> caches = 1;  // Mapping cache_id to CacheDetails
+}
+
+message GetUserLocationRequest {
+    int64 userId = 1; // User id
+}
+
+message GetUserLocationResponse {
+    double latitude = 1; // Latitude of the location
+    double longitude = 2; // Longitude of the location
+}
+
+message BlacklistUserRequest {
+    int64 userId = 1; // User id
+}
+
+message BlacklistUserResponse {
+    string message = 1;
+}
+
+message UnblacklistUserRequest {
+    int64 userId = 1; // User id
+}
+
+message UnblacklistUserResponse {
+    string message = 1;
+}   
+
+message GetAllBlacklistedUsersRequest {
+}
+
+message GetAllBlacklistedUsersResponse {
+    repeated int64 userIds = 1; // Array of blacklisted user ids
+}
+
+message UpdateUserPriorityPositiveRequest {
+    int64 userId = 1; // User id
+}
+
+message UpdateUserPriorityPositiveResponse {
+    string message = 1;
+}
+
+message UpdateUserPriorityNegativeRequest {
+    int64 userId = 1; // User id
+}   
+
+message UpdateUserPriorityNegativeResponse {
+    string message = 1;
+}
+
+message GetAllPriorityListRequest {
+}
+
+message GetAllPriorityListResponse {
+    map<int64, int64> priorityList = 1;
 }
