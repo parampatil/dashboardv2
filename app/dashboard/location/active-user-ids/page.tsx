@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { RefreshCw, MapPin, ChevronLeft, ChevronRight, Clock } from "lucide-react";
+import { convertInt64BinaryToBigInt } from "@/lib/utils";
 
 interface LocationData {
   key: string;
@@ -183,21 +184,7 @@ export default function ActiveUserIds() {
   const toggleAutoRefresh = () => {
     setAutoRefresh(!autoRefresh);
   };
-
-  function convertInt64BinaryToBigInt(binaryData: WithImplicitCoercion<string> | { [Symbol.toPrimitive](hint: "string"): string; }) {
-    try {
-      const buffer = Buffer.from(binaryData, 'binary');
-      let bigIntValue = BigInt(0);
-      for (let i = 7; i >= 0; i--) {
-          bigIntValue = (bigIntValue << BigInt(8)) + BigInt(buffer[i]);
-      }
-        return bigIntValue.toString();
-    } catch (error) {
-        console.error('Error converting int64 binary:', error);
-        return null;
-    }
-}
-  
+ 
 
   return (
     <ProtectedRoute allowedRoutes={["/dashboard/location/active-user-ids"]}>

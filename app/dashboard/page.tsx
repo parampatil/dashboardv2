@@ -12,7 +12,8 @@ import {
   Terminal, 
   BarChart3, 
   ChevronRight,
-  MapPin
+  MapPin,
+  Speech
 } from "lucide-react";
 
 const MainDashboard = () => {
@@ -62,7 +63,9 @@ const MainDashboard = () => {
         color: "bg-teal-500",
         routes: [
           // { path: '/dashboard/location', name: 'Location Dashboard' },
-          { path: '/dashboard/location/active-user-ids', name: 'Active User IDs'}
+          { path: '/dashboard/location/active-user-ids', name: 'Active User IDs'},
+          { path: '/dashboard/location/user-priority', name: 'User Priority List' },
+          { path: '/dashboard/location/blacklist-user', name: 'Blacklist User' },
         ]
       },
       {
@@ -105,6 +108,16 @@ const MainDashboard = () => {
           { path: '/dashboard/analytics/active-user-analytics', name: 'Active User Analytics' },
         ]
       },
+      {
+        name: "MP2",
+        icon: <Speech className="h-5 w-5" />,
+        color: "bg-pink-500",
+        routes: [
+          // { path: "/dashboard/mp2", name: "MP2 Dashboard" },
+          { path: "/dashboard/mp2/users-in-jail", name: "Users in Jail" },
+          { path: "/dashboard/mp2/add-to-jail", name: "Add Users to Jail" },
+        ]
+      }
     ];
 
     // Filter categories to only include those with at least one allowed route

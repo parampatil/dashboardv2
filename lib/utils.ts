@@ -71,3 +71,17 @@ export function dateToProtobufTimestamp(date: Date): { seconds: number; nanos: n
 export function protobufTimestampToDate(timestamp: { seconds: number; nanos: number }): Date {
   return new Date(timestamp.seconds * 1000 + timestamp.nanos / 1000000);
 }
+
+export function convertInt64BinaryToBigInt(binaryData: WithImplicitCoercion<string> | { [Symbol.toPrimitive](hint: "string"): string; }) {
+    try {
+      const buffer = Buffer.from(binaryData, 'binary');
+      let bigIntValue = BigInt(0);
+      for (let i = 7; i >= 0; i--) {
+          bigIntValue = (bigIntValue << BigInt(8)) + BigInt(buffer[i]);
+      }
+        return bigIntValue.toString();
+    } catch (error) {
+        console.error('Error converting int64 binary:', error);
+        return null;
+    }
+}

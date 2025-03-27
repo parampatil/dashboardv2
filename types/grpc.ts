@@ -268,10 +268,11 @@ export interface CreateRewardTransactionResponse {
 
 // Location Service Types
 export interface LocationServiceClient {
-  GetAllActiveUserIds: (
-    request: GetAllActiveUserIdsRequest,
-    callback: (error: Error, response: GetAllActiveUserIdsResponse) => void
-  ) => void;
+  GetAllActiveUserIds: (request: GetAllActiveUserIdsRequest, callback: (error: Error | null, response: GetAllActiveUserIdsResponse) => void) => void;
+  GetAllPriorityList: (request: GetAllPriorityListRequest, callback: (error: Error | null, response: GetAllPriorityListResponse) => void) => void;
+  GetAllBlacklistedUsers: (request: GetAllBlacklistedUsersRequest, callback: (error: Error | null, response: GetAllBlacklistedUsersResponse) => void) => void;
+  BlacklistUser: (request: BlacklistUserRequest, callback: (error: Error | null, response: BlacklistUserResponse) => void) => void;
+  UnblacklistUser: (request: UnblacklistUserRequest, callback: (error: Error | null, response: UnblacklistUserResponse) => void) => void;
 }
 
 export type GetAllActiveUserIdsRequest = Record<string, never>;
@@ -288,6 +289,34 @@ export interface ArrayLocationData {
   latitude: number;
   longitude: number;
   providerIds: string[];
+}
+
+export type GetAllPriorityListRequest = object
+
+export interface GetAllPriorityListResponse {
+  priorityList: { [key: string]: string };
+}
+
+export type GetAllBlacklistedUsersRequest = object
+
+export interface GetAllBlacklistedUsersResponse {
+  blacklistedUsers: string[];
+}
+
+export interface BlacklistUserRequest {
+  userId: string;
+}
+
+export interface BlacklistUserResponse {
+  success: boolean;
+}
+
+export interface UnblacklistUserRequest {
+  userId: string;
+}
+
+export interface UnblacklistUserResponse {
+  success: boolean;
 }
 
 // Call Management Service
