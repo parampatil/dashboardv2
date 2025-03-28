@@ -270,6 +270,15 @@ export interface CreateRewardTransactionResponse {
 export interface LocationServiceClient {
   GetAllActiveUserIds: (request: GetAllActiveUserIdsRequest, callback: (error: Error | null, response: GetAllActiveUserIdsResponse) => void) => void;
   GetAllPriorityList: (request: GetAllPriorityListRequest, callback: (error: Error | null, response: GetAllPriorityListResponse) => void) => void;
+  UpdateUserPriorityPositive: (
+    request: UpdateUserPriorityPositiveRequest, 
+    callback: (error: Error | null, response: UpdateUserPriorityPositiveResponse) => void
+  ) => void;
+  
+  UpdateUserPriorityNegative: (
+    request: UpdateUserPriorityNegativeRequest, 
+    callback: (error: Error | null, response: UpdateUserPriorityNegativeResponse) => void
+  ) => void;
   GetAllBlacklistedUsers: (request: GetAllBlacklistedUsersRequest, callback: (error: Error | null, response: GetAllBlacklistedUsersResponse) => void) => void;
   BlacklistUser: (request: BlacklistUserRequest, callback: (error: Error | null, response: BlacklistUserResponse) => void) => void;
   UnblacklistUser: (request: UnblacklistUserRequest, callback: (error: Error | null, response: UnblacklistUserResponse) => void) => void;
@@ -295,6 +304,22 @@ export type GetAllPriorityListRequest = object
 
 export interface GetAllPriorityListResponse {
   priorityList: { [key: string]: string };
+}
+
+export interface UpdateUserPriorityPositiveRequest {
+  userId: number;
+}
+
+export interface UpdateUserPriorityPositiveResponse {
+  message: string;
+}
+
+export interface UpdateUserPriorityNegativeRequest {
+  userId: number;
+}
+
+export interface UpdateUserPriorityNegativeResponse {
+  message: string;
 }
 
 export type GetAllBlacklistedUsersRequest = object

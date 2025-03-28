@@ -6,7 +6,7 @@ import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { useToast } from "@/hooks/use-toast";
 import { useApi } from "@/hooks/useApi";
 import { useEnvironment } from "@/context/EnvironmentContext";
-import { ArrowUpDown } from "lucide-react";
+import { ArrowUpDown, ThumbsUp, ThumbsDown, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -29,6 +29,8 @@ export default function UserPriority() {
   const [priorityList, setPriorityList] = useState<PriorityItem[]>([]);
   const [filteredData, setFilteredData] = useState<PriorityItem[]>([]);
   const [loading, setLoading] = useState(false);
+  const [updating, setUpdating] = useState<number | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
   const [userIdFilter, setUserIdFilter] = useState("");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
   const [sortField, setSortField] = useState<"userId" | "priority">("userId");
@@ -39,6 +41,7 @@ export default function UserPriority() {
 
   const fetchPriorityList = async () => {
     setLoading(true);
+    setRefreshing(true);
     try {
       const response = await api.fetch("/api/grpc/location/priority-list");
       
@@ -57,7 +60,6 @@ export default function UserPriority() {
         })
       );
       
-      
       setPriorityList(transformedData);
       setFilteredData(transformedData);
     } catch (error) {
@@ -68,6 +70,71 @@ export default function UserPriority() {
       });
     } finally {
       setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  const handleUpdatePriorityPositive = async (userId: number) => {
+    setUpdating(userId);
+    try {
+      const response = await api.fetch("/api/grpc/location/update-priority-positive", {
+        method: "POST",
+        body: JSON.stringify({ userId }),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to increase user priority");
+      }
+      
+      const data = await response.json();
+      
+      toast({
+        title: "Priority Updated",
+        description: data.message || "User priority increased successfully",
+      });
+      
+      fetchPriorityList(); // Refresh the list
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Update Failed",
+        description: (error as Error).message,
+      });
+    } finally {
+      setUpdating(null);
+    }
+  };
+
+  const handleUpdatePriorityNegative = async (userId: number) => {
+    setUpdating(userId);
+    try {
+      const response = await api.fetch("/api/grpc/location/update-priority-negative", {
+        method: "POST",
+        body: JSON.stringify({ userId }),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to decrease user priority");
+      }
+      
+      const data = await response.json();
+      
+      toast({
+        title: "Priority Updated",
+        description: data.message || "User priority decreased successfully",
+      });
+      
+      fetchPriorityList(); // Refresh the list
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Update Failed",
+        description: (error as Error).message,
+      });
+    } finally {
+      setUpdating(null);
     }
   };
 
@@ -110,9 +177,20 @@ export default function UserPriority() {
         animate={{ opacity: 1 }}
       >
         <div className="bg-white rounded-lg shadow-md p-6">
-          <h1 className="text-2xl font-bold text-gray-800 mb-6">
-            User Priority List
-          </h1>
+          <div className="flex justify-between items-center mb-6">
+            <h1 className="text-2xl font-bold text-gray-800">
+              User Priority List
+            </h1>
+            <Button
+              variant="outline"
+              onClick={fetchPriorityList}
+              disabled={loading || refreshing}
+              className="flex items-center gap-2"
+            >
+              <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
+              Refresh Data
+            </Button>
+          </div>
 
           <div className="mb-6">
             <Input
@@ -127,7 +205,7 @@ export default function UserPriority() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[50%]">
+                  <TableHead className="w-[40%]">
                     <Button
                       variant="ghost"
                       onClick={() => handleSort("userId")}
@@ -137,7 +215,7 @@ export default function UserPriority() {
                       <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
                   </TableHead>
-                  <TableHead>
+                  <TableHead className="w-[40%]">
                     <Button
                       variant="ghost"
                       onClick={() => handleSort("priority")}
@@ -147,12 +225,13 @@ export default function UserPriority() {
                       <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
                   </TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={2} className="text-center py-8">
+                    <TableCell colSpan={3} className="text-center py-8">
                       <div className="flex justify-center">
                         <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
                       </div>
@@ -160,15 +239,35 @@ export default function UserPriority() {
                   </TableRow>
                 ) : filteredData.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={2} className="text-center py-8">
+                    <TableCell colSpan={3} className="text-center py-8">
                       No priority data found
                     </TableCell>
                   </TableRow>
                 ) : (
-                  filteredData.map((item, index) => (
-                    <TableRow key={index}>
+                  filteredData.map((item) => (
+                    <TableRow key={item.userId}>
                       <TableCell className="font-medium">{item.userId}</TableCell>
                       <TableCell>{item.priority}</TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleUpdatePriorityPositive(item.userId)}
+                            disabled={updating === item.userId}
+                          >
+                            <ThumbsUp className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleUpdatePriorityNegative(item.userId)}
+                            disabled={updating === item.userId}
+                          >
+                            <ThumbsDown className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
                     </TableRow>
                   ))
                 )}
