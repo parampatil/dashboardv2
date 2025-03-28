@@ -150,7 +150,7 @@ export default function UsersInJail() {
                 <TableRow>
                   <TableHead>Name</TableHead>
                   <TableHead>Email</TableHead>
-                  <TableHead>Jail Time Remaining</TableHead>
+                  <TableHead>Jail Time End</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>

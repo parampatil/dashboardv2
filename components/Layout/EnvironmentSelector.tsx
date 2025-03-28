@@ -8,7 +8,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
 
 export function EnvironmentSelector() {
   const { currentEnvironment, setEnvironment, availableEnvironments } = useEnvironment();
@@ -28,13 +27,11 @@ export function EnvironmentSelector() {
         value={currentEnvironment} 
         onValueChange={(value) => setEnvironment(value as "dev" | "preprod" | "prod")}
       >
-        <SelectTrigger className="w-[180px]">
+        <SelectTrigger className={`${getBadgeColor(currentEnvironment)}`}>
           <SelectValue placeholder="Select environment">
             {currentEnvironment && (
-              <div className="flex items-center gap-2">
-                <Badge className={getBadgeColor(currentEnvironment)}>
-                  {availableEnvironments[currentEnvironment]}
-                </Badge>
+              <div className={`flex items-center gap-2 text-white font-semibold px-2`}>
+                  Env: {availableEnvironments[currentEnvironment]}
               </div>
             )}
           </SelectValue>

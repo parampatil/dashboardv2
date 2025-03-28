@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { useAuth } from "@/context/AuthContext";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import Link from "next/link";
-import { MapPin, Users, ChevronRight } from "lucide-react";
+import { MapPin, Users, ChevronRight, UserRoundX, BookUser } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const LocationDashboard = () => {
@@ -17,6 +17,20 @@ const LocationDashboard = () => {
       description: 'View active users and their location data',
       icon: <Users className="h-5 w-5" />,
       color: 'bg-blue-500'
+    },
+    {
+      path: '/dashboard/location/blacklist-user',
+      name: 'Blacklist User',
+      description: 'Manage blacklisted users and their locations',
+      icon: <UserRoundX className="h-5 w-5" />,
+      color: 'bg-red-500'
+    },
+    {
+      path: '/dashboard/location/user-priority',
+      name: 'User Priority',
+      description: 'Manage user priority settings',
+      icon: <BookUser className="h-5 w-5" />,
+      color: 'bg-green-500'
     }
   ];
 
