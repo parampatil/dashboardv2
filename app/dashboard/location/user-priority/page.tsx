@@ -17,11 +17,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { convertInt64BinaryToBigInt } from "@/lib/utils";
 
 interface PriorityItem {
-  userId: string;
-  priority: string;
+  userId: number;
+  priority: number;
 }
 
 type SortDirection = "asc" | "desc";
@@ -52,9 +51,9 @@ export default function UserPriority() {
       
       // Transform the data
       const transformedData: PriorityItem[] = Object.entries(data.priorityList || {}).map(
-        ([binaryUserId, priority]) => ({
-          userId: convertInt64BinaryToBigInt(binaryUserId) || "Unknown",
-          priority: String(priority),
+        ([userId, priority]) => ({
+          userId: Number(userId),
+          priority: Number(priority),
         })
       );
       
@@ -78,21 +77,19 @@ export default function UserPriority() {
 
   useEffect(() => {
     const filtered = priorityList.filter((item) => {
-      return userIdFilter ? item.userId.includes(userIdFilter) : true;
+      // Convert to string for filtering if userIdFilter is provided
+      return userIdFilter ? String(item.userId).includes(userIdFilter) : true;
     });
-
-    // Sort the data
+  
+    // Sort the data numerically
     filtered.sort((a, b) => {
-      const aValue = a[sortField];
-      const bValue = b[sortField];
-
-      if (sortDirection === "asc") {
-        return aValue.localeCompare(bValue);
+      if (sortField === "userId") {
+        return sortDirection === "asc" ? a.userId - b.userId : b.userId - a.userId;
       } else {
-        return bValue.localeCompare(aValue);
+        return sortDirection === "asc" ? a.priority - b.priority : b.priority - a.priority;
       }
     });
-
+  
     setFilteredData(filtered);
   }, [userIdFilter, priorityList, sortField, sortDirection]);
 
@@ -134,7 +131,7 @@ export default function UserPriority() {
                     <Button
                       variant="ghost"
                       onClick={() => handleSort("userId")}
-                      className="flex items-center"
+                      className="flex items-center p-0"
                     >
                       User ID
                       <ArrowUpDown className="ml-2 h-4 w-4" />
@@ -144,7 +141,7 @@ export default function UserPriority() {
                     <Button
                       variant="ghost"
                       onClick={() => handleSort("priority")}
-                      className="flex items-center"
+                      className="flex items-center p-0"
                     >
                       Priority
                       <ArrowUpDown className="ml-2 h-4 w-4" />

@@ -312,7 +312,7 @@ export default function CallHistoryAnalytics() {
                       <Button
                         variant="ghost"
                         onClick={() => handleSort("numberOfCalls")}
-                        className="flex items-center"
+                        className="flex items-center p-0"
                       >
                         Number of Calls
                         <ArrowUpDown className="ml-2 h-4 w-4" />
@@ -322,7 +322,7 @@ export default function CallHistoryAnalytics() {
                       <Button
                         variant="ghost"
                         onClick={() => handleSort("totalCallTime")}
-                        className="flex items-center"
+                        className="flex items-center p-0"
                       >
                         Total Call Time
                         <ArrowUpDown className="ml-2 h-4 w-4" />
@@ -332,7 +332,7 @@ export default function CallHistoryAnalytics() {
                       <Button
                         variant="ghost"
                         onClick={() => handleSort("callTimeAsProvider")}
-                        className="flex items-center"
+                        className="flex items-center p-0"
                       >
                         Call Time as Provider
                         <ArrowUpDown className="ml-2 h-4 w-4" />
@@ -342,7 +342,7 @@ export default function CallHistoryAnalytics() {
                       <Button
                         variant="ghost"
                         onClick={() => handleSort("callTimeAsConsumer")}
-                        className="flex items-center"
+                        className="flex items-center p-0"
                       >
                         Call Time as Consumer
                         <ArrowUpDown className="ml-2 h-4 w-4" />

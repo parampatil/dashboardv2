@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { createServiceClients, getEnvironmentFromRequest } from '@/app/api/grpc/client';
 import { promisify } from 'util';
 import { GetAllPriorityListResponse } from '@/types/grpc';
+import { convertInt64BinaryToBigInt } from '@/lib/utils';
 
 export async function GET(request: Request) {
   try {
@@ -19,6 +20,19 @@ export async function GET(request: Request) {
 
     // Call the service with empty request
     const response = await locationService.getAllPriorityList({}) as GetAllPriorityListResponse;
+    
+    // Transform the data - convert both userId and priority to numbers
+    if (response.priorityList) {
+      const transformedPriorityList: Record<string, string> = {};
+      
+      Object.entries(response.priorityList).forEach(([binaryUserId, priority]) => {
+        // Use your existing convertInt64BinaryToBigInt function to convert userId
+        const userId = convertInt64BinaryToBigInt(binaryUserId) as string;
+        transformedPriorityList[userId] = priority;
+      });
+      
+      response.priorityList = transformedPriorityList;
+    }
     
     return NextResponse.json(response);
   } catch (error) {
