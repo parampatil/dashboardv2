@@ -45,50 +45,42 @@ export const createServiceClients = (
   environment: "dev" | "preprod" | "prod" = DEFAULT_ENV
 ) => {
   const SERVICE_URLS = environments[environment].serviceUrls;
-  const bearerToken = environments[environment].bearerToken || "";
 
   return {
     profile: createServiceClient<ProfileServiceClient>(
       "ProfileService",
       PROTO_PATHS.PROFILE,
       SERVICE_URLS.PROFILE,
-      bearerToken
     ),
     consumerPurchase: createServiceClient<ConsumerPurchaseServiceClient>(
       "ConsumerPurchaseService",
       PROTO_PATHS.CONSUMER_PURCHASE,
       SERVICE_URLS.CONSUMER_PURCHASE,
-      bearerToken
     ),
     providerEarning: createServiceClient<ProviderEarningServiceClient>(
       "ProviderEarningService",
       PROTO_PATHS.PROVIDER_EARNING,
       SERVICE_URLS.PROVIDER_EARNING,
-      bearerToken
     ),
     reward: createServiceClient<RewardServiceClient>(
       "RewardService",
       PROTO_PATHS.REWARD,
       SERVICE_URLS.REWARD,
-      bearerToken
     ),
     location: createServiceClient<LocationServiceClient>(
       "LocationService",
       PROTO_PATHS.LOCATION,
       SERVICE_URLS.LOCATION,
-      bearerToken
     ),
     callManagement: createServiceClient<CallManagementServiceClient>(
       "CallManagementService",
       PROTO_PATHS.CALL_MANAGEMENT,
       SERVICE_URLS.CALL_MANAGEMENT,
-      bearerToken
     ),
     mpSquare: createServiceClient<MPSquareServiceClient>(
       "MPSquare",
       PROTO_PATHS.MPSQUARE,
       SERVICE_URLS.MPSQUARE,
-      bearerToken
     ),
   };
 };
@@ -97,7 +89,6 @@ function createServiceClient<T>(
   serviceName: string,
   protoPath: string,
   serviceUrl: string,
-  bearerToken: string
 ): T {
   const packageDefinition = protoLoader.loadSync(protoPath, {
     keepCase: true,
@@ -123,24 +114,16 @@ function createServiceClient<T>(
     packageDefinition
   ) as unknown as ProtoGrpcType;
 
-  const metadata = new grpc.Metadata();
-
-  if (bearerToken) {
-    metadata.add("Authorization", `Bearer ${bearerToken}`);
-  }
-
   if (serviceName === "MPSquare") {
     return new (protoDescriptor.MPSquare)[serviceName](
       serviceUrl,
       grpc.credentials.createInsecure(),
-      metadata
     ) as T;
   }
 
   return new (protoDescriptor[serviceName as keyof ProtoGrpcType] as typeof grpc.Client)(
     serviceUrl,
     grpc.credentials.createInsecure(),
-    metadata
   ) as T;
 
 }
