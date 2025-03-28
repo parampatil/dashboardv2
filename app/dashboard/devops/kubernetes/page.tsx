@@ -5,8 +5,11 @@ import ProtectedRoute from "@/components/auth/ProtectedRoute";
 
 const Kubernetes = () => {
   const [iframeSrc, setIframeSrc] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   
   useEffect(() => {
+    setLoading(true);
     async function fetchDashboard() {
       try {
         // Replace with your actual token
@@ -23,8 +26,12 @@ const Kubernetes = () => {
         const blob = await response.blob();
         const urlObject = URL.createObjectURL(blob);
         setIframeSrc(urlObject);
+        setLoading(false);
+        setError(null);
       } catch (error) {
         console.error("Error fetching dashboard:", error);
+        setLoading(false);
+        setError("Failed to load dashboard");
       }
     }
     
@@ -49,16 +56,19 @@ const Kubernetes = () => {
           <h2 className="text-lg font-semibold text-gray-800">Kubernetes</h2>
           <p className="text-sm text-gray-500">This is the Kubernetes page</p>
         </div>
-        {iframeSrc ? (
-          <iframe 
-            src={iframeSrc} 
-            className='w-full h-[calc(100vh-4rem)] rounded-lg'
-          />
-        ) : (
-          <div className="flex items-center justify-center h-[calc(100vh-4rem)]">
-            <p>Loading Kubernetes Dashboard...</p>
-          </div>
-        )}
+        <div className="bg-white rounded-lg shadow-md p-6 relative">
+          {loading && <svg className="animate-spin h-5 w-5 text-gray-500" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" strokeWidth="4" stroke="currentColor"></circle><path className="opacity-75" fill="currentColor" d="M4.93 4.93a10 10 0 0 1 14.14 14.14A10 10 0 1 1 4.93 4.93z"></path></svg>}
+          {error && <p className="text-red-500">{error}</p>}
+          {!loading && !error && (
+            <iframe
+              src={iframeSrc}
+              title="Kubernetes Dashboard"
+              width="100%"
+              height="600px"
+              className="border-none"
+            ></iframe>
+          )}
+        </div>
       </motion.div>
     </ProtectedRoute>
   );

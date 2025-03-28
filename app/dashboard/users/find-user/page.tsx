@@ -43,11 +43,11 @@ export default function FindUserComponent() {
         body: JSON.stringify({ userId }),
       });
       const data = await response.json();
-  
+
       if (!response.ok) {
         throw new Error(data.error.details || data.error.errorMessage);
       }
-  
+
       setUsers([data.user]);
     } catch (error) {
       console.error("Error fetching user:", error);
@@ -65,17 +65,20 @@ export default function FindUserComponent() {
     if (prefix.length < 3) return;
     setLoading(true);
     try {
-      const response = await api.fetch("/api/grpc/profile/getUserDetailsByEmail", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email_prefix: prefix }),
-      });
+      const response = await api.fetch(
+        "/api/grpc/profile/getUserDetailsByEmail",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email_prefix: prefix }),
+        }
+      );
       const data = await response.json();
-  
+
       if (!response.ok) {
         throw new Error(data.error.details || data.error.errorMessage);
       }
-  
+
       setUsers(data.users);
     } catch (error) {
       console.error("Error fetching users:", error);
@@ -89,9 +92,12 @@ export default function FindUserComponent() {
     }
   }, []);
 
-  const debouncedFetchUsers = useCallback((prefix: string) => {
-    debounce(() => fetchUsersByEmail(prefix), 300)();
-  }, [fetchUsersByEmail]);
+  const debouncedFetchUsers = useCallback(
+    (prefix: string) => {
+      debounce(() => fetchUsersByEmail(prefix), 300)();
+    },
+    [fetchUsersByEmail]
+  );
 
   useEffect(() => {
     if (searchMethod === "email" && searchInput.length >= 3) {
@@ -117,7 +123,7 @@ export default function FindUserComponent() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error.details || data.error.errorMessage)
+        throw new Error(data.error.details || data.error.errorMessage);
       }
 
       setUserDetails(data);
@@ -133,18 +139,18 @@ export default function FindUserComponent() {
     }
   };
 
-  const usersWithViewButton = users.map(user => ({
+  const usersWithViewButton = users.map((user) => ({
     ...user,
     viewButton: (
-      <Button 
-        variant="ghost" 
-        size="sm" 
+      <Button
+        variant="ghost"
+        size="sm"
         onClick={() => handleViewUserDetails(user.userId)}
       >
         <Eye className="h-4 w-4 mr-1" />
         View
       </Button>
-    )
+    ),
   }));
 
   const handleTabChange = (value: string) => {
@@ -202,12 +208,19 @@ export default function FindUserComponent() {
         </div>
 
         <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
-          <DrawerContent className="max-h-[80vh]">
-            <DrawerHeader className="bg-cyan-100">
-              <DrawerTitle>User Details</DrawerTitle>
-              <DrawerDescription>
-                Viewing details for user ID: {selectedUserId}
-              </DrawerDescription>
+          <DrawerContent className="max-h-screen !select-text">
+            <DrawerHeader className="bg-cyan-100 flex justify-between items-center">
+              <div>
+                <DrawerTitle>User Details</DrawerTitle>
+                <DrawerDescription data-vaul-no-drag="true">
+                  Viewing details for user ID: {selectedUserId}
+                </DrawerDescription>
+              </div>
+              <DrawerClose asChild>
+                <Button variant="ghost" size="sm" aria-label="Close">
+                  ✕
+                </Button>
+              </DrawerClose>
             </DrawerHeader>
             <div className="px-4 py-2 overflow-y-auto">
               {loadingDetails ? (

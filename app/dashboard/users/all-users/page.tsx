@@ -165,29 +165,36 @@ export default function Dashboard1() {
 
       {/* User Details Drawer */}
       <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
-        <DrawerContent className="max-h-[80vh]">
-          <DrawerHeader className="bg-cyan-100">
-            <DrawerTitle>User Details</DrawerTitle>
-            <DrawerDescription>
-              Viewing details for user ID: {selectedUserId}
-            </DrawerDescription>
-          </DrawerHeader>
-          <div className="px-4 py-2 overflow-y-auto">
-            {loadingDetails ? (
-              <div className="flex justify-center items-center h-64">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+          <DrawerContent className="max-h-screen !select-text">
+            <DrawerHeader className="bg-cyan-100 flex justify-between items-center">
+              <div>
+                <DrawerTitle>User Details</DrawerTitle>
+                <DrawerDescription data-vaul-no-drag="true">
+                  Viewing details for user ID: {selectedUserId}
+                </DrawerDescription>
               </div>
-            ) : (
-              userDetails && <UserDetails userData={userDetails} />
-            )}
-          </div>
-          <DrawerFooter>
-            <DrawerClose asChild>
-              <Button variant="outline">Close</Button>
-            </DrawerClose>
-          </DrawerFooter>
-        </DrawerContent>
-      </Drawer>
+              <DrawerClose asChild>
+                <Button variant="ghost" size="sm" aria-label="Close">
+                  ✕
+                </Button>
+              </DrawerClose>
+            </DrawerHeader>
+            <div className="px-4 py-2 overflow-y-auto">
+              {loadingDetails ? (
+                <div className="flex justify-center items-center h-64">
+                  <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+                </div>
+              ) : (
+                userDetails && <UserDetails userData={userDetails} />
+              )}
+            </div>
+            <DrawerFooter>
+              <DrawerClose asChild>
+                <Button variant="outline">Close</Button>
+              </DrawerClose>
+            </DrawerFooter>
+          </DrawerContent>
+        </Drawer>
     </motion.div>
     </ProtectedRoute>
   );

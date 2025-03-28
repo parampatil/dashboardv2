@@ -90,10 +90,6 @@ export function CallHistoryTabs({
       
       const data = await response.json();
       setConsumerCallHistory(data.callHistory || []);
-      toast({
-        title: "Success",
-        description: "Consumer call history refreshed",
-      });
     } catch (error) {
       toast({
         variant: "destructive",
@@ -125,10 +121,6 @@ export function CallHistoryTabs({
       
       const data = await response.json();
       setProviderCallHistory(data.callHistory || []);
-      toast({
-        title: "Success",
-        description: "Provider call history refreshed",
-      });
     } catch (error) {
       toast({
         variant: "destructive",
