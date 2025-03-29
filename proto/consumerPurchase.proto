@@ -21,6 +21,9 @@ service ConsumerPurchaseService {
     rpc GetPurchaseTransactionInfo (GetPurchaseTransactionInfoRequest) returns (GetPurchaseTransactionInfoResponse);
     rpc CreateCallTransaction(CreateCallTransactionRequest) returns (CreateCallTransactionResponse);
 
+    // Analytics
+    rpc GetTotalConsumerPurchaseAmount(GetTotalConsumerPurchaseAmountRequest) returns (GetTotalConsumerPurchaseAmountResponse);
+
     }
 
     // Purchase Status
@@ -252,3 +255,13 @@ message CreateCallTransactionRequest {
 message CreateCallTransactionResponse {
     string message = 1;
 }
+
+message GetTotalConsumerPurchaseAmountRequest {
+    google.protobuf.Timestamp startDate = 1;
+    google.protobuf.Timestamp endDate = 2;
+}
+
+message GetTotalConsumerPurchaseAmountResponse {
+    double totalPurchaseAmount = 1;
+}
+

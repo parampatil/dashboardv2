@@ -11,6 +11,14 @@ service ProviderEarningService {
     rpc CreatePayoutTransaction(CreatePayoutTransactionRequest) returns (CreatePayoutTransactionResponse);
     rpc UpdatePayoutTransaction(UpdatePayoutTransactionRequest) returns (UpdatePayoutTransactionResponse);
     rpc CreateCallTransaction(CreateCallTransactionRequest) returns (CreateCallTransactionResponse);
+    rpc CreateCallTransactionV2(CreateCallTransactionV2Request) returns (CreateCallTransactionV2Response);
+    rpc GetCallTransactionHistoryProvider(GetCallTransactionHistoryProviderRequest) returns (GetCallTransactionHistoryProviderResponse);
+    rpc InitiatePayoutTransaction(InitiatePayoutTransactionRequest) returns (InitiatePayoutTransactionResponse);
+    rpc GetPayoutInfo(GetPayoutInfoRequest) returns (GetPayoutInfoResponse);
+
+    //Analytics
+
+    rpc GetAllProviderAnalytics(GetAllProviderAnalyticsRequest) returns (GetAllProviderAnalyticsResponse);
 }
 
 enum TransactionType {
@@ -95,3 +103,70 @@ message CreateCallTransactionRequest {
 message CreateCallTransactionResponse {
     int64 callTransactionId = 1;
 }
+
+message CreateCallTransactionV2Request {
+    int64 userId = 1;
+    int64 Duration = 2; // in seconds
+}
+
+message CreateCallTransactionV2Response {
+    string message = 1;
+}
+
+message GetCallTransactionHistoryProviderRequest {
+    int64 userId = 1;
+}
+
+message callTransaction {
+    int64 callId = 1;
+    string location = 2;
+    string context = 3;
+    int64 durationSeconds = 4;
+    int64 charge = 5;
+    google.protobuf.Timestamp timestamp = 6; 
+}
+
+message GetCallTransactionHistoryProviderResponse {
+    repeated callTransaction callTransactions = 1;
+}
+
+message InitiatePayoutTransactionRequest {
+    int64 userId = 1;
+    double amount = 2;
+    string currency = 3;
+    string moduleName = 4;
+}
+
+message InitiatePayoutTransactionResponse {
+    int64 payoutId = 1;
+    int64 userId = 2;
+    double amount = 3;
+    string currency = 4;
+    string status = 5;
+    string remarks = 6;
+}
+
+message GetPayoutInfoRequest {
+    int64 payoutId = 1;
+    int64 userId = 2;
+}
+
+message GetPayoutInfoResponse {
+    int64 payoutId = 1;
+    int64 userId = 2;
+    double amount = 3;
+    string currency = 4;
+    string status = 5;
+    string remarks = 6;
+}
+
+message GetAllProviderAnalyticsRequest {
+    google.protobuf.Timestamp startDate = 1;
+    google.protobuf.Timestamp endDate = 2;
+}
+
+message GetAllProviderAnalyticsResponse {
+    double totalEarning = 1;
+    double totalPayout = 2;
+}
+

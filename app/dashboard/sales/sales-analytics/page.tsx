@@ -6,8 +6,8 @@ import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { useToast } from "@/hooks/use-toast";
 import { useApi } from "@/hooks/useApi";
 import { useEnvironment } from "@/context/EnvironmentContext";
-import { format } from "date-fns";
-import { Calendar as CalendarIcon, Search } from "lucide-react";
+import { format, subDays } from "date-fns";
+import { Calendar as CalendarIcon, Search, Phone, Clock, Calculator } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -16,24 +16,46 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { CallHistoryAnalyticsDashboard } from "@/components/AnalyticsDashboard/CallHistoryAnalyticsDashboard";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { LineChart } from "@/components/ui/LineChart";
+import { PieChart } from "@/components/ui/PieChart";
 
-interface UserCallTime {
-  userId: number;
-  userName: string;
-  numberOfCalls: number;
+interface DailyCallStats {
+  date: {
+    seconds: number;
+    nanos: number;
+  };
   totalCallTime: number;
-  callTimeAsProvider: number;
-  callTimeAsConsumer: number;
+  averageCallTime: number;
+}
+
+interface UserCallAnalytics {
+  totalCalls: number;
+  totalCallTime: number;
+  averageCallTime: number;
+  callStatsPerDay: DailyCallStats[];
+}
+
+interface ConsumerPurchaseAnalytics {
+  totalPurchaseAmount: number;
+}
+
+interface ProviderAnalytics {
+  totalEarning: number;
+  totalPayout: number;
 }
 
 export default function SalesAnalytics() {
-  const [userCallTimes, setUserCallTimes] = useState<UserCallTime[]>([]);
+  const [userId, setUserId] = useState<string>("0"); // Default to 0 for all records
+  const [analytics, setAnalytics] = useState<UserCallAnalytics | null>(null);
+  const [consumerPurchase, setConsumerPurchase] = useState<ConsumerPurchaseAnalytics | null>(null);
+  const [providerEarnings, setProviderEarnings] = useState<ProviderAnalytics | null>(null);
   const [loading, setLoading] = useState(false);
   const [startDate, setStartDate] = useState<Date | undefined>(() => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    return today;
+    const date = subDays(new Date(), 30);
+    date.setHours(0, 0, 0, 0);
+    return date;
   });
   const [endDate, setEndDate] = useState<Date | undefined>(() => {
     const today = new Date();
@@ -45,11 +67,11 @@ export default function SalesAnalytics() {
   const api = useApi();
   const { currentEnvironment } = useEnvironment();
 
-  const fetchCallTimeData = async () => {
+  const fetchAnalytics = async () => {
     if (!startDate || !endDate) {
       toast({
         variant: "destructive",
-        title: "Date range required",
+        title: "Missing required fields",
         description: "Please select both start and end dates",
       });
       return;
@@ -67,34 +89,71 @@ export default function SalesAnalytics() {
         nanos: (endDate.getTime() % 1000) * 1000000,
       };
 
-      const response = await api.fetch(
-        "/api/grpc/analytics/call-history-analytics",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            startTime: startTimestamp,
-            endTime: endTimestamp,
-          }),
-        }
-      );
+      // Fetch user call analytics
+      const callAnalyticsResponse = await api.fetch("/api/grpc/sales/user-call-analytics", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          userId: parseInt(userId), 
+          startTimestamp, 
+          endTimestamp 
+        }),
+      });
 
-      const data = await response.json();
-      if (!response.ok) {
+      const callAnalyticsData = await callAnalyticsResponse.json();
+      if (!callAnalyticsResponse.ok) {
         throw new Error(
-          data.error?.details ||
-            data.message ||
-            "Failed to fetch call time data"
+          callAnalyticsData.error?.details ||
+          callAnalyticsData.message ||
+          "Failed to fetch user call analytics"
         );
       }
+      setAnalytics(callAnalyticsData);
 
-      setUserCallTimes(data.userCallTime || []);
+      // Fetch consumer purchase analytics
+      const purchaseResponse = await api.fetch("/api/grpc/sales/total-purchase-amount", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          startDate: startTimestamp, 
+          endDate: endTimestamp 
+        }),
+      });
+
+      const purchaseData = await purchaseResponse.json();
+      if (!purchaseResponse.ok) {
+        throw new Error(
+          purchaseData.error?.details ||
+          purchaseData.message ||
+          "Failed to fetch consumer purchase analytics"
+        );
+      }
+      setConsumerPurchase(purchaseData);
+
+      // Fetch provider earnings
+      const earningsResponse = await api.fetch("/api/grpc/sales/provider-analytics", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          startDate: startTimestamp, 
+          endDate: endTimestamp 
+        }),
+      });
+
+      const earningsData = await earningsResponse.json();
+      if (!earningsResponse.ok) {
+        throw new Error(
+          earningsData.error?.details ||
+          earningsData.message ||
+          "Failed to fetch provider earnings"
+        );
+      }
+      setProviderEarnings(earningsData);
+
     } catch (error) {
       toast({
         variant: "destructive",
-        title: "Failed to fetch call time data",
+        title: "Failed to fetch analytics",
         description: (error as Error).message,
       });
     } finally {
@@ -103,15 +162,8 @@ export default function SalesAnalytics() {
   };
 
   useEffect(() => {
-    fetchCallTimeData();
+    fetchAnalytics();
   }, [currentEnvironment]);
-
-  const formatTime = (seconds: number) => {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    const secs = (seconds % 60).toFixed(0);
-    return `${hours}h ${minutes}m ${secs}s`;
-  };
 
   const handleStartDateChange = (date: Date | undefined) => {
     if (date) {
@@ -133,6 +185,28 @@ export default function SalesAnalytics() {
     }
   };
 
+  const formatTime = (seconds: number) => {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${hours}h ${minutes}m ${secs}s`;
+  };
+
+  const prepareChartData = () => {
+    if (!analytics || !analytics.callStatsPerDay) return [];
+    
+    return analytics.callStatsPerDay.map(stat => {
+      const date = new Date(stat.date.seconds * 1000);
+      return {
+        label: format(date, "MMM dd"),
+        values: {
+          "Total Call Time (minutes)": Number((stat.totalCallTime / 60).toFixed(2)),
+          "Average Call Time (minutes)": Number((stat.averageCallTime / 60).toFixed(2)),
+        }
+      };
+    });
+  };
+
   return (
     <ProtectedRoute allowedRoutes={["/dashboard/sales/sales-analytics"]}>
       <motion.div
@@ -145,7 +219,17 @@ export default function SalesAnalytics() {
             Sales Analytics
           </h1>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">User ID (Optional)</label>
+              <Input
+                type="number"
+                placeholder="Enter user ID (0 for all)"
+                value={userId}
+                onChange={(e) => setUserId(e.target.value)}
+              />
+            </div>
+            
             <div className="space-y-2">
               <label className="text-sm font-medium">Start Date</label>
               <Popover>
@@ -208,12 +292,12 @@ export default function SalesAnalytics() {
 
             <div className="flex items-end">
               <Button
-                onClick={fetchCallTimeData}
+                onClick={fetchAnalytics}
                 className="w-full"
                 disabled={loading || !startDate || !endDate}
               >
                 <Search className="mr-2 h-4 w-4" />
-                {loading ? "Loading..." : "Search"}
+                {loading ? "Loading..." : "Fetch Analytics"}
               </Button>
             </div>
           </div>
@@ -223,19 +307,126 @@ export default function SalesAnalytics() {
               <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
             </div>
           ) : (
-            <div className="bg-white rounded-lg">
-              {userCallTimes.length > 0 && (
-                <CallHistoryAnalyticsDashboard
-                  data={userCallTimes}
-                  formatTime={formatTime}
-                />
-              )}
+            <div className="space-y-6">
+              {/* User Call Analytics */}
+              {analytics && (
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <Card>
+                      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">
+                          Total Calls
+                        </CardTitle>
+                        <Phone className="h-4 w-4 text-muted-foreground" />
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-2xl font-bold">{analytics.totalCalls}</div>
+                      </CardContent>
+                    </Card>
+                    
+                    <Card>
+                      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">
+                          Total Call Time
+                        </CardTitle>
+                        <Clock className="h-4 w-4 text-muted-foreground" />
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-2xl font-bold">{formatTime(analytics.totalCallTime)}</div>
+                      </CardContent>
+                    </Card>
+                    
+                    <Card>
+                      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">
+                          Average Call Time
+                        </CardTitle>
+                        <Calculator className="h-4 w-4 text-muted-foreground" />
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-2xl font-bold">{formatTime(analytics.averageCallTime)}</div>
+                      </CardContent>
+                    </Card>
+                  </div>
 
-              {userCallTimes.length === 0 && !loading && (
-                <div className="flex justify-center items-center h-64 text-gray-500">
-                  No data available for the selected date range
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm font-medium">
+                        Call Time Analytics Over Time
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      {prepareChartData().length > 0 ? (
+                        <LineChart
+                          data={prepareChartData()}
+                          yAxisLabel="Call Time (minutes)"
+                          lineColors={{
+                            "Total Call Time (minutes)": "#1E90FF",
+                            "Average Call Time (minutes)": "#FF6347",
+                          }}
+                        />
+                      ) : (
+                        <div className="text-center text-gray-500">No data available for the selected period.</div>
+                      )}
+                    </CardContent>
+                  </Card>
                 </div>
               )}
+
+              {/* Consumer Purchase Analytics Pie Chart */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Consumer Purchase Analytics</CardTitle>
+                    <CardDescription>
+                      {startDate && endDate ? (
+                        `${format(startDate, "PPP")} - ${format(endDate, "PPP")}`
+                      ) : (
+                        "Select a date range"
+                      )}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="h-[300px] flex items-center justify-center">
+                    {consumerPurchase ? (
+                      <PieChart
+                        data={[
+                          { label: "Total Purchase Amount", value: consumerPurchase.totalPurchaseAmount },
+                        ]}
+                        colors={["#4CAF50"]}
+                      />
+                    ) : (
+                      <div className="text-gray-500">No purchase data available</div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Provider Earnings Pie Chart */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Provider Earnings</CardTitle>
+                    <CardDescription>
+                      {startDate && endDate ? (
+                        `${format(startDate, "PPP")} - ${format(endDate, "PPP")}`
+                      ) : (
+                        "Select a date range"
+                      )}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="h-[300px] flex items-center justify-center">
+                    {providerEarnings ? (
+                      <PieChart
+                        data={[
+                          { label: "Total Earnings", value: providerEarnings.totalEarning },
+                          { label: "Total Payouts", value: providerEarnings.totalPayout },
+                        ]}
+                        colors={["#2196F3", "#FFC107"]}
+                      />
+                    ) : (
+                      <div className="text-gray-500">No provider earnings data available</div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
             </div>
           )}
         </div>

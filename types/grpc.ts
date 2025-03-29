@@ -93,6 +93,10 @@ export interface ConsumerPurchaseServiceClient extends grpc.Client {
       response: ConsumerPurchaseHistoryResponse
     ) => void
   ) => void;
+  GetTotalConsumerPurchaseAmount: (
+    request: GetTotalConsumerPurchaseAmountRequest,
+    callback: (error: Error | null, response: GetTotalConsumerPurchaseAmountResponse) => void
+  ) => void;
   // Add other methods as needed
 }
 
@@ -169,6 +173,16 @@ export interface CreateOfferResponse {
   offerId: number;
 }
 
+// Consumer Purchase Analytics
+export interface GetTotalConsumerPurchaseAmountRequest {
+  startDate: ProtoTimestamp;
+  endDate: ProtoTimestamp;
+}
+
+export interface GetTotalConsumerPurchaseAmountResponse {
+  totalPurchaseAmount: number;
+}
+
 // Provider Earning Service Types
 export interface ProviderEarningServiceClient extends grpc.Client {
   GetProviderEarningBalance: (
@@ -181,6 +195,10 @@ export interface ProviderEarningServiceClient extends grpc.Client {
       error: Error | null,
       response: ProviderEarningTransactionsResponse
     ) => void
+  ) => void;
+  GetAllProviderAnalytics: (
+    request: GetAllProviderAnalyticsRequest,
+    callback: (error: Error | null, response: GetAllProviderAnalyticsResponse) => void
   ) => void;
   // Add other methods as needed
 }
@@ -226,6 +244,17 @@ export interface ProviderEarningTransactionsRequest {
 
 export interface ProviderEarningTransactionsResponse {
   providerTransactionHistory: ProviderEarningTransaction[];
+}
+
+// Provider Analytics
+export interface GetAllProviderAnalyticsRequest {
+  startDate: ProtoTimestamp;
+  endDate: ProtoTimestamp;
+}
+
+export interface GetAllProviderAnalyticsResponse {
+  totalEarning: number;
+  totalPayout: number;
 }
 
 // Reward Service Types
@@ -369,6 +398,11 @@ export interface CallManagementServiceClient {
       response: GetAllUsersCallTimeResponse
     ) => void
   ) => void;
+
+  GetUserCallAnalytics: (
+    request: GetUserCallAnalyticsRequest,
+    callback: (error: Error | null, response: GetUserCallAnalyticsResponse) => void
+  ) => void;
 }
 
 // Consumer Call History
@@ -429,6 +463,27 @@ export interface UserCallTime {
 
 export interface GetAllUsersCallTimeResponse {
   userCallTime: UserCallTime[];
+}
+
+// User Call Analytics
+export interface GetUserCallAnalyticsRequest {
+  userId: string | number;
+  startTimestamp: ProtoTimestamp;
+  endTimestamp: ProtoTimestamp;
+}
+
+export interface DailyCallStats {
+  date: ProtoTimestamp;
+  totalCallTime: string | number;
+  averageCallTime: string | number;
+}
+
+export interface GetUserCallAnalyticsResponse {
+  totalCalls: string | number;
+  totalCallTime: string | number;
+  averageCallTime: number;
+  medianCallTime: number;
+  callStatsPerDay: DailyCallStats[];
 }
 
 
