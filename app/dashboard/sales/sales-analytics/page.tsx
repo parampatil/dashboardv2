@@ -7,7 +7,15 @@ import { useToast } from "@/hooks/use-toast";
 import { useApi } from "@/hooks/useApi";
 import { useEnvironment } from "@/context/EnvironmentContext";
 import { format, subDays } from "date-fns";
-import { Calendar as CalendarIcon, Search, Phone, Clock, Calculator } from "lucide-react";
+import {
+  Calendar as CalendarIcon,
+  Search,
+  Phone,
+  Clock,
+  Calculator,
+  DollarSign,
+  Wallet,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -16,7 +24,13 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { LineChart } from "@/components/ui/LineChart";
 import { PieChart } from "@/components/ui/PieChart";
@@ -49,8 +63,10 @@ interface ProviderAnalytics {
 export default function SalesAnalytics() {
   const [userId, setUserId] = useState<string>("0"); // Default to 0 for all records
   const [analytics, setAnalytics] = useState<UserCallAnalytics | null>(null);
-  const [consumerPurchase, setConsumerPurchase] = useState<ConsumerPurchaseAnalytics | null>(null);
-  const [providerEarnings, setProviderEarnings] = useState<ProviderAnalytics | null>(null);
+  const [consumerPurchase, setConsumerPurchase] =
+    useState<ConsumerPurchaseAnalytics | null>(null);
+  const [providerEarnings, setProviderEarnings] =
+    useState<ProviderAnalytics | null>(null);
   const [loading, setLoading] = useState(false);
   const [startDate, setStartDate] = useState<Date | undefined>(() => {
     const date = subDays(new Date(), 30);
@@ -90,66 +106,74 @@ export default function SalesAnalytics() {
       };
 
       // Fetch user call analytics
-      const callAnalyticsResponse = await api.fetch("/api/grpc/sales/user-call-analytics", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          userId: parseInt(userId), 
-          startTimestamp, 
-          endTimestamp 
-        }),
-      });
+      const callAnalyticsResponse = await api.fetch(
+        "/api/grpc/sales/user-call-analytics",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            userId: parseInt(userId),
+            startTimestamp,
+            endTimestamp,
+          }),
+        }
+      );
 
       const callAnalyticsData = await callAnalyticsResponse.json();
       if (!callAnalyticsResponse.ok) {
         throw new Error(
           callAnalyticsData.error?.details ||
-          callAnalyticsData.message ||
-          "Failed to fetch user call analytics"
+            callAnalyticsData.message ||
+            "Failed to fetch user call analytics"
         );
       }
       setAnalytics(callAnalyticsData);
 
       // Fetch consumer purchase analytics
-      const purchaseResponse = await api.fetch("/api/grpc/sales/total-purchase-amount", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          startDate: startTimestamp, 
-          endDate: endTimestamp 
-        }),
-      });
+      const purchaseResponse = await api.fetch(
+        "/api/grpc/sales/total-purchase-amount",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            startDate: startTimestamp,
+            endDate: endTimestamp,
+          }),
+        }
+      );
 
       const purchaseData = await purchaseResponse.json();
       if (!purchaseResponse.ok) {
         throw new Error(
           purchaseData.error?.details ||
-          purchaseData.message ||
-          "Failed to fetch consumer purchase analytics"
+            purchaseData.message ||
+            "Failed to fetch consumer purchase analytics"
         );
       }
       setConsumerPurchase(purchaseData);
 
       // Fetch provider earnings
-      const earningsResponse = await api.fetch("/api/grpc/sales/provider-analytics", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          startDate: startTimestamp, 
-          endDate: endTimestamp 
-        }),
-      });
+      const earningsResponse = await api.fetch(
+        "/api/grpc/sales/provider-analytics",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            startDate: startTimestamp,
+            endDate: endTimestamp,
+          }),
+        }
+      );
 
       const earningsData = await earningsResponse.json();
       if (!earningsResponse.ok) {
         throw new Error(
           earningsData.error?.details ||
-          earningsData.message ||
-          "Failed to fetch provider earnings"
+            earningsData.message ||
+            "Failed to fetch provider earnings"
         );
       }
       setProviderEarnings(earningsData);
-
     } catch (error) {
       toast({
         variant: "destructive",
@@ -194,15 +218,19 @@ export default function SalesAnalytics() {
 
   const prepareChartData = () => {
     if (!analytics || !analytics.callStatsPerDay) return [];
-    
-    return analytics.callStatsPerDay.map(stat => {
+
+    return analytics.callStatsPerDay.map((stat) => {
       const date = new Date(stat.date.seconds * 1000);
       return {
         label: format(date, "MMM dd"),
         values: {
-          "Total Call Time (minutes)": Number((stat.totalCallTime / 60).toFixed(2)),
-          "Average Call Time (minutes)": Number((stat.averageCallTime / 60).toFixed(2)),
-        }
+          "Total Call Time (minutes)": Number(
+            (stat.totalCallTime / 60).toFixed(2)
+          ),
+          "Average Call Time (minutes)": Number(
+            (stat.averageCallTime / 60).toFixed(2)
+          ),
+        },
       };
     });
   };
@@ -229,7 +257,7 @@ export default function SalesAnalytics() {
                 onChange={(e) => setUserId(e.target.value)}
               />
             </div>
-            
+
             <div className="space-y-2">
               <label className="text-sm font-medium">Start Date</label>
               <Popover>
@@ -320,10 +348,12 @@ export default function SalesAnalytics() {
                         <Phone className="h-4 w-4 text-muted-foreground" />
                       </CardHeader>
                       <CardContent>
-                        <div className="text-2xl font-bold">{analytics.totalCalls}</div>
+                        <div className="text-2xl font-bold">
+                          {analytics.totalCalls}
+                        </div>
                       </CardContent>
                     </Card>
-                    
+
                     <Card>
                       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">
@@ -332,10 +362,12 @@ export default function SalesAnalytics() {
                         <Clock className="h-4 w-4 text-muted-foreground" />
                       </CardHeader>
                       <CardContent>
-                        <div className="text-2xl font-bold">{formatTime(analytics.totalCallTime)}</div>
+                        <div className="text-2xl font-bold">
+                          {formatTime(analytics.totalCallTime)}
+                        </div>
                       </CardContent>
                     </Card>
-                    
+
                     <Card>
                       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">
@@ -344,7 +376,9 @@ export default function SalesAnalytics() {
                         <Calculator className="h-4 w-4 text-muted-foreground" />
                       </CardHeader>
                       <CardContent>
-                        <div className="text-2xl font-bold">{formatTime(analytics.averageCallTime)}</div>
+                        <div className="text-2xl font-bold">
+                          {formatTime(analytics.averageCallTime)}
+                        </div>
                       </CardContent>
                     </Card>
                   </div>
@@ -355,7 +389,7 @@ export default function SalesAnalytics() {
                         Call Time Analytics Over Time
                       </CardTitle>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="h-[400px]">
                       {prepareChartData().length > 0 ? (
                         <LineChart
                           data={prepareChartData()}
@@ -366,63 +400,141 @@ export default function SalesAnalytics() {
                           }}
                         />
                       ) : (
-                        <div className="text-center text-gray-500">No data available for the selected period.</div>
+                        <div className="text-center text-gray-500">
+                          No data available for the selected period.
+                        </div>
                       )}
                     </CardContent>
                   </Card>
                 </div>
               )}
 
-              {/* Consumer Purchase Analytics Pie Chart */}
+              {/* Analytics Cards with Pie Charts */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Card>
+                {/* Consumer Purchase Analytics Card */}
+                <Card className="flex flex-col h-full">
                   <CardHeader>
                     <CardTitle>Consumer Purchase Analytics</CardTitle>
                     <CardDescription>
-                      {startDate && endDate ? (
-                        `${format(startDate, "PPP")} - ${format(endDate, "PPP")}`
-                      ) : (
-                        "Select a date range"
-                      )}
+                      {startDate && endDate
+                        ? `${format(startDate, "PPP")} - ${format(
+                            endDate,
+                            "PPP"
+                          )}`
+                        : "Select a date range"}
                     </CardDescription>
                   </CardHeader>
-                  <CardContent className="h-[300px] flex items-center justify-center">
+                  <CardContent className="flex-1 flex flex-col">
                     {consumerPurchase ? (
-                      <PieChart
-                        data={[
-                          { label: "Total Purchase Amount", value: consumerPurchase.totalPurchaseAmount },
-                        ]}
-                        colors={["#4CAF50"]}
-                      />
+                      <div className="flex flex-col h-full">
+                        <div className="flex items-center mb-4">
+                          <DollarSign className="h-5 w-5 mr-2 text-green-500" />
+                          <div className="text-3xl font-bold">
+                            ${consumerPurchase.totalPurchaseAmount.toFixed(2)}
+                          </div>
+                        </div>
+                        <div className="flex-1 flex flex-col items-center">
+                          <div className="h-[200px] w-full">
+                            <PieChart
+                              data={[
+                                { value: consumerPurchase.totalPurchaseAmount },
+                              ]}
+                              colors={["#4CAF50"]}
+                            />
+                          </div>
+                          <div className="mt-4 self-start">
+                            <div className="flex items-center">
+                              <div className="w-4 h-4 bg-[#4CAF50] rounded-sm mr-2"></div>
+                              <span>
+                                Total Purchase Amount: $
+                                {consumerPurchase.totalPurchaseAmount.toFixed(
+                                  2
+                                )}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     ) : (
-                      <div className="text-gray-500">No purchase data available</div>
+                      <div className="text-gray-500 flex items-center justify-center h-full">
+                        No purchase data available
+                      </div>
                     )}
                   </CardContent>
                 </Card>
 
-                {/* Provider Earnings Pie Chart */}
-                <Card>
+                {/* Provider Earnings Card */}
+                <Card className="flex flex-col h-full">
                   <CardHeader>
                     <CardTitle>Provider Earnings</CardTitle>
                     <CardDescription>
-                      {startDate && endDate ? (
-                        `${format(startDate, "PPP")} - ${format(endDate, "PPP")}`
-                      ) : (
-                        "Select a date range"
-                      )}
+                      {startDate && endDate
+                        ? `${format(startDate, "PPP")} - ${format(
+                            endDate,
+                            "PPP"
+                          )}`
+                        : "Select a date range"}
                     </CardDescription>
                   </CardHeader>
-                  <CardContent className="h-[300px] flex items-center justify-center">
+                  <CardContent className="flex-1 flex flex-col">
                     {providerEarnings ? (
-                      <PieChart
-                        data={[
-                          { label: "Total Earnings", value: providerEarnings.totalEarning },
-                          { label: "Total Payouts", value: providerEarnings.totalPayout },
-                        ]}
-                        colors={["#2196F3", "#FFC107"]}
-                      />
+                      <div className="flex flex-col h-full">
+                        <div className="grid grid-cols-2 gap-4 mb-4">
+                          <div className="flex items-center">
+                            <DollarSign className="h-5 w-5 mr-2 text-blue-500" />
+                            <div>
+                              <div className="text-sm text-gray-500">
+                                Total Earnings
+                              </div>
+                              <div className="text-2xl font-bold">
+                                ${providerEarnings.totalEarning.toFixed(2)}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center">
+                            <Wallet className="h-5 w-5 mr-2 text-amber-500" />
+                            <div>
+                              <div className="text-sm text-gray-500">
+                                Total Payouts
+                              </div>
+                              <div className="text-2xl font-bold">
+                                ${providerEarnings.totalPayout.toFixed(2)}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex-1 flex flex-col items-center">
+                          <div className="h-[200px] w-full">
+                            <PieChart
+                              data={[
+                                { value: providerEarnings.totalEarning },
+                                { value: providerEarnings.totalPayout },
+                              ]}
+                              colors={["#2196F3", "#FFC107"]}
+                            />
+                          </div>
+                          <div className="mt-4 self-start space-y-2">
+                            <div className="flex items-center">
+                              <div className="w-4 h-4 bg-[#2196F3] rounded-sm mr-2"></div>
+                              <span>
+                                Total Earnings: $
+                                {providerEarnings.totalEarning.toFixed(2)}
+                              </span>
+                            </div>
+                            <div className="flex items-center">
+                              <div className="w-4 h-4 bg-[#FFC107] rounded-sm mr-2"></div>
+                              <span>
+                                Total Payouts: $
+                                {providerEarnings.totalPayout.toFixed(2)}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     ) : (
-                      <div className="text-gray-500">No provider earnings data available</div>
+                      <div className="text-gray-500 flex items-center justify-center h-full">
+                        No provider earnings data available
+                      </div>
                     )}
                   </CardContent>
                 </Card>

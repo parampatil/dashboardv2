@@ -1,214 +1,220 @@
 // components/ui/LineChart.tsx
 "use client";
-import { useRef, useEffect } from "react";
-
-interface DataPoint {
-  label: string;
-  values: {
-    [key: string]: number;
-  };
-}
+import React, { useEffect, useRef } from 'react';
 
 interface LineChartProps {
-  data: DataPoint[];
-  width?: number;
-  height?: number;
-  lineColors?: { [key: string]: string };
-  backgroundColor?: string;
-  gridColor?: string;
-  textColor?: string;
-  showLegend?: boolean;
-  yAxisLabel?: string;
+  data: { label: string; values: { [key: string]: number } }[];
+  yAxisLabel: string;
+  lineColors: { [key: string]: string };
 }
 
-export const LineChart = ({
-  data,
-  width = 800,
-  height = 400,
-  lineColors = {},
-  backgroundColor = "white",
-  gridColor = "#e5e5e5",
-  textColor = "#333",
-  showLegend = true,
-  yAxisLabel,
-}: LineChartProps) => {
+export const LineChart: React.FC<LineChartProps> = ({ data, yAxisLabel, lineColors }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     if (!canvasRef.current || data.length === 0) return;
-
+    
     const canvas = canvasRef.current;
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Set canvas dimensions with higher resolution for retina displays
-    const dpr = window.devicePixelRatio || 1;
-    canvas.width = width * dpr;
-    canvas.height = height * dpr;
-    canvas.style.width = `${width}px`;
-    canvas.style.height = `${height}px`;
-    ctx.scale(dpr, dpr);
-
-    // Clear canvas
-    ctx.fillStyle = backgroundColor;
-    ctx.fillRect(0, 0, width, height);
-
-    // Chart dimensions
-    const padding = 60;
-    const chartWidth = width - padding * 2;
-    const chartHeight = height - padding * 2;
-
-    // Get all series names
-    const seriesNames = new Set<string>();
-    data.forEach((point) => {
-      Object.keys(point.values).forEach((key) => seriesNames.add(key));
-    });
-    const seriesArray = Array.from(seriesNames);
-
-    // Default colors if not provided
-    const defaultColors = [
-      "#4f46e5", // indigo
-      "#10b981", // emerald
-      "#ef4444", // red
-      "#f59e0b", // amber
-      "#8b5cf6", // violet
-    ];
-
-    // Assign colors to each series
-    seriesArray.forEach((series, index) => {
-      if (!lineColors[series]) {
-        lineColors[series] = defaultColors[index % defaultColors.length];
-      }
-    });
-
-    // Find min and max values for y-axis
-    let minValue = Infinity;
-    let maxValue = -Infinity;
-    data.forEach((point) => {
-      Object.values(point.values).forEach((value) => {
-        minValue = Math.min(minValue, value);
-        maxValue = Math.max(maxValue, value);
-      });
-    });
-
-    // Add some padding to the min/max values
-    const valueRange = maxValue - minValue;
-    minValue = Math.max(0, minValue - valueRange * 0.1);
-    maxValue = maxValue + valueRange * 0.1;
-
-    // Draw grid and axes
-    ctx.strokeStyle = gridColor;
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-
-    // Horizontal grid lines
-    const yTickCount = 5;
-    ctx.textAlign = "right";
-    ctx.textBaseline = "middle";
-    ctx.font = "12px sans-serif";
-    ctx.fillStyle = textColor;
-
-    for (let i = 0; i <= yTickCount; i++) {
-      const y = padding + chartHeight - (i / yTickCount) * chartHeight;
-      ctx.moveTo(padding, y);
-      ctx.lineTo(padding + chartWidth, y);
+    // Make canvas responsive
+    const resizeCanvas = () => {
+      const parent = canvas.parentElement;
+      if (!parent) return;
       
-      const value = minValue + (i / yTickCount) * (maxValue - minValue);
-      ctx.fillText(value.toFixed(1), padding - 10, y);
-    }
+      const { width, height } = parent.getBoundingClientRect();
+      canvas.width = width;
+      canvas.height = height;
+      drawLineChart();
+    };
 
-    // Y-axis label if provided
-    if (yAxisLabel) {
+    const drawLineChart = () => {
+      // Clear canvas
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // Set margins
+      const margin = { top: 40, right: 200, bottom: 60, left: 80 };
+      const chartWidth = canvas.width - margin.left - margin.right;
+      const chartHeight = canvas.height - margin.top - margin.bottom;
+      
+      // Find min and max values
+      const keys = Object.keys(data[0].values);
+      let maxValue = 0;
+      
+      data.forEach(item => {
+        keys.forEach(key => {
+          maxValue = Math.max(maxValue, item.values[key]);
+        });
+      });
+      
+      // Add 10% padding to max value
+      maxValue *= 1.1;
+      
+      // Draw axes
+      ctx.beginPath();
+      ctx.moveTo(margin.left, margin.top);
+      ctx.lineTo(margin.left, chartHeight + margin.top);
+      ctx.lineTo(chartWidth + margin.left, chartHeight + margin.top);
+      ctx.strokeStyle = '#ccc';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      
+      // Draw y-axis label
       ctx.save();
-      ctx.translate(15, height / 2);
+      ctx.translate(15, margin.top + chartHeight / 2);
       ctx.rotate(-Math.PI / 2);
-      ctx.textAlign = "center";
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#666';
+      ctx.font = '14px Arial';
       ctx.fillText(yAxisLabel, 0, 0);
       ctx.restore();
-    }
-
-    // Vertical grid lines and x-axis labels
-    ctx.textAlign = "center";
-    ctx.textBaseline = "top";
-    const xStep = chartWidth / (data.length - 1);
-    
-    data.forEach((point, i) => {
-      const x = padding + i * xStep;
-      ctx.moveTo(x, padding);
-      ctx.lineTo(x, padding + chartHeight);
-      ctx.fillText(point.label, x, padding + chartHeight + 10);
-    });
-    
-    ctx.stroke();
-
-    // Draw data lines
-    seriesArray.forEach((series) => {
-      ctx.strokeStyle = lineColors[series] || "#000";
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-
-      data.forEach((point, i) => {
-        const x = padding + i * xStep;
-        if (point.values[series] === undefined) return;
+      
+      // Draw x-axis labels
+      const xStep = chartWidth / (data.length - 1 || 1);
+      data.forEach((item, i) => {
+        const x = margin.left + i * xStep;
+        const y = chartHeight + margin.top + 20;
         
-        const yRatio = (point.values[series] - minValue) / (maxValue - minValue);
-        const y = padding + chartHeight - yRatio * chartHeight;
-        
-        if (i === 0) {
-          ctx.moveTo(x, y);
-        } else {
-          ctx.lineTo(x, y);
-        }
+        ctx.fillStyle = '#666';
+        ctx.font = '12px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText(item.label, x, y);
       });
       
-      ctx.stroke();
-
-      // Draw data points
-      ctx.fillStyle = lineColors[series] || "#000";
-      data.forEach((point, i) => {
-        if (point.values[series] === undefined) return;
-        
-        const x = padding + i * xStep;
-        const yRatio = (point.values[series] - minValue) / (maxValue - minValue);
-        const y = padding + chartHeight - yRatio * chartHeight;
+      // Draw y-axis grid lines and labels
+      const yStep = chartHeight / 5;
+      for (let i = 0; i <= 5; i++) {
+        const y = margin.top + chartHeight - i * yStep;
+        const value = (maxValue * i / 5).toFixed(1);
         
         ctx.beginPath();
-        ctx.arc(x, y, 4, 0, Math.PI * 2);
-        ctx.fill();
-      });
-    });
-
-    // Draw legend
-    if (showLegend && seriesArray.length > 0) {
-      const legendY = 20;
-      const legendItemWidth = 150;
-      const legendX = (width - (seriesArray.length * legendItemWidth)) / 2;
+        ctx.moveTo(margin.left, y);
+        ctx.lineTo(margin.left + chartWidth, y);
+        ctx.strokeStyle = '#eee';
+        ctx.stroke();
+        
+        ctx.fillStyle = '#666';
+        ctx.font = '12px Arial';
+        ctx.textAlign = 'right';
+        ctx.fillText(value, margin.left - 10, y + 5);
+      }
       
-      seriesArray.forEach((series, i) => {
-        const x = legendX + i * legendItemWidth;
+      // Draw legend
+      const legendX = margin.left + chartWidth + 10;
+      const legendY = margin.top + 20;
+      
+      keys.forEach((key, i) => {
+        const y = legendY + i * 25;
         
-        // Draw color box
-        ctx.fillStyle = lineColors[series] || "#000";
-        ctx.fillRect(x, legendY, 15, 15);
+        ctx.fillStyle = lineColors[key];
+        ctx.fillRect(legendX, y, 15, 15);
         
-        // Draw series name
-        ctx.fillStyle = textColor;
-        ctx.textAlign = "left";
-        ctx.textBaseline = "middle";
-        ctx.fillText(series, x + 25, legendY + 7);
+        ctx.fillStyle = '#000';
+        ctx.font = '12px Arial';
+        ctx.textAlign = 'left';
+        ctx.fillText(key, legendX + 25, y + 12);
       });
+      
+      // Draw lines for each data series with animation
+      keys.forEach((key, keyIndex) => {
+        // Animation variables
+        let progress = 0;
+        const animationDuration = 30; // frames
+        
+        const drawLine = () => {
+          if (progress >= animationDuration) return;
+          
+          // Clear only the chart area, not the axes or legend
+          ctx.clearRect(margin.left + 1, margin.top, chartWidth - 1, chartHeight);
+          
+          // Redraw grid
+          for (let i = 0; i <= 5; i++) {
+            const y = margin.top + chartHeight - i * yStep;
+            ctx.beginPath();
+            ctx.moveTo(margin.left, y);
+            ctx.lineTo(margin.left + chartWidth, y);
+            ctx.strokeStyle = '#eee';
+            ctx.stroke();
+          }
+          
+          // Draw all lines up to current progress
+          keys.forEach((k, idx) => {
+            // Only draw lines that have been started already
+            if (idx > keyIndex) return;
+            
+            ctx.beginPath();
+            
+            let isFirstPoint = true;
+            data.forEach((item, i) => {
+              if (i > data.length * (progress / animationDuration) && idx === keyIndex) return;
+              
+              const x = margin.left + i * xStep;
+              const y = margin.top + chartHeight - (item.values[k] / maxValue) * chartHeight;
+              
+              if (isFirstPoint) {
+                ctx.moveTo(x, y);
+                isFirstPoint = false;
+              } else {
+                ctx.lineTo(x, y);
+              }
+            });
+            
+            ctx.strokeStyle = lineColors[k];
+            ctx.lineWidth = k === "Total Call Time (minutes)" ? 4 : 2; // Make the total call time line thicker
+            ctx.stroke();
+            
+            // Draw points
+            data.forEach((item, i) => {
+              if (i > data.length * (progress / animationDuration) && idx === keyIndex) return;
+              
+              const x = margin.left + i * xStep;
+              const y = margin.top + chartHeight - (item.values[k] / maxValue) * chartHeight;
+              
+              ctx.beginPath();
+              ctx.arc(x, y, 5, 0, 2 * Math.PI);
+              ctx.fillStyle = lineColors[k];
+              ctx.fill();
+              ctx.strokeStyle = '#fff';
+              ctx.lineWidth = 1;
+              ctx.stroke();
+            });
+          });
+          
+          progress++;
+          if (progress < animationDuration) {
+            requestAnimationFrame(drawLine);
+          }
+        };
+        
+        // Stagger the animation of each line
+        setTimeout(() => {
+          drawLine();
+        }, keyIndex * 300);
+      });
+    };
+
+    // Set up resize observer
+    const resizeObserver = new ResizeObserver(() => {
+      resizeCanvas();
+    });
+    
+    if (canvas.parentElement) {
+      resizeObserver.observe(canvas.parentElement);
     }
-  }, [data, width, height, lineColors, backgroundColor, gridColor, textColor, showLegend, yAxisLabel]);
+    
+    // Initial draw
+    resizeCanvas();
+    
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [data, yAxisLabel, lineColors]);
 
   return (
-    <div className="relative">
-      <canvas
-        ref={canvasRef}
-        style={{
-          width: `${width}px`,
-          height: `${height}px`,
-        }}
-      />
-    </div>
+    <canvas 
+      ref={canvasRef} 
+      className="w-full h-full"
+    />
   );
 };

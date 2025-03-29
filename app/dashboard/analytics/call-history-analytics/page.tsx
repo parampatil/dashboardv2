@@ -25,7 +25,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
-// import { CallHistoryAnalyticsDashboard } from "@/components/AnalyticsDashboard/CallHistoryAnalyticsDashboard";
+import { CallHistoryAnalyticsDashboard } from "@/components/AnalyticsDashboard/CallHistoryAnalyticsDashboard";
 
 interface UserCallTime {
   userId: number;
@@ -382,14 +382,14 @@ export default function CallHistoryAnalytics() {
           )}
         </div>
 
-        {/* <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="bg-white rounded-lg shadow-md p-6">
           {!loading && filteredData.length > 0 && (
             <CallHistoryAnalyticsDashboard
               data={filteredData}
               formatTime={formatTime}
             />
           )}
-        </div> */}
+        </div>
       </motion.div>
     </ProtectedRoute>
   );

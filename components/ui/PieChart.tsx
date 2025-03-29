@@ -1,101 +1,158 @@
-import React, { useEffect, useRef, useState } from 'react';
+// components/ui/PieChart.tsx
+"use client";
+import React, { useEffect, useRef } from 'react';
 
 interface PieChartProps {
-  data: { label: string; value: number }[];
+  data: { value: number }[];
   colors: string[];
 }
 
 export const PieChart: React.FC<PieChartProps> = ({ data, colors }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [size, setSize] = useState({ width: 0, height: 0 });
-  const [animationProgress, setAnimationProgress] = useState(0);
 
   useEffect(() => {
-    const resizeObserver = new ResizeObserver(entries => {
-      for (const entry of entries) {
-        setSize({
-          width: entry.contentRect.width,
-          height: entry.contentRect.height
-        });
-      }
-    });
-
-    if (canvasRef.current) {
-      resizeObserver.observe(canvasRef.current.parentElement!);
-    }
-
-    return () => resizeObserver.disconnect();
-  }, []);
-
-  useEffect(() => {
-    let animationFrame: number;
-    const animate = () => {
-      setAnimationProgress(prev => {
-        if (prev < 1) {
-          animationFrame = requestAnimationFrame(animate);
-          return prev + 0.02;
-        }
-        return 1;
-      });
-    };
-    animate();
-    return () => cancelAnimationFrame(animationFrame);
-  }, [data]);
-
-  useEffect(() => {
-    if (!canvasRef.current || data.length === 0 || size.width === 0) return;
+    if (!canvasRef.current || data.length === 0) return;
     
-    const ctx = canvasRef.current.getContext('2d');
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    ctx.clearRect(0, 0, size.width, size.height);
-    
-    const total = data.reduce((sum, item) => sum + item.value, 0);
-    const centerX = size.width / 2;
-    const centerY = size.height / 2;
-    const radius = Math.min(centerX, centerY) * 0.8;
-    
-    let startAngle = 0;
-    
-    data.forEach((item, index) => {
-      const sliceAngle = (item.value / total) * 2 * Math.PI * animationProgress;
-      const endAngle = startAngle + sliceAngle;
+    // Make canvas responsive
+    const resizeCanvas = () => {
+      const parent = canvas.parentElement;
+      if (!parent) return;
       
-      ctx.beginPath();
-      ctx.moveTo(centerX, centerY);
-      ctx.arc(centerX, centerY, radius, startAngle, endAngle);
-      ctx.closePath();
+      const { width, height } = parent.getBoundingClientRect();
+      canvas.width = width;
+      canvas.height = height;
+      drawPieChart();
+    };
+
+    const drawPieChart = () => {
+      // Clear canvas
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
       
-      ctx.fillStyle = colors[index % colors.length];
-      ctx.fill();
+      // Calculate total value
+      const total = data.reduce((sum, item) => sum + item.value, 0);
+      if (total === 0) return;
       
-      startAngle = endAngle;
+      // Set up dimensions
+      const centerX = canvas.width / 2;
+      const centerY = canvas.height / 2;
+      const radius = Math.min(centerX, centerY) * 0.8;
+      
+      // Animation variables
+      let currentAngle = 0;
+      const targetAngle = Math.PI * 2;
+      const animationDuration = 30; // frames
+      const angleStep = targetAngle / animationDuration;
+      
+      const animate = () => {
+        // Clear canvas for animation frame
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        let startAngle = 0;
+        
+        // Draw each slice with current animation progress
+        data.forEach((item, index) => {
+          const sliceAngle = (item.value / total) * Math.PI * 2;
+          const endAngle = startAngle + sliceAngle * (currentAngle / targetAngle);
+          
+          // Calculate offset for separated slices (optional)
+          const mediumAngle = startAngle + (endAngle - startAngle) / 2;
+          const offset = 0; // Set to 0 for no separation, or a small value like 10 for separation
+          
+          ctx.beginPath();
+          ctx.moveTo(
+            centerX + Math.cos(mediumAngle) * offset, 
+            centerY + Math.sin(mediumAngle) * offset
+          );
+          ctx.arc(
+            centerX + Math.cos(mediumAngle) * offset, 
+            centerY + Math.sin(mediumAngle) * offset, 
+            radius, 
+            startAngle, 
+            endAngle
+          );
+          ctx.lineTo(
+            centerX + Math.cos(mediumAngle) * offset, 
+            centerY + Math.sin(mediumAngle) * offset
+          );
+          ctx.closePath();
+          
+          ctx.fillStyle = colors[index % colors.length];
+          ctx.fill();
+          
+          startAngle = endAngle;
+        });
+        
+        // Continue animation if not complete
+        currentAngle += angleStep;
+        if (currentAngle < targetAngle) {
+          requestAnimationFrame(animate);
+        } else {
+          // Draw one final time with complete angles to ensure no gaps
+          currentAngle = targetAngle;
+          let finalStartAngle = 0;
+          
+          data.forEach((item, index) => {
+            const sliceAngle = (item.value / total) * Math.PI * 2;
+            const finalEndAngle = finalStartAngle + sliceAngle;
+            
+            const mediumAngle = finalStartAngle + (finalEndAngle - finalStartAngle) / 2;
+            const offset = 0;
+            
+            ctx.beginPath();
+            ctx.moveTo(
+              centerX + Math.cos(mediumAngle) * offset, 
+              centerY + Math.sin(mediumAngle) * offset
+            );
+            ctx.arc(
+              centerX + Math.cos(mediumAngle) * offset, 
+              centerY + Math.sin(mediumAngle) * offset, 
+              radius, 
+              finalStartAngle, 
+              finalEndAngle
+            );
+            ctx.lineTo(
+              centerX + Math.cos(mediumAngle) * offset, 
+              centerY + Math.sin(mediumAngle) * offset
+            );
+            ctx.closePath();
+            
+            ctx.fillStyle = colors[index % colors.length];
+            ctx.fill();
+            
+            finalStartAngle = finalEndAngle;
+          });
+        }
+      };
+      
+      // Start animation
+      animate();
+    };
+
+    // Set up resize observer
+    const resizeObserver = new ResizeObserver(() => {
+      resizeCanvas();
     });
     
-    // Draw legend
-    const legendX = size.width - 120;
-    const legendY = 20;
+    if (canvas.parentElement) {
+      resizeObserver.observe(canvas.parentElement);
+    }
     
-    data.forEach((item, index) => {
-      const y = legendY + index * 25;
-      
-      ctx.fillStyle = colors[index % colors.length];
-      ctx.fillRect(legendX, y, 15, 15);
-      
-      ctx.fillStyle = '#000';
-      ctx.font = '12px Arial';
-      ctx.fillText(`${item.label}: $${item.value.toFixed(2)}`, legendX + 25, y + 12);
-    });
-  }, [data, colors, size, animationProgress]);
+    // Initial draw
+    resizeCanvas();
+    
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [data, colors]);
 
   return (
-    <div className="w-full h-full">
-      <canvas 
-        ref={canvasRef} 
-        width={size.width} 
-        height={size.height}
-        className="max-w-full max-h-full"
-      />
-    </div>
+    <canvas 
+      ref={canvasRef} 
+      className="w-full h-full"
+    />
   );
 };
