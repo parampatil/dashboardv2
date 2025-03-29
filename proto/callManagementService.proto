@@ -22,6 +22,9 @@ service CallManagementService {
 
     // Analytics
     rpc GetAllUsersCallTime(GetAllUsersCallTimeRequest) returns (GetAllUsersCallTimeResponse);
+    rpc GetCallDetails(GetCallDetailsRequest) returns (GetCallDetailsResponse);
+    rpc GetUserCallAnalytics(GetUserCallAnalyticsRequest) returns (GetUserCallAnalyticsResponse);
+
 }
 
 
@@ -145,4 +148,58 @@ message UserCallTime {
 
 message GetAllUsersCallTimeResponse {
     repeated UserCallTime userCallTime = 1;
+}
+message GetCallDetailsRequest {
+    int64 userId = 1;      // User ID (either consumer or provider)
+    string sortOrder = 2;  // "asc" or "desc", default is "desc"
+    int64 pageNumber = 3;  // Page number for pagination, default is 1
+    int64 pageSize = 4;    // Number of records per page, default is 20
+    repeated string callStatuses = 5;  // List of call statuses to filter
+}
+
+message CallTransactionDetails {
+    string callId = 1;
+    google.protobuf.Timestamp createdAt = 2;
+    string sessionId = 3;
+    int64 consumerId = 4;
+    int64 providerId = 5;
+    google.protobuf.Timestamp sessionStartTimestamp = 6;
+    google.protobuf.Timestamp sessionEndTimestamp = 7;
+    google.protobuf.Timestamp providerJoinTimestamp = 8;
+    google.protobuf.Timestamp providerLeaveTimestamp = 9;
+    google.protobuf.Timestamp consumerJoinTimestamp = 10;
+    google.protobuf.Timestamp consumerLeaveTimestamp = 11;
+    string callStatus = 12;
+    google.protobuf.Timestamp callUpdatedTimestamp = 13;
+    int64 callDuration = 14;
+    string context = 15;
+    string location = 16;
+    int64 charge = 17;
+}
+
+message GetCallDetailsResponse {
+    repeated CallTransactionDetails callDetails = 1;
+    int64 totalRecords = 2;
+    int64 pageNumber = 3;
+    int64 pageSize = 4;
+}
+
+message GetUserCallAnalyticsRequest {
+    int64 userId = 1;
+    google.protobuf.Timestamp startTimestamp = 2;
+    google.protobuf.Timestamp endTimestamp = 3;
+}
+
+message DailyCallStats {
+    google.protobuf.Timestamp date = 1;
+    int64 totalCallTime = 2;
+    int64 averageCallTime = 3;
+}
+
+message GetUserCallAnalyticsResponse {
+    int64 totalCalls = 1;
+    int64 totalCallTime = 2;
+    double averageCallTime = 3;
+    double medianCallTime = 4;
+    repeated DailyCallStats callStatsPerDay = 5;
 }

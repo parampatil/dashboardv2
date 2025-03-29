@@ -33,6 +33,8 @@ export const ROUTES = {
     { path: "/dashboard/mp2/users-in-jail", name: "Users in Jail" },
     { path: "/dashboard/mp2/add-to-jail", name: "Add Users to Jail" },
     { path: "/dashboard/mp2/dictionary", name: "Crime Dictionary" },
+    { path: "/dashboard/sales", name: 'Sales Dashboard' },
+    { path: "/dashboard/sales/sales-analytics", name: 'Sales Analytics' },
     { path: '/profile', name: 'Profile' },
     { path: '/admin', name: 'Admin Panel' },
     { path: '/admin/roles', name: 'Roles' },

@@ -1,4 +1,3 @@
-// components/analytics/CallHistoryAnalyticsDashboard.tsx
 import { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -23,8 +22,8 @@ export function CallHistoryAnalyticsDashboard({
   data,
   formatTime,
 }: CallHistoryAnalyticsDashboardProps) {
-    const [topUsersCount, setTopUsersCount] = useState(5);
-  // Convert string values to numbers for calculations
+  const [topUsersCount, setTopUsersCount] = useState(5);
+
   const normalizedData = useMemo(() => {
     return data.map((user) => ({
       userId: user.userId,
@@ -37,60 +36,30 @@ export function CallHistoryAnalyticsDashboard({
   }, [data]);
 
   const summaryData = useMemo(() => {
+    // Calculate actual total calls (half of the sum since each call is counted twice)
+    const totalCalls = Math.round(normalizedData.reduce(
+      (sum, user) => sum + user.numberOfCalls, 0) / 2);
+    
     return {
       totalUsers: normalizedData.length,
-      totalCalls: normalizedData.reduce(
-        (sum, user) => sum + user.numberOfCalls,
-        0
-      ),
+      totalCalls: totalCalls,
+      // Use only provider time for total call time as it's the same as consumer time
       totalCallTime: normalizedData.reduce(
-        (sum, user) => sum + user.totalCallTime,
-        0
-      ),
-      totalProviderTime: normalizedData.reduce(
-        (sum, user) => sum + user.callTimeAsProvider,
-        0
-      ),
-      totalConsumerTime: normalizedData.reduce(
-        (sum, user) => sum + user.callTimeAsConsumer,
-        0
-      ),
-      avgCallsPerUser:
-        normalizedData.length > 0
-          ? (
-              normalizedData.reduce(
-                (sum, user) => sum + user.numberOfCalls,
-                0
-              ) / normalizedData.length
-            ).toFixed(2)
-          : 0,
-      avgCallTimePerUser:
-        normalizedData.length > 0
-          ? (
-              normalizedData.reduce(
-                (sum, user) => sum + user.totalCallTime,
-                0
-              ) / normalizedData.length
-            ).toFixed(2)
-          : 0,
-      avgProviderTimePerUser:
-        normalizedData.length > 0
-          ? (
-              normalizedData.reduce(
-                (sum, user) => sum + user.callTimeAsProvider,
-                0
-              ) / normalizedData.length
-            ).toFixed(2)
-          : 0,
-      avgConsumerTimePerUser:
-        normalizedData.length > 0
-          ? (
-              normalizedData.reduce(
-                (sum, user) => sum + user.callTimeAsConsumer,
-                0
-              ) / normalizedData.length
-            ).toFixed(2)
-          : 0,
+        (sum, user) => sum + user.callTimeAsProvider, 0),
+      // Per user average calls
+      avgCallsPerUser: normalizedData.length > 0
+        ? (totalCalls / normalizedData.length).toFixed(2)
+        : 0,
+      // Average call duration per user (total call time / total calls)
+      avgCallDurationPerCall: totalCalls > 0
+        ? (normalizedData.reduce(
+            (sum, user) => sum + user.callTimeAsProvider, 0) / totalCalls).toFixed(2)
+        : 0,
+      // Average call time per user
+      avgCallTimePerUser: normalizedData.length > 0
+        ? (normalizedData.reduce(
+            (sum, user) => sum + user.callTimeAsProvider, 0) / normalizedData.length).toFixed(2)
+        : 0,
     };
   }, [normalizedData]);
 
@@ -106,7 +75,7 @@ export function CallHistoryAnalyticsDashboard({
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Total Users
+              Total Active Users
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -117,7 +86,7 @@ export function CallHistoryAnalyticsDashboard({
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Total Calls
+              Total Number of Calls
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -150,25 +119,16 @@ export function CallHistoryAnalyticsDashboard({
             </div>
           </CardContent>
         </Card>
-      </div>
 
-      {/* Provider and Consumer Time Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Provider Call Time
+              Avg Call Duration
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-col">
-              <div className="text-2xl font-bold">
-                {formatTime(summaryData.totalProviderTime)}
-              </div>
-              <div className="text-sm text-muted-foreground">
-                Avg: {formatTime(Number(summaryData.avgProviderTimePerUser))}{" "}
-                per user
-              </div>
+            <div className="text-2xl font-bold">
+              {formatTime(Number(summaryData.avgCallDurationPerCall))}
             </div>
           </CardContent>
         </Card>
@@ -176,23 +136,18 @@ export function CallHistoryAnalyticsDashboard({
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Consumer Call Time
+              Avg Call Time Per User
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-col">
-              <div className="text-2xl font-bold">
-                {formatTime(summaryData.totalConsumerTime)}
-              </div>
-              <div className="text-sm text-muted-foreground">
-                Avg: {formatTime(Number(summaryData.avgConsumerTimePerUser))}{" "}
-                per user
-              </div>
+            <div className="text-2xl font-bold">
+              {formatTime(Number(summaryData.avgCallTimePerUser))}
             </div>
           </CardContent>
         </Card>
       </div>
 
+      {/* Top Users Chart */}
       <Tabs defaultValue="topUsers">
         <div className="flex justify-between items-center mb-4">
           <TabsList>
@@ -217,7 +172,7 @@ export function CallHistoryAnalyticsDashboard({
           </Select>
         </div>
 
-        <TabsContent value="topUsers" className="p-4 border rounded-md  w-full overflow-y-auto">
+        <TabsContent value="topUsers" className="p-4 border rounded-md w-full overflow-y-auto">
           <h3 className="text-lg font-medium mb-4">Top {topUsersCount} Users by Call Time</h3>
           <div className="h-80">
             {topUsers.length > 0 ? (
