@@ -1,8 +1,10 @@
+// app/components/AnalyticsDashboard/CallHistoryAnalyticsDashboard.tsx
 import { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BarChart } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import TopUsersBarChart from "@/components/charts/TopUsersBarChart";
 
 interface UserCallTime {
   userId: string | number;
@@ -175,33 +177,10 @@ export function CallHistoryAnalyticsDashboard({
         <TabsContent value="topUsers" className="p-4 border rounded-md w-full overflow-y-auto">
           <h3 className="text-lg font-medium mb-4">Top {topUsersCount} Users by Call Time</h3>
           <div className="h-80">
-            {topUsers.length > 0 ? (
-              <div className="flex gap-4 h-full">
-                {topUsers.map((user) => {
-                  const maxTime = Math.max(...topUsers.map(u => Number(u.totalCallTime)));
-                  const heightPercentage = maxTime > 0 ? (Number(user.totalCallTime) / maxTime) * 100 : 0;
-                  
-                  return (
-                    <div key={user.userId} className="flex flex-col items-center flex-1">
-                      <div className="flex-1 w-full flex items-end">
-                        <div 
-                          className="mx-auto w-20 bg-blue-500 rounded-t-md transition-all duration-500"
-                          style={{ height: `${heightPercentage}%` }}
-                        ></div>
-                      </div>
-                      <div className="mt-2 text-center">
-                        <p className="text-sm font-medium truncate w-30">{user.userName}</p>
-                        <p className="text-xs text-gray-500 w-30">{formatTime(Number(user.totalCallTime))}</p>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <div className="flex items-center justify-center h-full text-gray-500">
-                No data available
-              </div>
-            )}
+            <TopUsersBarChart 
+              topUsers={topUsers} 
+              formatTime={formatTime} 
+            />
           </div>
         </TabsContent>
       </Tabs>

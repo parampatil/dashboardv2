@@ -13,8 +13,6 @@ import {
   Phone,
   Clock,
   Calculator,
-  DollarSign,
-  Wallet,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -29,36 +27,20 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { LineChart } from "@/components/ui/LineChart";
-import { PieChart } from "@/components/ui/PieChart";
 
-interface DailyCallStats {
-  date: {
-    seconds: number;
-    nanos: number;
-  };
-  totalCallTime: number;
-  averageCallTime: number;
-}
+// Import chart components
+import CallTimeLineChart from "@/components/charts/CallTimeLineChart";
+import ConsumerPurchasePieChart from "@/components/charts/ConsumerPurchasePieChart";
+import ProviderEarningsPieChart from "@/components/charts/ProviderEarningsPieChart";
 
-interface UserCallAnalytics {
-  totalCalls: number;
-  totalCallTime: number;
-  averageCallTime: number;
-  callStatsPerDay: DailyCallStats[];
-}
-
-interface ConsumerPurchaseAnalytics {
-  totalPurchaseAmount: number;
-}
-
-interface ProviderAnalytics {
-  totalEarning: number;
-  totalPayout: number;
-}
+// Types
+import { 
+  UserCallAnalytics, 
+  ConsumerPurchaseAnalytics, 
+  ProviderAnalytics,
+} from "@/types/analytics";
 
 export default function SalesAnalytics() {
   const [userId, setUserId] = useState<string>("0"); // Default to 0 for all records
@@ -216,25 +198,6 @@ export default function SalesAnalytics() {
     return `${hours}h ${minutes}m ${secs}s`;
   };
 
-  const prepareChartData = () => {
-    if (!analytics || !analytics.callStatsPerDay) return [];
-
-    return analytics.callStatsPerDay.map((stat) => {
-      const date = new Date(stat.date.seconds * 1000);
-      return {
-        label: format(date, "MMM dd"),
-        values: {
-          "Total Call Time (minutes)": Number(
-            (stat.totalCallTime / 60).toFixed(2)
-          ),
-          "Average Call Time (minutes)": Number(
-            (stat.averageCallTime / 60).toFixed(2)
-          ),
-        },
-      };
-    });
-  };
-
   return (
     <ProtectedRoute allowedRoutes={["/dashboard/sales/sales-analytics"]}>
       <motion.div
@@ -390,20 +353,7 @@ export default function SalesAnalytics() {
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="h-[400px]">
-                      {prepareChartData().length > 0 ? (
-                        <LineChart
-                          data={prepareChartData()}
-                          yAxisLabel="Call Time (minutes)"
-                          lineColors={{
-                            "Total Call Time (minutes)": "#1E90FF",
-                            "Average Call Time (minutes)": "#FF6347",
-                          }}
-                        />
-                      ) : (
-                        <div className="text-center text-gray-500">
-                          No data available for the selected period.
-                        </div>
-                      )}
+                      <CallTimeLineChart callStatsPerDay={analytics.callStatsPerDay || []} />
                     </CardContent>
                   </Card>
                 </div>
@@ -415,127 +365,35 @@ export default function SalesAnalytics() {
                 <Card className="flex flex-col h-full">
                   <CardHeader>
                     <CardTitle>Consumer Purchase Analytics</CardTitle>
-                    <CardDescription>
+                    <div className="text-sm text-gray-500">
                       {startDate && endDate
                         ? `${format(startDate, "PPP")} - ${format(
                             endDate,
                             "PPP"
                           )}`
                         : "Select a date range"}
-                    </CardDescription>
+                    </div>
                   </CardHeader>
-                  <CardContent className="flex-1 flex flex-col">
-                    {consumerPurchase ? (
-                      <div className="flex flex-col h-full">
-                        <div className="flex items-center mb-4">
-                          <DollarSign className="h-5 w-5 mr-2 text-green-500" />
-                          <div className="text-3xl font-bold">
-                            ${consumerPurchase.totalPurchaseAmount.toFixed(2)}
-                          </div>
-                        </div>
-                        <div className="flex-1 flex flex-col items-center">
-                          <div className="h-[200px] w-full">
-                            <PieChart
-                              data={[
-                                { value: consumerPurchase.totalPurchaseAmount },
-                              ]}
-                              colors={["#4CAF50"]}
-                            />
-                          </div>
-                          <div className="mt-4 self-start">
-                            <div className="flex items-center">
-                              <div className="w-4 h-4 bg-[#4CAF50] rounded-sm mr-2"></div>
-                              <span>
-                                Total Purchase Amount: $
-                                {consumerPurchase.totalPurchaseAmount.toFixed(
-                                  2
-                                )}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="text-gray-500 flex items-center justify-center h-full">
-                        No purchase data available
-                      </div>
-                    )}
+                  <CardContent className="flex-1">
+                    <ConsumerPurchasePieChart data={consumerPurchase} />
                   </CardContent>
                 </Card>
 
-                {/* Provider Earnings Card */}
+                {/* Provider Earnings Analytics Card */}
                 <Card className="flex flex-col h-full">
                   <CardHeader>
-                    <CardTitle>Provider Earnings</CardTitle>
-                    <CardDescription>
+                    <CardTitle>Provider Earnings Analytics</CardTitle>
+                    <div className="text-sm text-gray-500">
                       {startDate && endDate
                         ? `${format(startDate, "PPP")} - ${format(
                             endDate,
                             "PPP"
                           )}`
                         : "Select a date range"}
-                    </CardDescription>
+                    </div>
                   </CardHeader>
-                  <CardContent className="flex-1 flex flex-col">
-                    {providerEarnings ? (
-                      <div className="flex flex-col h-full">
-                        <div className="grid grid-cols-2 gap-4 mb-4">
-                          <div className="flex items-center">
-                            <DollarSign className="h-5 w-5 mr-2 text-blue-500" />
-                            <div>
-                              <div className="text-sm text-gray-500">
-                                Total Earnings
-                              </div>
-                              <div className="text-2xl font-bold">
-                                ${providerEarnings.totalEarning.toFixed(2)}
-                              </div>
-                            </div>
-                          </div>
-                          <div className="flex items-center">
-                            <Wallet className="h-5 w-5 mr-2 text-amber-500" />
-                            <div>
-                              <div className="text-sm text-gray-500">
-                                Total Payouts
-                              </div>
-                              <div className="text-2xl font-bold">
-                                ${providerEarnings.totalPayout.toFixed(2)}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex-1 flex flex-col items-center">
-                          <div className="h-[200px] w-full">
-                            <PieChart
-                              data={[
-                                { value: providerEarnings.totalEarning },
-                                { value: providerEarnings.totalPayout },
-                              ]}
-                              colors={["#2196F3", "#FFC107"]}
-                            />
-                          </div>
-                          <div className="mt-4 self-start space-y-2">
-                            <div className="flex items-center">
-                              <div className="w-4 h-4 bg-[#2196F3] rounded-sm mr-2"></div>
-                              <span>
-                                Total Earnings: $
-                                {providerEarnings.totalEarning.toFixed(2)}
-                              </span>
-                            </div>
-                            <div className="flex items-center">
-                              <div className="w-4 h-4 bg-[#FFC107] rounded-sm mr-2"></div>
-                              <span>
-                                Total Payouts: $
-                                {providerEarnings.totalPayout.toFixed(2)}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="text-gray-500 flex items-center justify-center h-full">
-                        No provider earnings data available
-                      </div>
-                    )}
+                  <CardContent className="flex-1">
+                    <ProviderEarningsPieChart data={providerEarnings} />
                   </CardContent>
                 </Card>
               </div>
