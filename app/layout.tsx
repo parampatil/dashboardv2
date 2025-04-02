@@ -9,8 +9,8 @@ import { EnvironmentProvider } from "@/context/EnvironmentContext";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-  title: "Next.js Firebase Auth",
-  description: "Authentication with Firebase and Next.js",
+  title: "360 Dashboard",
+  description: "360 World Dashboard",
 };
 
 export default function RootLayout({
