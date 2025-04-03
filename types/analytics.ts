@@ -1,9 +1,7 @@
 // types/analytics.ts
+import { ProtoTimestamp } from '@/types/grpc';
 export interface DailyCallStats {
-    date: {
-      seconds: number;
-      nanos: number;
-    };
+    date: ProtoTimestamp;
     totalCallTime: number;
     averageCallTime: number;
   }
@@ -23,4 +21,3 @@ export interface DailyCallStats {
     totalEarning: number;
     totalPayout: number;
   }
-  

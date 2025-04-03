@@ -44,7 +44,7 @@ export default function CallTimeLineChart({ callStatsPerDay }: CallTimeLineChart
     }
 
     const labels = callStatsPerDay.map((stat) => {
-      const date = new Date(stat.date.seconds * 1000);
+      const date = new Date(Number(stat.date.seconds) * 1000);
       return format(date, "MMM dd");
     });
 

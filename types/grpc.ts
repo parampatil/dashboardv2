@@ -403,6 +403,16 @@ export interface CallManagementServiceClient {
     request: GetUserCallAnalyticsRequest,
     callback: (error: Error | null, response: GetUserCallAnalyticsResponse) => void
   ) => void;
+
+  GetTotalCallsPageCount: (
+    request: GetTotalCallsPageCountRequest,
+    callback: (error: Error | null, response: GetTotalCallsPageCountResponse) => void
+  ) => void;
+
+  GetCallDetails: (
+    request: GetCallDetailsRequest,
+    callback: (error: Error | null, response: GetCallDetailsResponse) => void
+  ) => void;
 }
 
 // Consumer Call History
@@ -484,6 +494,61 @@ export interface GetUserCallAnalyticsResponse {
   averageCallTime: number;
   medianCallTime: number;
   callStatsPerDay: DailyCallStats[];
+}
+
+// Call History table
+export interface GetTotalCallsPageCountRequest {
+  callStatuses?: string[];
+  userId?: string;
+  fromDate?: ProtoTimestamp;
+  toDate?: ProtoTimestamp;
+  isConsumer?: boolean;
+  isProvider?: boolean;
+  perPageEntries: number;
+}
+
+export interface GetTotalCallsPageCountResponse {
+  totalCallCount: string;
+  totalPageCount: string;
+}
+
+export interface GetCallDetailsRequest {
+  userId: string;
+  sortOrder: "asc" | "desc";
+  pageNumber: number;
+  pageSize: number;
+  callStatuses: string[];
+  fromDate: ProtoTimestamp;
+  toDate: ProtoTimestamp;
+  isConsumer: boolean;
+  isProvider: boolean;
+}
+
+export interface CallTransactionDetails {
+  callId: string;
+  createdAt: ProtoTimestamp;
+  sessionId: string;
+  consumerId: string;
+  providerId: string;
+  sessionStartTimestamp: ProtoTimestamp;
+  sessionEndTimestamp: ProtoTimestamp;
+  providerJoinTimestamp: ProtoTimestamp;
+  providerLeaveTimestamp: ProtoTimestamp;
+  consumerJoinTimestamp: ProtoTimestamp;
+  consumerLeaveTimestamp: ProtoTimestamp;
+  callStatus: string;
+  callUpdatedTimestamp: ProtoTimestamp;
+  callDuration: string;
+  context: string;
+  location: string;
+  charge: string;
+}
+
+export interface GetCallDetailsResponse {
+  callDetails: CallTransactionDetails[];
+  totalRecords: string;
+  pageNumber: number;
+  pageSize: number;
 }
 
 

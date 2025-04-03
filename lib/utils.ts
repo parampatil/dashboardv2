@@ -2,6 +2,7 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 import { format } from "date-fns";
+import { ProtoTimestamp } from "@/types/grpc";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -68,8 +69,8 @@ export function dateToProtobufTimestamp(date: Date): { seconds: number; nanos: n
   };
 }
 
-export function protobufTimestampToDate(timestamp: { seconds: number; nanos: number }): Date {
-  return new Date(timestamp.seconds * 1000 + timestamp.nanos / 1000000);
+export function protobufTimestampToDate(timestamp: ProtoTimestamp): Date {
+  return new Date(Number(timestamp.seconds) * 1000 + timestamp.nanos / 1000000);
 }
 
 export function convertInt64BinaryToBigInt(binaryData: WithImplicitCoercion<string> | { [Symbol.toPrimitive](hint: "string"): string; }) {
@@ -84,4 +85,32 @@ export function convertInt64BinaryToBigInt(binaryData: WithImplicitCoercion<stri
         console.error('Error converting int64 binary:', error);
         return null;
     }
+}
+
+export function formatSecondsToHMS(seconds: number): string {
+  const hrs = Math.floor(seconds / 3600);
+  const mins = Math.floor((seconds % 3600) / 60);
+  const secs = seconds % 60;
+  
+  const parts = [];
+  if (hrs > 0) parts.push(`${hrs}h`);
+  if (mins > 0) parts.push(`${mins}m`);
+  if (secs > 0 || parts.length === 0) parts.push(`${secs}s`);
+  
+  return parts.join(' ');
+}
+
+export function formatTimestampToDate(timestamp: ProtoTimestamp): string {
+  if (!timestamp || !timestamp.seconds) return 'N/A';
+  
+  const date = new Date(Number(timestamp.seconds) * 1000);
+  return new Intl.DateTimeFormat('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: true
+  }).format(date);
 }

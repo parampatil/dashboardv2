@@ -24,6 +24,7 @@ service CallManagementService {
     rpc GetAllUsersCallTime(GetAllUsersCallTimeRequest) returns (GetAllUsersCallTimeResponse);
     rpc GetCallDetails(GetCallDetailsRequest) returns (GetCallDetailsResponse);
     rpc GetUserCallAnalytics(GetUserCallAnalyticsRequest) returns (GetUserCallAnalyticsResponse);
+    rpc GetTotalCallsPageCount(GetTotalCallsPageCountRequest) returns (GetTotalCallsPageCountResponse);
 
 }
 
@@ -150,11 +151,15 @@ message GetAllUsersCallTimeResponse {
     repeated UserCallTime userCallTime = 1;
 }
 message GetCallDetailsRequest {
-    int64 userId = 1;      // User ID (either consumer or provider)
-    string sortOrder = 2;  // "asc" or "desc", default is "desc"
-    int64 pageNumber = 3;  // Page number for pagination, default is 1
-    int64 pageSize = 4;    // Number of records per page, default is 20
-    repeated string callStatuses = 5;  // List of call statuses to filter
+    int64 userId = 1;      
+    string sortOrder = 2;  
+    int64 pageNumber = 3;
+    int64 pageSize = 4;    
+    repeated string callStatuses = 5;  
+    google.protobuf.Timestamp fromDate = 6;   
+    google.protobuf.Timestamp toDate = 7;    
+    bool isProvider = 8; 
+    bool isConsumer = 9;
 }
 
 message CallTransactionDetails {
@@ -182,6 +187,21 @@ message GetCallDetailsResponse {
     int64 totalRecords = 2;
     int64 pageNumber = 3;
     int64 pageSize = 4;
+}
+
+message GetTotalCallsPageCountRequest {
+    int64 userId = 1;      
+    repeated string callStatuses = 2;  
+    google.protobuf.Timestamp fromDate = 3;   
+    google.protobuf.Timestamp toDate = 4;    
+    bool isProvider = 5; 
+    bool isConsumer = 6;
+    int64 perPageEntries = 7;
+}
+
+message GetTotalCallsPageCountResponse {
+    int64 totalCallCount = 1;
+    int64 totalPageCount = 2;
 }
 
 message GetUserCallAnalyticsRequest {
