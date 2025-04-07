@@ -21,6 +21,9 @@ export function EnvironmentSelector() {
     }
   };
 
+  // Sort environments alphabetically
+  const sortedEnvironments = Object.entries(availableEnvironments).sort(([keyA], [keyB]) => keyA.localeCompare(keyB));
+
   return (
     <div className="flex items-center gap-2">
       <Select 
@@ -37,7 +40,7 @@ export function EnvironmentSelector() {
           </SelectValue>
         </SelectTrigger>
         <SelectContent>
-          {Object.entries(availableEnvironments).map(([key, name]) => (
+          {sortedEnvironments.map(([key, name]) => (
             <SelectItem key={key} value={key}>
                   {name}
             </SelectItem>

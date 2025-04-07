@@ -49,8 +49,8 @@ interface CallHistoryTableComponentProps {
 const allColumns = [
   { id: 'callId', name: 'Call ID' },
   { id: 'createdAt', name: 'Created At' },
-  { id: 'consumerId', name: 'Consumer ID' },
-  { id: 'providerId', name: 'Provider ID' },
+  { id: 'consumer', name: 'Consumer' },
+  { id: 'provider', name: 'Provider' },
   { id: 'callStatus', name: 'Status' },
   { id: 'callDuration', name: 'Duration' },
   { id: 'charge', name: 'Charge' },
@@ -157,17 +157,17 @@ export function CallHistoryTableComponent({
   const getStatusBadgeClass = (status: string) => {
     switch (status) {
       case "session_started":
-        return "bg-green-100 text-green-800";
+        return "bg-green-100 text-green-800 hover:bg-green-200";
       case "session_ended":
-        return "bg-blue-100 text-blue-800";
+        return "bg-blue-100 text-blue-800 hover:bg-blue-200";
       case "call_missed":
-        return "bg-yellow-100 text-yellow-800";
+        return "bg-yellow-100 text-yellow-800 hover:bg-yellow-200";
       case "call_created":
-        return "bg-purple-100 text-purple-800";
+        return "bg-purple-100 text-purple-800 hover:bg-purple-200";
       case "call_rejected":
-        return "bg-red-100 text-red-800";
+        return "bg-red-100 text-red-800 hover:bg-red-200";
       default:
-        return "bg-gray-100 text-gray-800";
+        return "bg-gray-100 text-gray-800 hover:bg-gray-200";
     }
   };
 
@@ -375,7 +375,7 @@ export function CallHistoryTableComponent({
                     className="hover:bg-gray-50"
                   >
                     {visibleColumns.includes('callId') && (
-                      <TableCell className="font-medium truncate max-w-[120px]" title={call.callId}>
+                      <TableCell className="font-medium max-w-40" title={call.callId}>
                         {call.callId}
                       </TableCell>
                     )}
@@ -384,12 +384,34 @@ export function CallHistoryTableComponent({
                       <TableCell>{call.createdAt}</TableCell>
                     )}
                     
-                    {visibleColumns.includes('consumerId') && (
-                      <TableCell>{call.consumerId}</TableCell>
+                    {visibleColumns.includes('consumer') && (
+                      <TableCell>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="cursor-help">{call.consumerName || 'Unknown'}</span>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>User ID: {call.consumerId}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </TableCell>
                     )}
                     
-                    {visibleColumns.includes('providerId') && (
-                      <TableCell>{call.providerId}</TableCell>
+                    {visibleColumns.includes('provider') && (
+                       <TableCell>
+                       <TooltipProvider>
+                         <Tooltip>
+                           <TooltipTrigger asChild>
+                             <span className="cursor-help">{call.providerName || 'Unknown'}</span>
+                           </TooltipTrigger>
+                           <TooltipContent>
+                             <p>User ID: {call.providerId}</p>
+                           </TooltipContent>
+                         </Tooltip>
+                       </TooltipProvider>
+                     </TableCell>
                     )}
                     
                     {visibleColumns.includes('callStatus') && (

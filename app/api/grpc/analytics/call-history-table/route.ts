@@ -2,7 +2,7 @@
 import { NextResponse } from 'next/server';
 import { createServiceClients, getEnvironmentFromRequest } from '@/app/api/grpc/client';
 import { promisify } from 'util';
-import { GetCallDetailsRequest, GetCallDetailsResponse } from '@/types/grpc';
+import { GetCallDetailsRequest, GetCallDetailsResponse, GetAllUserIdsAndNamesDashboardResponse } from '@/types/grpc';
 import { formatSecondsToHMS, formatTimestampToDate } from '@/lib/utils';
 
 export async function POST(request: Request) {
@@ -15,13 +15,28 @@ export async function POST(request: Request) {
     const callManagementService = {
       getCallDetails: promisify(clients.callManagement.GetCallDetails.bind(clients.callManagement))
     };
+    
+    const profileService = {
+      getAllUserIdsAndNamesDashboard: promisify(clients.profile.GetAllUserIdsAndNamesDashboard.bind(clients.profile))
+    };
 
-    const response = await callManagementService.getCallDetails(requestData) as GetCallDetailsResponse;
+    // Fetch call details and user names in parallel
+    const [callDetailsResponse, userNamesResponse] = await Promise.all([
+      callManagementService.getCallDetails(requestData) as Promise<GetCallDetailsResponse>,
+      profileService.getAllUserIdsAndNamesDashboard({}) as Promise<GetAllUserIdsAndNamesDashboardResponse>
+    ]);
+
+    // Create a mapping of user IDs to names
+    const userIdToNameMap = userNamesResponse.userIdsAndNames || {};
 
     // Transform the data before sending to frontend
-    const transformedCallDetails = response.callDetails.map(call => {
+    const transformedCallDetails = callDetailsResponse.callDetails.map(call => {
       return {
         ...call,
+        // Add user names from the mapping
+        consumerName: userIdToNameMap[call.consumerId] || 'Unknown User',
+        providerName: userIdToNameMap[call.providerId] || 'Unknown User',
+        
         // Convert timestamps to readable date strings
         createdAt: formatTimestampToDate(call.createdAt),
         sessionStartTimestamp: formatTimestampToDate(call.sessionStartTimestamp),
@@ -44,9 +59,9 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       callDetails: transformedCallDetails,
-      totalRecords: response.totalRecords,
-      pageNumber: response.pageNumber,
-      pageSize: response.pageSize
+      totalRecords: callDetailsResponse.totalRecords,
+      pageNumber: callDetailsResponse.pageNumber,
+      pageSize: callDetailsResponse.pageSize
     });
   } catch (error) {
     console.error('API error:', error);

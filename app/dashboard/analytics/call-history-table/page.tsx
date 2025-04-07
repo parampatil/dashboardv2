@@ -1,6 +1,6 @@
 // app/dashboard/analytics/call-history-table/page.tsx
 "use client";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CallHistoryTableComponent } from "@/components/AnalyticsDashboard/CallHistoryTableComponent";
 import { CallHistoryFilters } from "@/components/AnalyticsDashboard/CallHistoryFilters";
@@ -28,8 +28,8 @@ const CallHistoryTable = () => {
     callStatuses: ["call_created", "session_ended", "session_started", "call_missed", "call_rejected"],
     fromDate: startOfDay(new Date()),
     toDate: endOfDay(new Date()),
-    isConsumer: false,
-    isProvider: false,
+    isConsumer: true,
+    isProvider: true,
   });
 
   const fetchTotalPages = async () => {
@@ -106,7 +106,6 @@ const CallHistoryTable = () => {
       
 
         setCallDetails(data.callDetails);
-        setTotalRecords(Number(data.totalRecords));
     } catch (error) {
       toast({
         variant: "destructive",
@@ -117,26 +116,6 @@ const CallHistoryTable = () => {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    fetchTotalPages();
-  }, [
-    filters.pageSize,
-    filters.userId,
-    filters.callStatuses,
-    filters.fromDate,
-    filters.toDate,
-    filters.isConsumer,
-    filters.isProvider
-  ]);
-
-  useEffect(() => {
-    fetchCallDetails();
-  }, [
-    filters.pageNumber,
-    filters.pageSize,
-    filters.sortOrder
-  ]);
 
   const handleFilterChange = (newFilters: Partial<CallHistoryTableFilters>) => {
     setFilters(prev => ({ ...prev, ...newFilters, pageNumber: 1 }));
@@ -151,6 +130,11 @@ const CallHistoryTable = () => {
     fetchCallDetails();
     fetchTotalPages();
   };
+
+  useEffect(() => {
+    fetchCallDetails();
+    fetchTotalPages();
+  }, []);
 
   return (
     <ProtectedRoute allowedRoutes={['/dashboard/analytics/call-history-table']}>

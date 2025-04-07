@@ -22,7 +22,13 @@ export interface ProfileServiceClient extends grpc.Client {
     request: PageCountRequest,
     callback: (error: Error | null, response: PageCountResponse) => void
   ) => void;
-  // Add other methods as needed
+  GetAllUserIdsAndNamesDashboard: (
+    request: GetAllUserIdsAndNamesDashboardResponseRequest,
+    callback: (
+      error: Error | null,
+      response: GetAllUserIdsAndNamesDashboardResponse
+    ) => void
+  ) => void;
 }
 
 export interface PageCountRequest {
@@ -70,6 +76,16 @@ export interface User {
   lastUpdatedTimestamp: ProtoTimestamp;
   phoneNumber?: string;
   userName: string;
+}
+
+export interface UserIdNameMapping {
+  [userId: string]: string;
+}
+
+export type GetAllUserIdsAndNamesDashboardResponseRequest = object
+
+export interface GetAllUserIdsAndNamesDashboardResponse {
+  userIdsAndNames: UserIdNameMapping;
 }
 
 // Consumer Purchase Service Types

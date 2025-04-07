@@ -1,6 +1,6 @@
 // components/AnalyticsDashboard/CallHistoryFilters.tsx
 "use client";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -21,6 +21,8 @@ import {
   CardContent
 } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
+import debounce from "lodash/debounce";
+
 
 interface CallHistoryFiltersProps {
   filters: CallHistoryTableFilters;
@@ -31,6 +33,7 @@ interface CallHistoryFiltersProps {
 
 export function CallHistoryFilters({ filters, onFilterChange, onApplyFilters, onReset }: CallHistoryFiltersProps) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [localUserId, setLocalUserId] = useState<string>(filters.userId === 0 ? "" : filters.userId.toString());
   
   const callStatusOptions = [
     { value: "session_started", label: "Session Started" },
@@ -39,11 +42,6 @@ export function CallHistoryFilters({ filters, onFilterChange, onApplyFilters, on
     { value: "call_created", label: "Call Created" },
     { value: "call_rejected", label: "Call Rejected" }
   ];
-
-  const handleUserIdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value === "" ? 0 : parseInt(e.target.value);
-    onFilterChange({ userId: value });
-  };
 
   const handleCallStatusChange = (status: string, checked: boolean) => {
     const updatedStatuses = checked
@@ -65,7 +63,7 @@ export function CallHistoryFilters({ filters, onFilterChange, onApplyFilters, on
         callStatuses: ["call_created", "session_ended", "session_started", "call_missed", "call_rejected"],
         fromDate: startOfDay(new Date()),
         toDate: endOfDay(new Date()),
-        isConsumer: false,
+        isConsumer: true,
         isProvider: true
       });
       onApplyFilters();
@@ -83,6 +81,27 @@ export function CallHistoryFilters({ filters, onFilterChange, onApplyFilters, on
   const handleToggleProvider = () => {
     onFilterChange({ isProvider: !filters.isProvider });
   };
+
+  const handleUserIdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const inputValue = e.target.value;
+    setLocalUserId(inputValue); // Update local state immediately for responsive UI
+    const value = inputValue === "" ? 0 : parseInt(inputValue);
+    debouncedUserIdChange(value); // Debounce the actual filter change
+  };
+
+  const debouncedUserIdChange = useMemo(
+    () => debounce((value: number) => {
+      onFilterChange({ userId: value });
+    }, 500),
+    [onFilterChange]
+  );
+
+  useEffect(() => {
+    return () => {
+      debouncedUserIdChange.cancel();
+    };
+  }, [debouncedUserIdChange]);
+
 
   return (
     <motion.div 
@@ -127,13 +146,13 @@ export function CallHistoryFilters({ filters, onFilterChange, onApplyFilters, on
             transition={{ duration: 0.3 }}
             >
             <div>
-              <Label htmlFor="userId">User ID (0 for all users)</Label>
+              <Label htmlFor="userId">User ID</Label>
               <Input
               id="userId"
               type="number"
-              value={filters.userId === 0 ? "" : filters.userId}
+              value={localUserId}
               onChange={handleUserIdChange}
-              placeholder="Enter user ID (0 for all)"
+              placeholder="Enter user ID"
               className="mt-1"
               />
             </div>

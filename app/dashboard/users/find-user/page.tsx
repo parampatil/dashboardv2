@@ -23,7 +23,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import debounce from "lodash/debounce";
 
 export default function FindUserComponent() {
-  const [searchMethod, setSearchMethod] = useState<"id" | "email">("id");
+  const [searchMethod, setSearchMethod] = useState<"email" | "id">("email");
   const [searchInput, setSearchInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
@@ -170,8 +170,8 @@ export default function FindUserComponent() {
           <h1 className="text-2xl font-bold mb-4">Find User</h1>
           <Tabs value={searchMethod} onValueChange={handleTabChange}>
             <TabsList className="mb-4">
-              <TabsTrigger value="id">Find by ID</TabsTrigger>
               <TabsTrigger value="email">Find by Email</TabsTrigger>
+              <TabsTrigger value="id">Find by ID</TabsTrigger>
             </TabsList>
             <TabsContent value="id">
               <Input

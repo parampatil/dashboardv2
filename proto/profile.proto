@@ -12,6 +12,10 @@ service ProfileService {
     rpc UpdateUserCountry(UpdateUserCountryRequest) returns (UpdateUserCountryResponse);
     rpc GetTotalPageCount(GetTotalPageCountRequest) returns (GetTotalPageCountResponse);
     rpc GetUserDetailsByEmail(GetUserDetailsByEmailRequest) returns (GetUserDetailsByEmailResponse);
+    rpc UpdateUserRating(UpdateUserRatingRequest) returns (UpdateUserRatingResponse);
+    rpc GetUserRating(GetUserRatingRequest) returns (GetUserRatingResponse);
+    rpc GetAllUserIdsAndNames(GetAllUserIdsAndNamesRequest) returns (GetAllUserIdsAndNamesResponse);
+    rpc GetAllUserIdsAndNamesDashboard(GetAllUserIdsAndNamesDashboardRequest) returns (GetAllUserIdsAndNamesDashboardResponse);
 }
 
 message User {
@@ -120,4 +124,36 @@ message GetUserDetailsByEmailRequest {
 message GetUserDetailsByEmailResponse {
     repeated User users = 1;
     int64 total_count = 2;
+}
+
+message UpdateUserRatingRequest {
+    int64 userId = 1;
+    int64 rating = 2;
+}
+
+message UpdateUserRatingResponse {
+    bool success = 1;
+    double rating = 2;
+}
+
+message GetUserRatingRequest {
+    int64 userId = 1;
+}
+
+message GetUserRatingResponse {
+    double rating = 1;
+}
+
+message GetAllUserIdsAndNamesRequest {
+}
+
+message GetAllUserIdsAndNamesResponse {
+    map<int64, string> userIdsAndNames = 1;
+}
+
+message GetAllUserIdsAndNamesDashboardRequest {
+}
+
+message GetAllUserIdsAndNamesDashboardResponse {
+    map<string, string> userIdsAndNames = 1;
 }
