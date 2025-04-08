@@ -44,6 +44,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import CopyTooltip from "@/components/ui/CopyToolTip";
+import { formatTimestampToDate } from "@/lib/utils";
+import { CallDetailsDrawer } from "./CallDetailsDrawer";
 
 interface CallHistoryTableComponentProps {
   callDetails: FormattedCallTransactionDetails[];
@@ -71,6 +73,7 @@ const allColumns = [
   { id: "charge", name: "Charge" },
   { id: "context", name: "Context" },
   { id: "location", name: "Location" },
+  { id: "actions", name: "Actions" },
 ];
 
 export function CallHistoryTableComponent({
@@ -98,6 +101,7 @@ export function CallHistoryTableComponent({
   const refreshTimerRef = useRef<NodeJS.Timeout | null>(null);
   const [lastRefreshed, setLastRefreshed] = useState<Date>(new Date());
   const [refreshCountdown, setRefreshCountdown] = useState(refreshInterval);
+  const [selectedCall, setSelectedCall] = useState<FormattedCallTransactionDetails | null>(null);
 
   // Handle column visibility toggle
   const toggleColumn = (columnId: string) => {
@@ -425,7 +429,7 @@ export function CallHistoryTableComponent({
                     )}
 
                     {visibleColumns.includes("createdAt") && (
-                      <TableCell>{call.createdAt}</TableCell>
+                      <TableCell>{formatTimestampToDate(call.createdAt)}</TableCell>
                     )}
 
                     {visibleColumns.includes("consumer") && (
@@ -471,6 +475,19 @@ export function CallHistoryTableComponent({
                     {visibleColumns.includes("location") && (
                       <TableCell>{call.location || "N/A"}</TableCell>
                     )}
+
+                    {visibleColumns.includes("actions") && (
+                      <TableCell>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setSelectedCall(call)}
+                      >
+                        <Eye className="h-4 w-4 mr-2" />
+                        View Details
+                      </Button>
+                    </TableCell>
+                    )}
                   </motion.tr>
                 ))}
               </AnimatePresence>
@@ -513,6 +530,11 @@ export function CallHistoryTableComponent({
           </motion.div>
         </div>
       </motion.div>
+
+      <CallDetailsDrawer
+        call={selectedCall}
+        onClose={() => setSelectedCall(null)}
+      />
     </motion.div>
   );
 }

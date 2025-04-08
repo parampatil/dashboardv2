@@ -58,8 +58,6 @@ const CallHistoryTable = () => {
       });
 
       const data = await response.json();
-
-      console.log("Total Pages Response:", data);
       
       if (response.ok) {
         setTotalRecords(Number(data.totalCallCount));

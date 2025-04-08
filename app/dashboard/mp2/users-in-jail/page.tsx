@@ -2,7 +2,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-// import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { useToast } from "@/hooks/use-toast";
 import { useApi } from "@/hooks/useApi";
 import { IncarceratedUser } from "@/types/grpc";
@@ -18,6 +18,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { RefreshCw } from "lucide-react";
+import { formatJailTime } from "@/lib/utils";
 
 export default function UsersInJail() {
   const [incarceratedUsers, setIncarceratedUsers] = useState<IncarceratedUser[]>([]);
@@ -105,23 +106,10 @@ export default function UsersInJail() {
     }
   };
 
-  const formatJailTime = (isoString: string) => {
-    const date = new Date(isoString);
-    return date.toLocaleString("en-US", {
-      weekday: "short",
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-      timeZoneName: "short",
-    });
-  };
+  
 
   return (
-    // <ProtectedRoute allowedRoutes={["/dashboard/mp2/users-in-jail"]}>
-    <>
+    <ProtectedRoute allowedRoutes={["/dashboard/mp2/users-in-jail"]}>
       <motion.div
         className="space-y-6"
         initial={{ opacity: 0 }}
@@ -192,7 +180,6 @@ export default function UsersInJail() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      </>
-    // </ProtectedRoute>
+    </ProtectedRoute>
   );
 }

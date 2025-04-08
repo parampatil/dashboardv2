@@ -1,26 +1,28 @@
+import { ProtoTimestamp } from "./grpc";
+
 // types/callHistoryTable.ts
 export interface FormattedCallTransactionDetails {
   callId: string;
-  createdAt: string;
   sessionId: string;
   consumerId: string;
   providerId: string;
   consumerName?: string; // Added consumer name
   providerName?: string; // Added provider name
-  sessionStartTimestamp: string | null;
-  sessionEndTimestamp: string | null;
-  providerJoinTimestamp: string | null;
-  providerLeaveTimestamp: string | null;
-  consumerJoinTimestamp: string | null;
-  consumerLeaveTimestamp: string | null;
+  createdAt: ProtoTimestamp;
+  sessionStartTimestamp: ProtoTimestamp;
+  sessionEndTimestamp: ProtoTimestamp;
+  providerJoinTimestamp: ProtoTimestamp;
+  providerLeaveTimestamp: ProtoTimestamp;
+  consumerJoinTimestamp: ProtoTimestamp;
+  consumerLeaveTimestamp: ProtoTimestamp;
   callStatus: string;
-  callUpdatedTimestamp: string;
+  callUpdatedTimestamp: ProtoTimestamp;
   callDuration: string;
   context: string;
   location: string;
   charge: string;
-  callDurationSeconds: string;
-  chargeSeconds: string;
+  // callDurationSeconds: string;
+  // chargeSeconds: string;
 }
 
   

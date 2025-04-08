@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 import { createServiceClients, getEnvironmentFromRequest } from '@/app/api/grpc/client';
 import { promisify } from 'util';
 import { GetCallDetailsRequest, GetCallDetailsResponse, GetAllUserIdsAndNamesDashboardResponse } from '@/types/grpc';
-import { formatSecondsToHMS, formatTimestampToDate } from '@/lib/utils';
+import { formatSecondsToHMS } from '@/lib/utils';
 
 export async function POST(request: Request) {
   try {
@@ -37,23 +37,23 @@ export async function POST(request: Request) {
         consumerName: userIdToNameMap[call.consumerId] || 'Unknown User',
         providerName: userIdToNameMap[call.providerId] || 'Unknown User',
         
-        // Convert timestamps to readable date strings
-        createdAt: formatTimestampToDate(call.createdAt),
-        sessionStartTimestamp: formatTimestampToDate(call.sessionStartTimestamp),
-        sessionEndTimestamp: formatTimestampToDate(call.sessionEndTimestamp),
-        providerJoinTimestamp: formatTimestampToDate(call.providerJoinTimestamp),
-        providerLeaveTimestamp: formatTimestampToDate(call.providerLeaveTimestamp),
-        consumerJoinTimestamp: formatTimestampToDate(call.consumerJoinTimestamp),
-        consumerLeaveTimestamp: formatTimestampToDate(call.consumerLeaveTimestamp),
-        callUpdatedTimestamp: formatTimestampToDate(call.callUpdatedTimestamp),
+        // // Convert timestamps to readable date strings
+        // createdAt: formatTimestampToDate(call.createdAt),
+        // sessionStartTimestamp: formatTimestampToDate(call.sessionStartTimestamp),
+        // sessionEndTimestamp: formatTimestampToDate(call.sessionEndTimestamp),
+        // providerJoinTimestamp: formatTimestampToDate(call.providerJoinTimestamp),
+        // providerLeaveTimestamp: formatTimestampToDate(call.providerLeaveTimestamp),
+        // consumerJoinTimestamp: formatTimestampToDate(call.consumerJoinTimestamp),
+        // consumerLeaveTimestamp: formatTimestampToDate(call.consumerLeaveTimestamp),
+        // callUpdatedTimestamp: formatTimestampToDate(call.callUpdatedTimestamp),
         
         // Format durations and charges
         callDuration: formatSecondsToHMS(Number(call.callDuration)),
         charge: formatSecondsToHMS(Number(call.charge)),
         
         // Keep original data for reference if needed
-        callDurationSeconds: call.callDuration,
-        chargeSeconds: call.charge
+        // callDurationSeconds: call.callDuration,
+        // chargeSeconds: call.charge
       };
     });
 
