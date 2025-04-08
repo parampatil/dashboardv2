@@ -1,35 +1,49 @@
 // components/AnalyticsDashboard/CallHistoryTableComponent.tsx
 "use client";
 import { useState, useEffect, useRef } from "react";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { FormattedCallTransactionDetails } from "@/types/callHistoryTable";
 import { format } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
-import { 
-  ArrowUp, 
-  ArrowDown, 
-  ChevronLeft, 
-  ChevronRight, 
-  RefreshCw, 
-  Eye, 
+import {
+  ArrowUp,
+  ArrowDown,
+  ChevronLeft,
+  ChevronRight,
+  RefreshCw,
+  Eye,
 } from "lucide-react";
-import { 
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuCheckboxItem,
   DropdownMenuTrigger,
   DropdownMenuSeparator,
-  DropdownMenuLabel
+  DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
-import { 
+import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import CopyTooltip from "@/components/ui/CopyToolTip";
 
 interface CallHistoryTableComponentProps {
   callDetails: FormattedCallTransactionDetails[];
@@ -37,6 +51,7 @@ interface CallHistoryTableComponentProps {
   pageNumber: number;
   pageSize: number;
   totalPages: number;
+  pageRecords: string;
   totalRecords: number;
   onPageChange: (page: number) => void;
   onPageSizeChange: (size: number) => void;
@@ -47,15 +62,15 @@ interface CallHistoryTableComponentProps {
 
 // Define all possible columns
 const allColumns = [
-  { id: 'callId', name: 'Call ID' },
-  { id: 'createdAt', name: 'Created At' },
-  { id: 'consumer', name: 'Consumer' },
-  { id: 'provider', name: 'Provider' },
-  { id: 'callStatus', name: 'Status' },
-  { id: 'callDuration', name: 'Duration' },
-  { id: 'charge', name: 'Charge' },
-  { id: 'context', name: 'Context' },
-  { id: 'location', name: 'Location' },
+  { id: "callId", name: "Call ID" },
+  { id: "createdAt", name: "Created At" },
+  { id: "consumer", name: "Consumer" },
+  { id: "provider", name: "Provider" },
+  { id: "callStatus", name: "Status" },
+  { id: "callDuration", name: "Duration" },
+  { id: "charge", name: "Charge" },
+  { id: "context", name: "Context" },
+  { id: "location", name: "Location" },
 ];
 
 export function CallHistoryTableComponent({
@@ -64,16 +79,19 @@ export function CallHistoryTableComponent({
   pageNumber,
   pageSize,
   totalPages,
+  pageRecords,
   totalRecords,
   onPageChange,
   onPageSizeChange,
   sortOrder,
   onSortOrderChange,
-  onRefresh
+  onRefresh,
 }: CallHistoryTableComponentProps) {
   // State for visible columns
-  const [visibleColumns, setVisibleColumns] = useState(allColumns.map(col => col.id));
-  
+  const [visibleColumns, setVisibleColumns] = useState(
+    allColumns.map((col) => col.id)
+  );
+
   // State for auto-refresh
   const [autoRefresh, setAutoRefresh] = useState(false);
   const [refreshInterval, setRefreshInterval] = useState(30); // seconds
@@ -83,9 +101,9 @@ export function CallHistoryTableComponent({
 
   // Handle column visibility toggle
   const toggleColumn = (columnId: string) => {
-    setVisibleColumns(prev => 
+    setVisibleColumns((prev) =>
       prev.includes(columnId)
-        ? prev.filter(id => id !== columnId)
+        ? prev.filter((id) => id !== columnId)
         : [...prev, columnId]
     );
   };
@@ -106,7 +124,7 @@ export function CallHistoryTableComponent({
 
   // Toggle auto-refresh
   const toggleAutoRefresh = () => {
-    setAutoRefresh(prev => !prev);
+    setAutoRefresh((prev) => !prev);
   };
 
   // Update refresh interval
@@ -114,7 +132,7 @@ export function CallHistoryTableComponent({
     const interval = parseInt(value);
     setRefreshInterval(interval);
     setRefreshCountdown(interval);
-    
+
     // Reset the timer with new interval
     if (autoRefresh && refreshTimerRef.current) {
       clearInterval(refreshTimerRef.current);
@@ -125,16 +143,19 @@ export function CallHistoryTableComponent({
   // Set up auto-refresh
   useEffect(() => {
     if (autoRefresh && onRefresh) {
-      refreshTimerRef.current = setInterval(handleRefresh, refreshInterval * 1000);
-      
+      refreshTimerRef.current = setInterval(
+        handleRefresh,
+        refreshInterval * 1000
+      );
+
       // Countdown timer
       const countdownTimer = setInterval(() => {
-        setRefreshCountdown(prev => {
+        setRefreshCountdown((prev) => {
           if (prev <= 1) return refreshInterval;
           return prev - 1;
         });
       }, 1000);
-      
+
       return () => {
         if (refreshTimerRef.current) clearInterval(refreshTimerRef.current);
         clearInterval(countdownTimer);
@@ -175,18 +196,18 @@ export function CallHistoryTableComponent({
   const formatStatus = (status: string) => {
     return status
       .split("_")
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
       .join(" ");
   };
 
   return (
-    <motion.div 
+    <motion.div
       className="space-y-4"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3 }}
     >
-      <motion.div 
+      <motion.div
         className="flex flex-wrap justify-between items-center gap-2"
         initial={{ y: -10 }}
         animate={{ y: 0 }}
@@ -194,24 +215,27 @@ export function CallHistoryTableComponent({
       >
         <div className="flex items-center space-x-2">
           <span className="text-sm text-gray-500">
-            Showing {callDetails.length} of {totalRecords} calls
+            Showing {pageRecords} of {totalRecords} calls
           </span>
         </div>
-        
+
         <div className="flex flex-wrap items-center gap-2">
           {/* Auto-refresh controls */}
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Button 
-                    variant={autoRefresh ? "default" : "outline"} 
-                    size="sm" 
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Button
+                    variant={autoRefresh ? "default" : "outline"}
+                    size="sm"
                     onClick={toggleAutoRefresh}
                     className="relative"
                   >
                     <RefreshCw className="h-4 w-4 mr-1" />
-                    {autoRefresh ? 'Auto' : 'Manual'}
+                    {autoRefresh ? "Auto" : "Manual"}
                     {autoRefresh && (
                       <span className="absolute -top-2 -right-2 bg-primary text-primary-foreground text-xs rounded-full w-5 h-5 flex items-center justify-center">
                         {refreshCountdown}
@@ -221,11 +245,13 @@ export function CallHistoryTableComponent({
                 </motion.div>
               </TooltipTrigger>
               <TooltipContent>
-                <p>{autoRefresh ? 'Disable auto-refresh' : 'Enable auto-refresh'}</p>
+                <p>
+                  {autoRefresh ? "Disable auto-refresh" : "Enable auto-refresh"}
+                </p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
-          
+
           {autoRefresh && (
             <Select
               value={String(refreshInterval)}
@@ -235,6 +261,7 @@ export function CallHistoryTableComponent({
                 <SelectValue placeholder="Interval" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="5">5s</SelectItem>
                 <SelectItem value="10">10s</SelectItem>
                 <SelectItem value="30">30s</SelectItem>
                 <SelectItem value="60">1m</SelectItem>
@@ -242,29 +269,36 @@ export function CallHistoryTableComponent({
               </SelectContent>
             </Select>
           )}
-          
+
           {/* Manual refresh button */}
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Button
+                    variant="outline"
+                    size="sm"
                     onClick={handleRefresh}
                     disabled={loading}
                   >
-                    <RefreshCw className={`h-4 w-4 mr-1 ${loading ? 'animate-spin' : ''}`} />
+                    <RefreshCw
+                      className={`h-4 w-4 mr-1 ${
+                        loading ? "animate-spin" : ""
+                      }`}
+                    />
                     Refresh
                   </Button>
                 </motion.div>
               </TooltipTrigger>
               <TooltipContent>
-                <p>Last refreshed: {format(lastRefreshed, 'HH:mm:ss')}</p>
+                <p>Last refreshed: {format(lastRefreshed, "HH:mm:ss")}</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
-          
+
           {/* Column visibility dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -276,7 +310,7 @@ export function CallHistoryTableComponent({
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Toggle Columns</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              {allColumns.map(column => (
+              {allColumns.map((column) => (
                 <DropdownMenuCheckboxItem
                   key={column.id}
                   checked={visibleColumns.includes(column.id)}
@@ -287,14 +321,10 @@ export function CallHistoryTableComponent({
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
-          
+
           {/* Sort order button */}
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={toggleSortOrder}
-            >
+            <Button variant="outline" size="sm" onClick={toggleSortOrder}>
               {sortOrder === "asc" ? (
                 <ArrowUp className="h-4 w-4 mr-1" />
               ) : (
@@ -303,7 +333,7 @@ export function CallHistoryTableComponent({
               {sortOrder === "asc" ? "Oldest First" : "Newest First"}
             </Button>
           </motion.div>
-          
+
           {/* Page size selector */}
           <div className="flex items-center space-x-2">
             <span className="text-sm">Show:</span>
@@ -327,7 +357,7 @@ export function CallHistoryTableComponent({
         </div>
       </motion.div>
 
-      <motion.div 
+      <motion.div
         className="rounded-md border overflow-hidden"
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -336,22 +366,30 @@ export function CallHistoryTableComponent({
         <Table>
           <TableHeader>
             <TableRow>
-              {allColumns.map(column => (
-                visibleColumns.includes(column.id) && (
-                  <TableHead key={column.id}>{column.name}</TableHead>
-                )
-              ))}
+              {allColumns.map(
+                (column) =>
+                  visibleColumns.includes(column.id) && (
+                    <TableHead key={column.id}>{column.name}</TableHead>
+                  )
+              )}
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={visibleColumns.length} className="h-24 text-center">
+                <TableCell
+                  colSpan={visibleColumns.length}
+                  className="h-24 text-center"
+                >
                   <div className="flex justify-center items-center">
-                    <motion.div 
+                    <motion.div
                       className="h-6 w-6 border-b-2 border-gray-900 rounded-full"
                       animate={{ rotate: 360 }}
-                      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                      transition={{
+                        duration: 1,
+                        repeat: Infinity,
+                        ease: "linear",
+                      }}
                     />
                     <span className="ml-2">Loading...</span>
                   </div>
@@ -359,7 +397,10 @@ export function CallHistoryTableComponent({
               </TableRow>
             ) : callDetails.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={visibleColumns.length} className="h-24 text-center text-gray-500">
+                <TableCell
+                  colSpan={visibleColumns.length}
+                  className="h-24 text-center text-gray-500"
+                >
                   No call records found
                 </TableCell>
               </TableRow>
@@ -372,70 +413,63 @@ export function CallHistoryTableComponent({
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
                     transition={{ duration: 0.2, delay: index * 0.05 }}
-                    className="hover:bg-gray-50"
+                    className="hover:bg-gray-50 overflow-hidden"
                   >
-                    {visibleColumns.includes('callId') && (
-                      <TableCell className="font-medium max-w-40" title={call.callId}>
+                    {visibleColumns.includes("callId") && (
+                      <TableCell
+                        className="font-medium max-w-40"
+                        title={call.callId}
+                      >
                         {call.callId}
                       </TableCell>
                     )}
-                    
-                    {visibleColumns.includes('createdAt') && (
+
+                    {visibleColumns.includes("createdAt") && (
                       <TableCell>{call.createdAt}</TableCell>
                     )}
-                    
-                    {visibleColumns.includes('consumer') && (
+
+                    {visibleColumns.includes("consumer") && (
                       <TableCell>
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <span className="cursor-help">{call.consumerName || 'Unknown'}</span>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>User ID: {call.consumerId}</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </TableCell>
+                        <CopyTooltip
+                          prefix="User ID:"
+                          content={call.consumerId}
+                          triggerContent={call.consumerName || "Unknown"}
+                        />
+                      </TableCell>
                     )}
-                    
-                    {visibleColumns.includes('provider') && (
-                       <TableCell>
-                       <TooltipProvider>
-                         <Tooltip>
-                           <TooltipTrigger asChild>
-                             <span className="cursor-help">{call.providerName || 'Unknown'}</span>
-                           </TooltipTrigger>
-                           <TooltipContent>
-                             <p>User ID: {call.providerId}</p>
-                           </TooltipContent>
-                         </Tooltip>
-                       </TooltipProvider>
-                     </TableCell>
+
+                    {visibleColumns.includes("provider") && (
+                      <TableCell>
+                        <CopyTooltip
+                          prefix="User ID:"
+                          content={call.providerId}
+                          triggerContent={call.providerName || "Unknown"}
+                        />
+                      </TableCell>
                     )}
-                    
-                    {visibleColumns.includes('callStatus') && (
+
+                    {visibleColumns.includes("callStatus") && (
                       <TableCell>
                         <Badge className={getStatusBadgeClass(call.callStatus)}>
                           {formatStatus(call.callStatus)}
                         </Badge>
                       </TableCell>
                     )}
-                    
-                    {visibleColumns.includes('callDuration') && (
+
+                    {visibleColumns.includes("callDuration") && (
                       <TableCell>{call.callDuration}</TableCell>
                     )}
-                    
-                    {visibleColumns.includes('charge') && (
+
+                    {visibleColumns.includes("charge") && (
                       <TableCell>{call.charge}</TableCell>
                     )}
-                    
-                    {visibleColumns.includes('context') && (
-                      <TableCell>{call.context || 'N/A'}</TableCell>
+
+                    {visibleColumns.includes("context") && (
+                      <TableCell>{call.context || "N/A"}</TableCell>
                     )}
-                    
-                    {visibleColumns.includes('location') && (
-                      <TableCell>{call.location || 'N/A'}</TableCell>
+
+                    {visibleColumns.includes("location") && (
+                      <TableCell>{call.location || "N/A"}</TableCell>
                     )}
                   </motion.tr>
                 ))}
@@ -445,7 +479,7 @@ export function CallHistoryTableComponent({
         </Table>
       </motion.div>
 
-      <motion.div 
+      <motion.div
         className="flex justify-between items-center mt-4"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}

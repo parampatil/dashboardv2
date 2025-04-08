@@ -2,8 +2,10 @@
 import { NextResponse } from 'next/server';
 import { createServiceClients, getEnvironmentFromRequest } from '@/app/api/grpc/client';
 import { promisify } from 'util';
-import { GetAllActiveUserIdsResponse } from '@/types/grpc';
+import { GetAllActiveUserIdsResponse, GetAllUserIdsAndNamesDashboardResponse } from '@/types/grpc';
+import { Provider } from '@/types/location';
 import { convertInt64BinaryToBigInt } from '@/lib/utils';
+
 export async function GET(request: Request) {
   try {
     // Get environment from request header
@@ -12,19 +14,29 @@ export async function GET(request: Request) {
     // Create clients for the specified environment
     const clients = createServiceClients(environment);
     
-    // Create service with promisified methods
+    // Create services with promisified methods
     const locationService = {
       getAllActiveUserIds: promisify(clients.location.GetAllActiveUserIds.bind(clients.location))
     };
+    
+    const profileService = {
+      getAllUserIdsAndNamesDashboard: promisify(clients.profile.GetAllUserIdsAndNamesDashboard.bind(clients.profile))
+    };
 
-    // Call the service with empty request
-    const response = await locationService.getAllActiveUserIds({}) as GetAllActiveUserIdsResponse;
+    // Fetch location data and user names in parallel
+    const [locationResponse, userNamesResponse] = await Promise.all([
+      locationService.getAllActiveUserIds({}) as Promise<GetAllActiveUserIdsResponse>,
+      profileService.getAllUserIdsAndNamesDashboard({}) as Promise<GetAllUserIdsAndNamesDashboardResponse>
+    ]);
 
-    // Convert the response keys to BigInt
-    if (response.caches) {
-      for (const cacheId in response.caches) {
-        if (response.caches[cacheId].locations) {
-          const locations = response.caches[cacheId].locations;
+    // Create a mapping of user IDs to names
+    const userIdToNameMap = userNamesResponse.userIdsAndNames || {};
+
+    // Process the response
+    if (locationResponse.caches) {
+      for (const cacheId in locationResponse.caches) {
+        if (locationResponse.caches[cacheId].locations) {
+          const locations = locationResponse.caches[cacheId].locations;
           
           // Extract binary keys
           const binaryKeys = Object.keys(locations);
@@ -40,32 +52,48 @@ export async function GET(request: Request) {
           // Sort the BigInt keys
           bigIntKeys.sort();
           
-          // Create a new sorted locations object
-          const sortedLocations: Record<string, typeof locations[keyof typeof locations]> = {};
-          bigIntKeys.forEach(bigIntKey => {
+          // Create a new sorted locations object with the same structure as the original
+          const sortedLocations: Record<string, {
+            latitude: number;
+            longitude: number;
+            providerIds: string[];
+            providers: Provider[];
+          }> = {};
+          
+          for (const bigIntKey of bigIntKeys) {
             const originalKey = keyMapping[bigIntKey as string];
             if (originalKey) {
-              // Get the location data
               const locationData = locations[originalKey as unknown as keyof typeof locations];
               
-              // Sort the providerIds array if it exists
               if (locationData.providerIds && Array.isArray(locationData.providerIds)) {
-                // Sort providerIds as strings
-                locationData.providerIds.sort();
+                // Sort providerIds
+                const sortedProviderIds = [...locationData.providerIds].sort();
+                
+                // Map provider IDs to Provider objects with names from the API response
+                const providers: Provider[] = sortedProviderIds.map(id => ({
+                  id: id.toString(),
+                  name: userIdToNameMap[id] || `Provider ${id}`
+                }));
+                
+                // Add the location with providers to the result
+                // Maintain the original structure while adding the providers array
+                sortedLocations[bigIntKey as string] = {
+                  latitude: locationData.latitude,
+                  longitude: locationData.longitude,
+                  providerIds: sortedProviderIds,
+                  providers: providers
+                };
               }
-              
-              // Add the location with sorted providerIds to the result
-              sortedLocations[bigIntKey as string] = locationData;
             }
-          });
+          }
           
           // Replace the original locations with sorted ones
-          response.caches[cacheId].locations = sortedLocations;
+          locationResponse.caches[cacheId].locations = sortedLocations;
         }
       }
     }
     
-    return NextResponse.json(response);
+    return NextResponse.json(locationResponse);
   } catch (error) {
     console.error('API error:', error);
     return NextResponse.json({ error: error, message: 'Failed to fetch location data' }, { status: 500 });

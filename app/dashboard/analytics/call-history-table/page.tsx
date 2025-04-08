@@ -18,6 +18,7 @@ const CallHistoryTable = () => {
   const [loading, setLoading] = useState(false);
   const [callDetails, setCallDetails] = useState<FormattedCallTransactionDetails[]>([]);
   const [totalRecords, setTotalRecords] = useState(0);
+  const [pageRecords, setPageRecords] = useState("0");
   const [totalPages, setTotalPages] = useState(0);
   
   const [filters, setFilters] = useState<CallHistoryTableFilters>({
@@ -106,6 +107,7 @@ const CallHistoryTable = () => {
       
 
         setCallDetails(data.callDetails);
+        setPageRecords(data.totalRecords);
     } catch (error) {
       toast({
         variant: "destructive",
@@ -134,7 +136,7 @@ const CallHistoryTable = () => {
   useEffect(() => {
     fetchCallDetails();
     fetchTotalPages();
-  }, []);
+  }, [filters.pageNumber, filters.pageSize, filters.sortOrder]);
 
   return (
     <ProtectedRoute allowedRoutes={['/dashboard/analytics/call-history-table']}>
@@ -157,6 +159,7 @@ const CallHistoryTable = () => {
                 pageNumber={filters.pageNumber}
                 pageSize={filters.pageSize}
                 totalPages={totalPages}
+                pageRecords={pageRecords}
                 totalRecords={totalRecords}
                 onPageChange={(page) => setFilters(prev => ({ ...prev, pageNumber: page }))}
                 onPageSizeChange={(size) => setFilters(prev => ({ ...prev, pageSize: size, pageNumber: 1 }))}
