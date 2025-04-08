@@ -104,13 +104,14 @@ export function formatTimestampToDate(timestamp: ProtoTimestamp): string {
   if (!timestamp || !timestamp.seconds) return 'N/A';
   
   const date = new Date(Number(timestamp.seconds) * 1000);
-  return new Intl.DateTimeFormat('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: true
-  }).format(date);
+  return date.toLocaleString("en-US", {
+    weekday: "short",
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    timeZoneName: "short",
+  });
 }
