@@ -19,6 +19,7 @@ import {
   Clock,
 } from "lucide-react";
 import { LocationData, GetAllActiveUserIdsResponse } from "@/types/location";
+import LocationMap from "@/components/LocationDashboard/LocationMap";
 
 export default function ActiveUserIds() {
   const [locations, setLocations] = useState<LocationData[]>([]);
@@ -509,6 +510,11 @@ export default function ActiveUserIds() {
             </motion.div>
           )}
         </motion.div>
+
+        
+        {allCachesData?.caches && <LocationMap caches={allCachesData.caches} />}
+        
+          
       </motion.div>
     </ProtectedRoute>
   );
