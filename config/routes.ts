@@ -35,6 +35,8 @@ export const ROUTES = {
     { path: "/dashboard/mpsquare/dictionary", name: "Crime Dictionary" },
     { path: "/dashboard/sales", name: 'Sales Dashboard' },
     { path: "/dashboard/sales/sales-analytics", name: 'Sales Analytics' },
+    { path: "/dashboard/remoteconfig", name: 'Remote Config Dashboard' },
+    { path: "/dashboard/remoteconfig/sparrow-remote-config", name: 'Sparrow Remote Config' },
     { path: '/profile', name: 'Profile' },
     { path: '/admin', name: 'Admin Panel' },
     { path: '/admin/roles', name: 'Roles' },
