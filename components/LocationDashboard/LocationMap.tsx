@@ -100,9 +100,6 @@ const LocationMap: React.FC<LocationMapProps> = ({ caches }) => {
     if (count >= 3) return '#FFFF00';  // Yellow for 3-4
     return '#0000FF';                  // Blue for 1-2
   };
-
-
-
   
   return (
     <div className="relative h-[800px] w-full rounded-lg overflow-hidden border border-gray-200">
