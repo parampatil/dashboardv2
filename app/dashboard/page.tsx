@@ -109,13 +109,13 @@ const MainDashboard = () => {
         ]
       },
       {
-        name: "MP2",
+        name: "MP Square",
         icon: <Speech className="h-5 w-5" />,
         color: "bg-pink-500",
         routes: [
-          // { path: "/dashboard/mp2", name: "MP2 Dashboard" },
-          { path: "/dashboard/mp2/users-in-jail", name: "Users in Jail" },
-          { path: "/dashboard/mp2/add-to-jail", name: "Add Users to Jail" },
+          // { path: "/dashboard/mpsquare", name: "MP2 Dashboard" },
+          { path: "/dashboard/mpsquare/users-in-jail", name: "Users in Jail" },
+          { path: "/dashboard/mpsquare/add-to-jail", name: "Add Users to Jail" },
         ]
       }
     ];

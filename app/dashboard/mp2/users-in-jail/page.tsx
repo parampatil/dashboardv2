@@ -15,17 +15,17 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+// import { Input } from "@/components/ui/input";
+// import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { RefreshCw } from "lucide-react";
 import { formatJailTime } from "@/lib/utils";
 
 export default function UsersInJail() {
   const [incarceratedUsers, setIncarceratedUsers] = useState<IncarceratedUser[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedUser, setSelectedUser] = useState<IncarceratedUser | null>(null);
-  const [newJailTime, setNewJailTime] = useState("");
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  // const [selectedUser, setSelectedUser] = useState<IncarceratedUser | null>(null);
+  // const [newJailTime, setNewJailTime] = useState("");
+  // const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const { toast } = useToast();
   const api = useApi();
@@ -53,37 +53,37 @@ export default function UsersInJail() {
     }
   };
 
-  const handleChangeJailTime = (user: IncarceratedUser) => {
-    setSelectedUser(user);
-    setNewJailTime("");
-    setIsDialogOpen(true);
-  };
+  // const handleChangeJailTime = (user: IncarceratedUser) => {
+  //   setSelectedUser(user);
+  //   setNewJailTime("");
+  //   setIsDialogOpen(true);
+  // };
 
-  const handleSetJailTime = async () => {
-    if (!selectedUser || !newJailTime) return;
-    try {
-      const response = await api.fetch("/api/grpc/mp2/set-jail-time", {
-        method: "POST",
-        body: JSON.stringify({
-          userId: selectedUser.user_id,
-          jailTimeSeconds: parseInt(newJailTime) * 60,
-        }),
-      });
-      const data = await response.json();
-      toast({
-        title: "Jail time updated",
-        description: data.message || `Jail time for ${selectedUser.first_name} ${selectedUser.last_name} has been updated.`,
-      });
-      setIsDialogOpen(false);
-      fetchIncarceratedUsers();
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Failed to update jail time",
-        description: (error as Error).message,
-      });
-    }
-  };
+  // const handleSetJailTime = async () => {
+  //   if (!selectedUser || !newJailTime) return;
+  //   try {
+  //     const response = await api.fetch("/api/grpc/mp2/set-jail-time", {
+  //       method: "POST",
+  //       body: JSON.stringify({
+  //         userId: selectedUser.user_id,
+  //         jailTimeSeconds: parseInt(newJailTime) * 60,
+  //       }),
+  //     });
+  //     const data = await response.json();
+  //     toast({
+  //       title: "Jail time updated",
+  //       description: data.message || `Jail time for ${selectedUser.first_name} ${selectedUser.last_name} has been updated.`,
+  //     });
+  //     setIsDialogOpen(false);
+  //     fetchIncarceratedUsers();
+  //   } catch (error) {
+  //     toast({
+  //       variant: "destructive",
+  //       title: "Failed to update jail time",
+  //       description: (error as Error).message,
+  //     });
+  //   }
+  // };
 
   const handleJailbreak = async (user_id: number) => {
     try {
@@ -109,7 +109,7 @@ export default function UsersInJail() {
   
 
   return (
-    <ProtectedRoute allowedRoutes={["/dashboard/mp2/users-in-jail"]}>
+    <ProtectedRoute allowedRoutes={["/dashboard/mpsquare/users-in-jail"]}>
       <motion.div
         className="space-y-6"
         initial={{ opacity: 0 }}
@@ -149,9 +149,9 @@ export default function UsersInJail() {
                     <TableCell>{user.email_address}</TableCell>
                     <TableCell>{formatJailTime(user.jail_time_end)}</TableCell>
                     <TableCell>
-                      <Button onClick={() => handleChangeJailTime(user)} className="mr-2">
+                      {/* <Button onClick={() => handleChangeJailTime(user)} className="mr-2">
                         Change Jail Time
-                      </Button>
+                      </Button> */}
                       <Button onClick={() => handleJailbreak(user.user_id)} variant="destructive">
                         Release
                       </Button>
@@ -164,7 +164,7 @@ export default function UsersInJail() {
         </div>
       </motion.div>
 
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      {/* <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Change Jail Time</DialogTitle>
@@ -179,7 +179,7 @@ export default function UsersInJail() {
             <Button onClick={handleSetJailTime}>Set Jail Time</Button>
           </DialogFooter>
         </DialogContent>
-      </Dialog>
+      </Dialog> */}
     </ProtectedRoute>
   );
 }

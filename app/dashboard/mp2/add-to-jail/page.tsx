@@ -60,7 +60,7 @@ export default function AddToJail() {
   };
 
   return (
-    <ProtectedRoute allowedRoutes={["/dashboard/mp2/add-to-jail"]}>
+    <ProtectedRoute allowedRoutes={["/dashboard/mpsquare/add-to-jail"]}>
       <motion.div
         className="space-y-6"
         initial={{ opacity: 0 }}

@@ -1,41 +1,28 @@
-// app/dashboard/mp2/page.tsx
+// app/dashboard/remoteconfig/page.tsx
 "use client";
 import { motion } from "framer-motion";
 import { useAuth } from "@/context/AuthContext";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Users, BookOpen, AlertTriangle, ChevronRight, Shield } from "lucide-react";
+import { ToggleLeft, ChevronRight, Shield } from "lucide-react";
 
-const MP2Dashboard = () => {
+const RemoteConfigDashboard = () => {
   const { user } = useAuth();
   
-  const mp2Routes = [
+  const remoteConfigRoutes = [
     {
-      path: "/dashboard/mpsquare/users-in-jail",
-      name: "Users in Jail",
-      description: "View and manage users currently serving jail time.",
-      icon: <Users className="h-5 w-5" />,
-      color: "bg-red-500",
+      path: "/dashboard/remoteconfig/sparrow-remote-config",
+      name: "Feature Flags",
+      description: "Manage feature flags and toggle features on/off for your Flutter app.",
+      icon: <ToggleLeft className="h-5 w-5" />,
+      color: "bg-emerald-500",
     },
-    {
-      path: "/dashboard/mpsquare/add-to-jail",
-      name: "Add Users to Jail",
-      description: "Add users to jail for violations.",
-      icon: <AlertTriangle className="h-5 w-5" />,
-      color: "bg-amber-500",
-    },
-    {
-      path: "/dashboard/mpsquare/dictionary",
-      name: "Crime Dictionary",
-      description: "Manage the dictionary of crime words and variants.",
-      icon: <BookOpen className="h-5 w-5" />,
-      color: "bg-blue-500",
-    },
+
   ];
 
   // Filter routes based on user permissions
-  const allowedMP2Routes = mp2Routes.filter(route => 
+  const allowedRemoteConfigRoutes = remoteConfigRoutes.filter(route => 
     user?.allowedRoutes && user.allowedRoutes[route.path]
   );
 
@@ -67,7 +54,7 @@ const MP2Dashboard = () => {
   };
 
   return (
-    <ProtectedRoute allowedRoutes={["/dashboard/mp2"]}>
+    <ProtectedRoute allowedRoutes={["/dashboard/remoteconfig"]}>
       <motion.div
         variants={containerVariants}
         initial="hidden"
@@ -76,14 +63,14 @@ const MP2Dashboard = () => {
       >
         <div className="bg-white rounded-lg shadow-md p-6">
           <h1 className="text-2xl font-bold text-gray-800 mb-6">
-            MP2 Dashboard - Misuse, Prevention & Protection
+            Remote Configuration Dashboard
           </h1>
           <p className="text-gray-600 mb-8">
-            Manage user violations, jail time, and the crime dictionary from this central dashboard.
+            Manage feature flags, configuration parameters, and control your Flutter app&apos;s behavior without deploying updates.
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {allowedMP2Routes.map((route) => (
+            {allowedRemoteConfigRoutes.map((route) => (
               <motion.div
                 key={route.path}
                 variants={itemVariants}
@@ -112,14 +99,14 @@ const MP2Dashboard = () => {
             ))}
           </div>
           
-          {allowedMP2Routes.length === 0 && (
+          {allowedRemoteConfigRoutes.length === 0 && (
             <motion.div 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               className="text-center py-12 bg-gray-50 rounded-lg"
             >
               <Shield className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500">You don&apos;t have access to any MP2 features.</p>
+              <p className="text-gray-500">You don&apos;t have access to any Remote Config features.</p>
               <p className="text-gray-400 text-sm mt-2">Contact your administrator for access.</p>
             </motion.div>
           )}
@@ -129,4 +116,4 @@ const MP2Dashboard = () => {
   );
 };
 
-export default MP2Dashboard;
+export default RemoteConfigDashboard;
