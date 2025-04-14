@@ -67,7 +67,7 @@ const MP2Dashboard = () => {
   };
 
   return (
-    <ProtectedRoute allowedRoutes={["/dashboard/mp2"]}>
+    <ProtectedRoute allowedRoutes={["/dashboard/mpsquare"]}>
       <motion.div
         variants={containerVariants}
         initial="hidden"
