@@ -121,6 +121,13 @@ function createServiceClient<T>(
     ) as T;
   }
 
+  if (serviceName === "LocationService") {
+    return new (protoDescriptor)[serviceName](
+      serviceUrl,
+      grpc.credentials.createSsl(),
+    ) as T;
+  }
+
   return new (protoDescriptor[serviceName as keyof ProtoGrpcType] as typeof grpc.Client)(
     serviceUrl,
     grpc.credentials.createInsecure(),
