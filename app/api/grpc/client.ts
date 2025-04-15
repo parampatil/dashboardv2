@@ -51,36 +51,43 @@ export const createServiceClients = (
       "ProfileService",
       PROTO_PATHS.PROFILE,
       SERVICE_URLS.PROFILE,
+      environment
     ),
     consumerPurchase: createServiceClient<ConsumerPurchaseServiceClient>(
       "ConsumerPurchaseService",
       PROTO_PATHS.CONSUMER_PURCHASE,
       SERVICE_URLS.CONSUMER_PURCHASE,
+      environment
     ),
     providerEarning: createServiceClient<ProviderEarningServiceClient>(
       "ProviderEarningService",
       PROTO_PATHS.PROVIDER_EARNING,
       SERVICE_URLS.PROVIDER_EARNING,
+      environment
     ),
     reward: createServiceClient<RewardServiceClient>(
       "RewardService",
       PROTO_PATHS.REWARD,
       SERVICE_URLS.REWARD,
+      environment
     ),
     location: createServiceClient<LocationServiceClient>(
       "LocationService",
       PROTO_PATHS.LOCATION,
       SERVICE_URLS.LOCATION,
+      environment
     ),
     callManagement: createServiceClient<CallManagementServiceClient>(
       "CallManagementService",
       PROTO_PATHS.CALL_MANAGEMENT,
       SERVICE_URLS.CALL_MANAGEMENT,
+      environment
     ),
     mpSquare: createServiceClient<MPSquareServiceClient>(
       "MPSquare",
       PROTO_PATHS.MPSQUARE,
       SERVICE_URLS.MPSQUARE,
+      environment
     ),
   };
 };
@@ -89,6 +96,7 @@ function createServiceClient<T>(
   serviceName: string,
   protoPath: string,
   serviceUrl: string,
+  environment: string,
 ): T {
   const packageDefinition = protoLoader.loadSync(protoPath, {
     keepCase: true,
@@ -121,7 +129,7 @@ function createServiceClient<T>(
     ) as T;
   }
 
-  if (serviceName === "LocationService") {
+  if (serviceName === "LocationService" && environment === "prod") {
     return new (protoDescriptor)[serviceName](
       serviceUrl,
       grpc.credentials.createSsl(),
