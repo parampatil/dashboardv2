@@ -1,10 +1,18 @@
-import { useState, } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { RefreshCw, Clock } from "lucide-react";
+import { RefreshCw, Clock, LayoutGrid, Columns } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { type LayoutMode } from "@/app/dashboard/location/active-user-ids/page";
 
 interface MenuOptionsProps {
   loading: boolean;
@@ -19,6 +27,8 @@ interface MenuOptionsProps {
   availablePages: string[];
   currentPage: string;
   onPageChange: (page: string) => void;
+  layoutMode: LayoutMode;
+  setLayoutMode: (mode: LayoutMode) => void;
 }
 
 export const PingDot = ({ refreshSuccess }: { refreshSuccess: boolean }) => {
@@ -65,6 +75,8 @@ export default function MenuOptions({
   timeUntilRefresh,
   onRefresh,
   refreshSuccess,
+  layoutMode,
+  setLayoutMode,
 }: MenuOptionsProps) {
   const [showTimeSelector, setShowTimeSelector] = useState(false);
 
@@ -95,6 +107,35 @@ export default function MenuOptions({
       </div>
 
       <div className="flex flex-col sm:flex-row items-center gap-4 mt-4 md:mt-0">
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="flex items-center space-x-2">
+                <ToggleGroup
+                  type="single"
+                  value={layoutMode}
+                  onValueChange={(value) =>
+                    value && setLayoutMode(value as LayoutMode)
+                  }
+                >
+                  <ToggleGroupItem value="stacked" aria-label="Stacked layout">
+                    <LayoutGrid className="h-4 w-4" />
+                  </ToggleGroupItem>
+                  <ToggleGroupItem
+                    value="sideBySide"
+                    aria-label="Side-by-side layout"
+                  >
+                    <Columns className="h-4 w-4" />
+                  </ToggleGroupItem>
+                </ToggleGroup>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Toggle layout mode</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+
         <motion.div
           className="flex items-center space-x-2"
           whileHover={{ scale: 1.05 }}

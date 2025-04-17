@@ -1,21 +1,28 @@
-// components/LocationMap.tsx
 "use client";
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import Map, { Marker, Popup, NavigationControl } from "react-map-gl/mapbox";
 import "mapbox-gl/dist/mapbox-gl.css";
-
-import { LocationData, GetAllActiveUserIdsResponse } from "@/types/location";
+import { LocationData } from "@/types/location";
 import { motion } from "framer-motion";
 import { X } from "lucide-react";
+import { type LayoutMode } from "@/app/dashboard/location/active-user-ids/page";
 
 // Replace with your actual Mapbox token
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || "";
 
 interface LocationMapProps {
-  caches: GetAllActiveUserIdsResponse["caches"];
+  locations: LocationData[];
+  currentPrecision: number;
+  onZoomChange: (precision: string) => void;
+  layoutMode: LayoutMode;
 }
 
-const LocationMap: React.FC<LocationMapProps> = ({ caches }) => {
+const LocationMap: React.FC<LocationMapProps> = ({
+  locations,
+  currentPrecision,
+  onZoomChange,
+  layoutMode,
+}) => {
   const [viewState, setViewState] = useState({
     longitude: 0,
     latitude: 20,
@@ -23,11 +30,20 @@ const LocationMap: React.FC<LocationMapProps> = ({ caches }) => {
     pitch: 0,
     bearing: 0,
   });
-
-  const [currentPrecision, setCurrentPrecision] = useState(1);
   const [selectedLocation, setSelectedLocation] = useState<LocationData | null>(
     null
   );
+
+  // Add a mapContainer ref to track the map element
+  const mapContainerRef = useRef<HTMLDivElement>(null);
+
+  // Force rerender when layout changes
+  const [mapKey, setMapKey] = useState(Date.now());
+
+  useEffect(() => {
+    // Force map to rerender when layout changes by updating the key
+    setMapKey(Date.now());
+  }, [layoutMode]);
 
   // Calculate geohash precision based on zoom level
   const getGeohashPrecision = useCallback((zoomLevel: number): number => {
@@ -52,51 +68,29 @@ const LocationMap: React.FC<LocationMapProps> = ({ caches }) => {
 
   // Update precision when zoom changes
   useEffect(() => {
-    setCurrentPrecision(getGeohashPrecision(viewState.zoom));
+    const newPrecision = getGeohashPrecision(viewState.zoom);
+    onZoomChange(newPrecision.toString());
   }, [viewState.zoom, getGeohashPrecision]);
 
-  // Get locations for current precision
-  const getLocationsForCurrentPrecision = () => {
-    const cache = caches[currentPrecision.toString()];
-    if (!cache || !cache.locations) {
-      return [];
-    }
-
-    return Object.entries(cache.locations).map(([key, location]) => ({
-      key,
-      ...location,
-    }));
-  };
-
-  const locations = getLocationsForCurrentPrecision();
-
-  // Center map on locations when first loaded
+  // Center map on the first available location in the data when first loaded or when locations change
   useEffect(() => {
-    if (locations.length > 0) {
-      // Find average of all location coordinates to center the map
-      const total = locations.reduce(
-        (acc, loc) => {
-          return {
-            lat: acc.lat + loc.latitude,
-            lng: acc.lng + loc.longitude,
-          };
-        },
-        { lat: 0, lng: 0 }
-      );
+    const availableLocation = locations.find(
+      (location) => location.latitude && location.longitude
+    );
 
-      const center = {
-        latitude: total.lat / locations.length,
-        longitude: total.lng / locations.length,
-      };
-
+    if (
+      availableLocation &&
+      viewState.latitude === 20 &&
+      viewState.longitude === 0
+    ) {
       setViewState((prev) => ({
         ...prev,
-        latitude: center.latitude,
-        longitude: center.longitude,
-        zoom: 4,
+        latitude: availableLocation.latitude,
+        longitude: availableLocation.longitude,
+        zoom: 4, // Default zoom level
       }));
     }
-  }, []);
+  }, [locations]);
 
   // Determine marker color based on number of users
   const getMarkerColor = (count: number) => {
@@ -116,13 +110,20 @@ const LocationMap: React.FC<LocationMapProps> = ({ caches }) => {
   };
 
   return (
-    <div className="relative h-[800px] w-full rounded-lg overflow-hidden border border-gray-200">
+    <div
+      ref={mapContainerRef}
+      className={`relative rounded-lg overflow-hidden border border-gray-200 mb-6 ${
+        layoutMode === "stacked" ? "h-[500px]" : "h-[800px]"
+      }`}
+    >
       <Map
+        key={mapKey}
         {...viewState}
         onMove={(evt) => setViewState(evt.viewState)}
         mapStyle="mapbox://styles/mapbox/dark-v11"
         mapboxAccessToken={MAPBOX_TOKEN}
         style={{ width: "100%", height: "100%" }}
+        reuseMaps
       >
         <NavigationControl position="top-right" />
 
@@ -157,13 +158,13 @@ const LocationMap: React.FC<LocationMapProps> = ({ caches }) => {
         ))}
 
         {selectedLocation && (
-            <Popup
+          <Popup
             longitude={selectedLocation.longitude}
             latitude={selectedLocation.latitude}
             onClose={() => setSelectedLocation(null)}
             closeButton={false}
             closeOnClick={true}
-            >
+          >
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -172,32 +173,32 @@ const LocationMap: React.FC<LocationMapProps> = ({ caches }) => {
               className="bg-white rounded-lg shadow-lg p-4 w-64"
             >
               <div className="flex justify-between items-center mb-3">
-            <h3 className="font-semibold text-base text-gray-900">
-            Users at this location ({selectedLocation.providers.length})
-            </h3>
-            <button
-            onClick={() => setSelectedLocation(null)}
-            className="text-gray-400 hover:text-gray-600 transition"
-            >
-            <X className="h-5 w-5" />
-            </button>
+                <h3 className="font-semibold text-base text-gray-900">
+                  Users at this location ({selectedLocation.providers.length})
+                </h3>
+                <button
+                  onClick={() => setSelectedLocation(null)}
+                  className="text-gray-400 hover:text-gray-600 transition"
+                >
+                  <X className="h-5 w-5" />
+                </button>
               </div>
               <div className="max-h-40 overflow-y-auto">
-            <ul className="space-y-2">
-            {selectedLocation.providers.map((provider) => (
-              <li
-              key={provider.id}
-              className="text-sm py-2 px-3 bg-gray-50 border border-gray-200 rounded-md shadow-sm flex items-center"
-              >
-              <span className="font-medium text-gray-800">
-            {provider.name}
-              </span>
-              </li>
-            ))}
-            </ul>
+                <ul className="space-y-2">
+                  {selectedLocation.providers.map((provider) => (
+                    <li
+                      key={provider.id}
+                      className="text-sm py-2 px-3 bg-gray-50 border border-gray-200 rounded-md shadow-sm flex items-center"
+                    >
+                      <span className="font-medium text-gray-800">
+                        {provider.name}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
               </div>
             </motion.div>
-            </Popup>
+          </Popup>
         )}
       </Map>
 

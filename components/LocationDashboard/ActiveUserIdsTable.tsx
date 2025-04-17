@@ -1,8 +1,10 @@
+"use client";
 import { motion, AnimatePresence } from "framer-motion";
 import { MapPin, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import CopyTooltip from "@/components/ui/CopyToolTip";
 import { LocationData } from "@/types/location";
+import { type LayoutMode } from "@/app/dashboard/location/active-user-ids/page";
 
 interface ActiveUserIdsTableProps {
   loading: boolean;
@@ -11,6 +13,7 @@ interface ActiveUserIdsTableProps {
   availablePages: string[];
   currentPage: string;
   onPageChange: (page: string) => void;
+  layoutMode: LayoutMode;
 }
 
 export default function ActiveUserIdsTable({
@@ -20,7 +23,11 @@ export default function ActiveUserIdsTable({
   availablePages,
   currentPage,
   onPageChange,
+  layoutMode,
 }: ActiveUserIdsTableProps) {
+  // Hide the key column when in side-by-side layout
+  const showKeyColumn = layoutMode !== "sideBySide";
+
   return (
     <>
       {loading && !refreshing ? (
@@ -47,17 +54,16 @@ export default function ActiveUserIdsTable({
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-blue-100">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
-                    Key
-                  </th>
+                  {showKeyColumn && (
+                    <th className="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+                      Key
+                    </th>
+                  )}
                   <th className="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
                     Provider Names
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
-                    Latitude
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
-                    Longitude
+                    Coordinates
                   </th>
                 </tr>
               </thead>
@@ -72,9 +78,11 @@ export default function ActiveUserIdsTable({
                       exit={{ opacity: 0, y: -10 }}
                       transition={{ delay: index * 0.03, duration: 0.2 }}
                     >
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        {location.key}
-                      </td>
+                      {showKeyColumn && (
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                          {location.key}
+                        </td>
+                      )}
                       <td className="px-6 py-4 text-sm text-gray-500">
                         <div className="max-h-80 flex flex-col">
                           {location.providers.map((provider, idx) => (
@@ -88,9 +96,7 @@ export default function ActiveUserIdsTable({
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {location.latitude.toFixed(6)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {location.latitude.toFixed(6)},{" "}
                         {location.longitude.toFixed(6)}
                       </td>
                     </motion.tr>
@@ -101,15 +107,11 @@ export default function ActiveUserIdsTable({
           </motion.div>
 
           <motion.div
-            className="mt-6 flex items-center justify-between"
+            className="mt-6 flex flex-col items-center justify-between space-y-2"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5 }}
           >
-            <div className="text-sm text-gray-500">
-              Cache {currentPage} of {availablePages.length}
-            </div>
-
             <div className="flex items-center space-x-2">
               <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
                 <Button
@@ -178,6 +180,9 @@ export default function ActiveUserIdsTable({
                   <ChevronRight className="h-4 w-4" />
                 </Button>
               </motion.div>
+            </div>
+            <div className="text-sm text-gray-500">
+              Cache {currentPage} of {availablePages.length}
             </div>
           </motion.div>
         </>

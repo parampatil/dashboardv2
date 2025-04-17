@@ -1,6 +1,5 @@
-// app/dashboard/location/active-user-ids/page.tsx
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { useToast } from "@/hooks/use-toast";
@@ -11,11 +10,18 @@ import LocationMap from "@/components/LocationDashboard/LocationMap";
 import MenuOptions from "@/components/LocationDashboard/MenuOptions";
 import ActiveUserIdsTable from "@/components/LocationDashboard/ActiveUserIdsTable";
 
+export type LayoutMode = "stacked" | "sideBySide";
+
 export default function ActiveUserIds() {
+  // Table and map data state
+  const [tablePage, setTablePage] = useState("1");
+  const [mapPrecision, setMapPrecision] = useState(1);
   const [locations, setLocations] = useState<LocationData[]>([]);
+  const [mapLocations, setMapLocations] = useState<LocationData[]>([]);
+
+  // UI state
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [currentPage, setCurrentPage] = useState("1");
   const [availablePages, setAvailablePages] = useState<string[]>([]);
   const [autoRefresh, setAutoRefresh] = useState(false);
   const [timeUntilRefresh, setTimeUntilRefresh] = useState(5);
@@ -23,6 +29,7 @@ export default function ActiveUserIds() {
   const [refreshSuccess, setRefreshSuccess] = useState(false);
   const [allCachesData, setAllCachesData] =
     useState<GetAllActiveUserIdsResponse | null>(null);
+  const [layoutMode, setLayoutMode] = useState<LayoutMode>("sideBySide");
 
   const autoRefreshIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -50,11 +57,14 @@ export default function ActiveUserIds() {
       setAvailablePages(pages);
 
       // If current page doesn't exist in available pages, set to first page
-      if (pages.length > 0 && !pages.includes(currentPage)) {
-        setCurrentPage(pages[0]);
+      if (pages.length > 0 && !pages.includes(tablePage)) {
+        setTablePage(pages[0]);
       }
 
-      updateLocationsForCurrentPage(data, currentPage);
+      // Update table and map data
+      updateTableData(data, tablePage);
+      updateMapData(data, mapPrecision.toString());
+
       setRefreshSuccess(true);
       setTimeout(() => setRefreshSuccess(false), 1000); // Reset after 1 second
     } catch (error) {
@@ -69,27 +79,83 @@ export default function ActiveUserIds() {
     }
   };
 
-  const updateLocationsForCurrentPage = (
-    data: GetAllActiveUserIdsResponse | null,
-    page: string
-  ) => {
-    if (!data) return;
+  // Update table data based on selected page
+  const updateTableData = useCallback(
+    (data: GetAllActiveUserIdsResponse | null, page: string) => {
+      if (!data) return;
 
-    if (data.caches[page]?.locations) {
-      const locationsArray = Object.entries(data.caches[page].locations).map(
-        ([key, location]) => ({
+      if (data.caches[page]?.locations) {
+        const locationsArray = Object.entries(data.caches[page].locations).map(
+          ([key, location]) => ({
+            key,
+            providers: location.providers || [],
+            latitude: location.latitude,
+            longitude: location.longitude,
+          })
+        );
+
+        setLocations(locationsArray);
+      } else {
+        setLocations([]);
+      }
+    },
+    []
+  );
+
+  // Update map data based on precision
+  const updateMapData = useCallback(
+    (data: GetAllActiveUserIdsResponse | null, precision: string) => {
+      if (!data) return;
+
+      if (data.caches[precision]?.locations) {
+        const locationsArray = Object.entries(
+          data.caches[precision].locations
+        ).map(([key, location]) => ({
           key,
           providers: location.providers || [],
           latitude: location.latitude,
           longitude: location.longitude,
-        })
-      );
+        }));
 
-      setLocations(locationsArray);
-    } else {
-      setLocations([]);
-    }
-  };
+        setMapLocations(locationsArray);
+      } else {
+        setMapLocations([]);
+      }
+    },
+    []
+  );
+
+  // Handle map zoom changes - updates both map and table
+  const handleMapZoomChange = useCallback(
+    (precision: string) => {
+      const precisionNum = parseInt(precision);
+      setMapPrecision(precisionNum);
+
+      // Only update table page if the precision is available in the data
+      if (availablePages.includes(precision)) {
+        setTablePage(precision);
+      }
+
+      // Update map data
+      if (allCachesData) {
+        updateMapData(allCachesData, precision);
+      }
+    },
+    [availablePages, allCachesData, updateMapData]
+  );
+
+  // Handle table page changes - only updates the table
+  const handleTablePageChange = useCallback(
+    (page: string) => {
+      setTablePage(page);
+
+      // Update table data only
+      if (allCachesData) {
+        updateTableData(allCachesData, page);
+      }
+    },
+    [allCachesData, updateTableData]
+  );
 
   // Initial data fetch
   useEffect(() => {
@@ -106,10 +172,19 @@ export default function ActiveUserIds() {
     };
   }, [currentEnvironment]);
 
-  // Update locations when page changes
+  // Update table data when page changes
   useEffect(() => {
-    updateLocationsForCurrentPage(allCachesData, currentPage);
-  }, [currentPage, allCachesData]);
+    if (allCachesData) {
+      updateTableData(allCachesData, tablePage);
+    }
+  }, [tablePage, allCachesData, updateTableData]);
+
+  // Update map data when allCachesData changes or mapPrecision changes
+  useEffect(() => {
+    if (allCachesData) {
+      updateMapData(allCachesData, mapPrecision.toString());
+    }
+  }, [allCachesData, mapPrecision, updateMapData]);
 
   // Handle auto-refresh toggle
   useEffect(() => {
@@ -166,10 +241,6 @@ export default function ActiveUserIds() {
     };
   }, [autoRefresh, refreshInterval]);
 
-  const handlePageChange = (page: string) => {
-    setCurrentPage(page);
-  };
-
   return (
     <ProtectedRoute allowedRoutes={["/dashboard/location/active-user-ids"]}>
       <motion.div
@@ -195,21 +266,44 @@ export default function ActiveUserIds() {
             onRefresh={fetchLocations}
             refreshSuccess={refreshSuccess}
             availablePages={availablePages}
-            currentPage={currentPage}
-            onPageChange={handlePageChange}
+            currentPage={tablePage}
+            onPageChange={handleTablePageChange}
+            layoutMode={layoutMode}
+            setLayoutMode={setLayoutMode}
           />
 
-          <ActiveUserIdsTable
-            loading={loading}
-            refreshing={refreshing}
-            locations={locations}
-            availablePages={availablePages}
-            currentPage={currentPage}
-            onPageChange={handlePageChange}
-          />
+          {allCachesData && (
+            <div
+              className={`flex ${
+                layoutMode === "stacked" ? "flex-col" : "flex-col lg:flex-row"
+              } gap-6`}
+            >
+              <div
+                className={layoutMode === "sideBySide" ? "flex-1" : "w-full"}
+              >
+                <LocationMap
+                  locations={mapLocations}
+                  currentPrecision={mapPrecision}
+                  onZoomChange={handleMapZoomChange}
+                  layoutMode={layoutMode}
+                />
+              </div>
+              <div
+                className={layoutMode === "sideBySide" ? "flex-1" : "w-full"}
+              >
+                <ActiveUserIdsTable
+                  loading={loading}
+                  refreshing={refreshing}
+                  locations={locations}
+                  availablePages={availablePages}
+                  currentPage={tablePage}
+                  onPageChange={handleTablePageChange}
+                  layoutMode={layoutMode}
+                />
+              </div>
+            </div>
+          )}
         </motion.div>
-
-        {allCachesData?.caches && <LocationMap caches={allCachesData.caches} />}
       </motion.div>
     </ProtectedRoute>
   );

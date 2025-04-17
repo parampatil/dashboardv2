@@ -20,7 +20,6 @@ interface CopyTooltipProps {
 }
 
 const CopyTooltip = ({
-  key, 
   prefix, 
   suffix, 
   content, 
@@ -36,7 +35,7 @@ const CopyTooltip = ({
   };
 
   return (
-    <TooltipProvider key={key}>
+    <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
             <motion.span 
@@ -71,7 +70,6 @@ const CopyTooltip = ({
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
                     exit={{ scale: 0 }}
-                    transition={{ duration: 0.2, delay: typeof key === 'number' ? key * 0.1 : 0 }}
                     >
                     <Check className="h-3.5 w-3.5 text-green-500" />
                     </motion.div>
