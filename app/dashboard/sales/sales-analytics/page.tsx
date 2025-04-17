@@ -86,7 +86,7 @@ export default function SalesAnalytics() {
         seconds: Math.floor(endDate.getTime() / 1000),
         nanos: (endDate.getTime() % 1000) * 1000000,
       };
-
+      
       // Fetch user call analytics
       const callAnalyticsResponse = await api.fetch(
         "/api/grpc/sales/user-call-analytics",

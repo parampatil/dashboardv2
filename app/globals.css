@@ -79,6 +79,21 @@
     @apply bg-background text-foreground;
   }
 }
-.mapboxgl-ctrl-attrib-inner {
-  display: hidden !important;
+
+.mapboxgl-popup {
+  max-width: fit-content !important;
+  border: none !important;
+}
+.mapboxgl-popup-content{
+  background-color: transparent !important;
+  max-width: fit-content !important;
+  padding: 0 !important;
+}
+
+.mapboxgl-ctrl-logo{
+  display: none !important;
+}
+
+.mapboxgl-ctrl-attrib{
+  display: none !important;
 }
