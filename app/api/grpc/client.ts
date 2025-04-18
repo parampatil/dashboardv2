@@ -129,7 +129,7 @@ function createServiceClient<T>(
     ) as T;
   }
 
-  if (serviceName === "LocationService" && environment === "prod") {
+  if (serviceName === "LocationService" && environment === "dev") {
     return new (protoDescriptor)[serviceName](
       serviceUrl,
       grpc.credentials.createSsl(),
