@@ -1,11 +1,10 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { RefreshCw, Clock, LayoutGrid, Columns, Users } from "lucide-react";
+import { RefreshCw, Clock, Columns, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import {
   Tooltip,
   TooltipContent,
@@ -119,46 +118,62 @@ export default function MenuOptions({
                   animate={{ scale: 1 }}
                   transition={{ duration: 0.3 }}
                 >
-                  {totalActiveUsers} Active Users
+                  Total{" "}
+                  <span className="font-semibold text-yellow-600">
+                    {totalActiveUsers}
+                  </span>{" "}
+                  Active Users
                 </motion.span>
               </Badge>
             </motion.div>
           )}
         </div>
-        <p className="text-gray-500">
-          View active users and their location data
-        </p>
+        <p className="text-gray-500">Active Providers and their Locations</p>
       </div>
 
       <div className="flex flex-col sm:flex-row items-center gap-4 mt-4 md:mt-0">
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div className="flex items-center space-x-2">
-                <ToggleGroup
-                  type="single"
-                  value={layoutMode}
-                  onValueChange={(value) =>
-                    value && setLayoutMode(value as LayoutMode)
-                  }
+        <motion.div
+          className="flex items-center bg-gray-100 px-2 rounded-md"
+          initial={{ opacity: 0, y: -5 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+        >
+          <TooltipProvider>
+            <Label className="text-sm font-medium">Layout:</Label>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <motion.div
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
                 >
-                  <ToggleGroupItem value="stacked" aria-label="Stacked layout">
-                    <LayoutGrid className="h-4 w-4" />
-                  </ToggleGroupItem>
-                  <ToggleGroupItem
-                    value="sideBySide"
-                    aria-label="Side-by-side layout"
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() =>
+                      setLayoutMode(
+                        layoutMode === "stacked" ? "sideBySide" : "stacked"
+                      )
+                    }
+                    className="hover:bg-transparent focus:outline-none focus:ring-0"
                   >
-                    <Columns className="h-4 w-4" />
-                  </ToggleGroupItem>
-                </ToggleGroup>
-              </div>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Toggle layout mode</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+                    <motion.div
+                      animate={{ rotate: layoutMode === "stacked" ? 90 : 0 }}
+                      transition={{ type: "spring", stiffness: 300 }}
+                    >
+                      <Columns className="h-4 w-4" />
+                    </motion.div>
+                  </Button>
+                </motion.div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>
+                  Change layout to{" "}
+                  {layoutMode === "stacked" ? "side-by-side" : "stacked"} view
+                </p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </motion.div>
 
         <motion.div
           className="flex items-center space-x-2"

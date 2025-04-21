@@ -126,7 +126,7 @@ export default function ActiveUserIdsTable({
                 <tr>
                   {showKeyColumn && (
                     <th className="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
-                      Key
+                      Location Key
                     </th>
                   )}
                   <th className="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
@@ -143,7 +143,7 @@ export default function ActiveUserIdsTable({
                     </th>
                   )}
                   <th className="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
-                    Place
+                    Pin Location
                   </th>
                 </tr>
               </thead>
@@ -295,7 +295,7 @@ export default function ActiveUserIdsTable({
               </motion.div>
             </div>
             <div className="text-sm text-gray-500">
-              Cache {currentPage} of {availablePages.length}
+              Page {currentPage} of {availablePages.length}
             </div>
           </motion.div>
         </>
