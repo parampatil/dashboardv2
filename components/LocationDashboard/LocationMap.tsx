@@ -287,7 +287,7 @@ const LocationMap: React.FC<LocationMapProps> = ({
                       key={provider.id}
                       className="text-sm py-1.5 px-2.5 bg-gray-50 border border-gray-100 rounded flex items-center justify-between"
                     >
-                      <CopyTooltip triggerContent={provider.name} content="provider.id" prefix="ID:" />
+                      <CopyTooltip triggerContent={provider.name} content={provider.id} prefix="ID:" />
                     </li>
                   ))}
                 </ul>

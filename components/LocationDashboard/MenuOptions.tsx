@@ -119,10 +119,10 @@ export default function MenuOptions({
                   transition={{ duration: 0.3 }}
                 >
                   Total{" "}
-                  <span className="font-semibold text-yellow-600">
+                  <span className="font-bold  text-amber-600">
                     {totalActiveUsers}
                   </span>{" "}
-                  Active Users
+                  Active Providers
                 </motion.span>
               </Badge>
             </motion.div>
@@ -133,7 +133,7 @@ export default function MenuOptions({
 
       <div className="flex flex-col sm:flex-row items-center gap-4 mt-4 md:mt-0">
         <motion.div
-          className="flex items-center bg-gray-100 px-2 rounded-md"
+          className="flex items-center bg-gray-100 ps-2 rounded-md"
           initial={{ opacity: 0, y: -5 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
