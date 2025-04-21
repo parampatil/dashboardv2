@@ -3,6 +3,7 @@ import * as protoLoader from "@grpc/proto-loader";
 import * as grpc from "@grpc/grpc-js";
 import path from "path";
 import { environments } from "@/config/environments";
+import fs from "fs";
 import {
   ProfileServiceClient,
   ConsumerPurchaseServiceClient,
@@ -129,10 +130,26 @@ function createServiceClient<T>(
     ) as T;
   }
 
-  if (serviceName === "LocationService" && environment === "dev") {
-    return new (protoDescriptor)[serviceName](
-      serviceUrl,
-      grpc.credentials.createSsl(),
+  if (environment === "dev") {
+    const rootCertPath = path.resolve("./config/main-ssl.crt");
+    const rootCert = fs.readFileSync(rootCertPath);
+    
+    // Temporary workaround for gRPC-js limitation
+    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'; // Only for development!
+  
+   return new (protoDescriptor[serviceName as keyof ProtoGrpcType] as typeof grpc.Client)(
+    serviceUrl,
+      grpc.credentials.createSsl(
+        rootCert,
+        null,
+        null,
+        {
+          checkServerIdentity: () => {
+            console.warn('Bypassing TLS certificate validation - DEV ONLY');
+            return undefined;
+          }
+        }
+      )
     ) as T;
   }
 
