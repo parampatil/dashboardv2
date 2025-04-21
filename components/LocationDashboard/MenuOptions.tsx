@@ -101,7 +101,7 @@ export default function MenuOptions({
       transition={{ delay: 0.2 }}
     >
       <div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-top gap-3">
           <h1 className="text-2xl font-bold text-gray-800 mb-2">
             Active User IDs
           </h1>

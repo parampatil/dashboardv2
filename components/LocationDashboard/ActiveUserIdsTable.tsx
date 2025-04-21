@@ -105,27 +105,6 @@ export default function ActiveUserIdsTable({
 
   return (
     <>
-      {!loading && locations.length > 0 && (
-        <div className="flex items-center justify-between mb-4">
-          <motion.div
-            className="bg-blue-100 text-blue-800 px-4 py-2 rounded-md font-medium flex items-center"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            <span className="mr-2">Total Active Users:</span>
-            <motion.span
-              className="font-bold"
-              key={totalActiveUsers}
-              initial={{ scale: 1.2 }}
-              animate={{ scale: 1 }}
-              transition={{ duration: 0.3 }}
-            >
-              {totalActiveUsers}
-            </motion.span>
-          </motion.div>
-        </div>
-      )}
 
       {loading && !refreshing ? (
         <motion.div
