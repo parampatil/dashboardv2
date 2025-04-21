@@ -39,12 +39,6 @@ export default function ActiveUserIdsTable({
     {}
   );
 
-  // Calculate total active users
-  const totalActiveUsers = locations.reduce(
-    (sum, location) => sum + location.providers.length,
-    0
-  );
-
   // Function to fetch place information from coordinates
   const fetchPlaceInfo = useCallback(
     async (latitude: number, longitude: number, locationKey: string) => {
