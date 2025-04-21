@@ -1,4 +1,5 @@
 "use client";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MapPin, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -16,6 +17,9 @@ interface ActiveUserIdsTableProps {
   layoutMode: LayoutMode;
 }
 
+// Cache for geocoding results to avoid redundant API calls
+const geocodeCache: Record<string, string> = {};
+
 export default function ActiveUserIdsTable({
   loading,
   refreshing,
@@ -25,11 +29,104 @@ export default function ActiveUserIdsTable({
   onPageChange,
   layoutMode,
 }: ActiveUserIdsTableProps) {
-  // Hide the key column when in side-by-side layout
-  const showKeyColumn = layoutMode !== "sideBySide";
+  // Show key column only in stacked mode
+  const showKeyColumn = layoutMode === "stacked";
+  // Show coordinates column only in stacked mode (separate from the lat/long in sideBySide mode)
+  const showCoordinatesColumn = layoutMode === "stacked";
+
+  // State to store place names for each location
+  const [locationPlaces, setLocationPlaces] = useState<Record<string, string>>(
+    {}
+  );
+
+  // Calculate total active users
+  const totalActiveUsers = locations.reduce(
+    (sum, location) => sum + location.providers.length,
+    0
+  );
+
+  // Function to fetch place information from coordinates
+  const fetchPlaceInfo = useCallback(
+    async (latitude: number, longitude: number, locationKey: string) => {
+      const cacheKey = `${latitude.toFixed(6)},${longitude.toFixed(6)}`;
+
+      // Return cached result if available
+      if (geocodeCache[cacheKey]) {
+        setLocationPlaces((prev) => ({
+          ...prev,
+          [locationKey]: geocodeCache[cacheKey],
+        }));
+        return;
+      }
+
+      // Get Mapbox API token
+      const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
+      if (!mapboxToken) return;
+
+      try {
+        const response = await fetch(
+          `https://api.mapbox.com/geocoding/v5/mapbox.places/${longitude},${latitude}.json?access_token=${mapboxToken}&types=place,region,country`
+        );
+
+        if (!response.ok) throw new Error("Geocoding failed");
+
+        const data = await response.json();
+
+        // Extract relevant place information
+        let placeName = "Unknown location";
+        if (data.features && data.features.length > 0) {
+          const feature = data.features[0];
+          placeName = feature.place_name || feature.text || "Unknown location";
+        }
+
+        // Cache the result
+        geocodeCache[cacheKey] = placeName;
+
+        // Update state
+        setLocationPlaces((prev) => ({
+          ...prev,
+          [locationKey]: placeName,
+        }));
+      } catch (error) {
+        console.error("Error fetching place info:", error);
+      }
+    },
+    []
+  );
+
+  // Fetch place information for all locations
+  useEffect(() => {
+    if (locations.length > 0) {
+      locations.forEach((location) => {
+        fetchPlaceInfo(location.latitude, location.longitude, location.key);
+      });
+    }
+  }, [locations, fetchPlaceInfo]);
 
   return (
     <>
+      {!loading && locations.length > 0 && (
+        <div className="flex items-center justify-between mb-4">
+          <motion.div
+            className="bg-blue-100 text-blue-800 px-4 py-2 rounded-md font-medium flex items-center"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <span className="mr-2">Total Active Users:</span>
+            <motion.span
+              className="font-bold"
+              key={totalActiveUsers}
+              initial={{ scale: 1.2 }}
+              animate={{ scale: 1 }}
+              transition={{ duration: 0.3 }}
+            >
+              {totalActiveUsers}
+            </motion.span>
+          </motion.div>
+        </div>
+      )}
+
       {loading && !refreshing ? (
         <motion.div
           className="flex justify-center items-center h-64"
@@ -62,8 +159,18 @@ export default function ActiveUserIdsTable({
                   <th className="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
                     Provider Names
                   </th>
+                  {showCoordinatesColumn && (
+                    <th className="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+                      Latitude
+                    </th>
+                  )}
+                  {showCoordinatesColumn && (
+                    <th className="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+                      Longitude
+                    </th>
+                  )}
                   <th className="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
-                    Coordinates
+                    Place
                   </th>
                 </tr>
               </thead>
@@ -95,9 +202,42 @@ export default function ActiveUserIdsTable({
                           ))}
                         </div>
                       </td>
+                      {showCoordinatesColumn && (
+                        <>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <CopyTooltip
+                              prefix="Latitude:"
+                              content={`${location.latitude.toFixed(6)}`}
+                              triggerContent={`${location.latitude.toFixed(6)}`}
+                            />
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <CopyTooltip
+                              prefix="Longitude:"
+                              content={`${location.longitude.toFixed(6)}`}
+                              triggerContent={`${location.longitude.toFixed(
+                                6
+                              )}`}
+                            />
+                          </td>
+                        </>
+                      )}
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {location.latitude.toFixed(6)},{" "}
-                        {location.longitude.toFixed(6)}
+                        {locationPlaces[location.key] ? (
+                          <CopyTooltip
+                            content={`${location.latitude.toFixed(6)} / ${location.longitude.toFixed(6)}`}
+                            prefix="Coordinates(lat/long)):"
+                            triggerContent={locationPlaces[location.key]}
+                            className="text-emerald-700 font-medium"
+                          />
+                        ) : (
+                          <motion.span
+                            animate={{ opacity: [0.5, 1, 0.5] }}
+                            transition={{ duration: 1.5, repeat: Infinity }}
+                          >
+                            Loading...
+                          </motion.span>
+                        )}
                       </td>
                     </motion.tr>
                   ))}

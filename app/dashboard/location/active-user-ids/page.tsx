@@ -18,6 +18,7 @@ export default function ActiveUserIds() {
   const [mapPrecision, setMapPrecision] = useState(1);
   const [locations, setLocations] = useState<LocationData[]>([]);
   const [mapLocations, setMapLocations] = useState<LocationData[]>([]);
+  const [totalActiveUsers, setTotalActiveUsers] = useState(0);
 
   // UI state
   const [loading, setLoading] = useState(true);
@@ -65,6 +66,9 @@ export default function ActiveUserIds() {
       updateTableData(data, tablePage);
       updateMapData(data, mapPrecision.toString());
 
+      // Calculate total active users across all caches/locations
+      calculateTotalActiveUsers(data);
+
       setRefreshSuccess(true);
       setTimeout(() => setRefreshSuccess(false), 1000); // Reset after 1 second
     } catch (error) {
@@ -78,6 +82,31 @@ export default function ActiveUserIds() {
       setRefreshing(false);
     }
   };
+
+  // Calculate total number of active users across all locations
+  const calculateTotalActiveUsers = useCallback(
+    (data: GetAllActiveUserIdsResponse | null) => {
+      if (!data) return;
+      // We're counting each user once per cache/precision level,
+      // but we want the unique count from the most detailed precision level
+      // Get the highest precision level (largest key number)
+      const keys = Object.keys(data.caches || {}).map(Number);
+      const highestPrecision = Math.max(...keys).toString();
+
+      // Count users in the highest precision level
+      let uniqueTotal = 0;
+      if (data.caches[highestPrecision]?.locations) {
+        Object.values(data.caches[highestPrecision].locations).forEach(
+          (location) => {
+            uniqueTotal += location.providers?.length || 0;
+          }
+        );
+      }
+
+      setTotalActiveUsers(uniqueTotal);
+    },
+    []
+  );
 
   // Update table data based on selected page
   const updateTableData = useCallback(
@@ -270,6 +299,7 @@ export default function ActiveUserIds() {
             onPageChange={handleTablePageChange}
             layoutMode={layoutMode}
             setLayoutMode={setLayoutMode}
+            totalActiveUsers={totalActiveUsers}
           />
 
           {allCachesData && (

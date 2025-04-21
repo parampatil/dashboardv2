@@ -5,10 +5,15 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import { LocationData } from "@/types/location";
 import { motion } from "framer-motion";
 import { X } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { type LayoutMode } from "@/app/dashboard/location/active-user-ids/page";
+import CopyTooltip from "../ui/CopyToolTip";
 
 // Replace with your actual Mapbox token
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || "";
+
+// Cache for geocoding results to avoid redundant API calls
+const geocodeCache: Record<string, string> = {};
 
 interface LocationMapProps {
   locations: LocationData[];
@@ -33,6 +38,8 @@ const LocationMap: React.FC<LocationMapProps> = ({
   const [selectedLocation, setSelectedLocation] = useState<LocationData | null>(
     null
   );
+  const [locationPlace, setLocationPlace] = useState<string>("");
+  const [isLoadingPlace, setIsLoadingPlace] = useState(false);
 
   // Add a mapContainer ref to track the map element
   const mapContainerRef = useRef<HTMLDivElement>(null);
@@ -70,7 +77,7 @@ const LocationMap: React.FC<LocationMapProps> = ({
   useEffect(() => {
     const newPrecision = getGeohashPrecision(viewState.zoom);
     onZoomChange(newPrecision.toString());
-  }, [viewState.zoom, getGeohashPrecision]);
+  }, [viewState.zoom, getGeohashPrecision, onZoomChange]);
 
   // Center map on the first available location in the data when first loaded or when locations change
   useEffect(() => {
@@ -91,6 +98,56 @@ const LocationMap: React.FC<LocationMapProps> = ({
       }));
     }
   }, [locations]);
+
+  // Fetch place information when a location is selected
+  useEffect(() => {
+    if (selectedLocation) {
+      fetchPlaceInfo(selectedLocation.latitude, selectedLocation.longitude);
+    } else {
+      setLocationPlace("");
+    }
+  }, [selectedLocation]);
+
+  // Function to fetch place information using Mapbox geocoding
+  const fetchPlaceInfo = async (latitude: number, longitude: number) => {
+    setIsLoadingPlace(true);
+    const cacheKey = `${latitude.toFixed(6)},${longitude.toFixed(6)}`;
+
+    // Return cached result if available
+    if (geocodeCache[cacheKey]) {
+      setLocationPlace(geocodeCache[cacheKey]);
+      setIsLoadingPlace(false);
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${longitude},${latitude}.json?access_token=${MAPBOX_TOKEN}&types=place,region,country`
+      );
+
+      if (!response.ok) throw new Error("Geocoding failed");
+
+      const data = await response.json();
+
+      // Extract relevant place information
+      let placeName = "Unknown location";
+      if (data.features && data.features.length > 0) {
+        const feature = data.features[0];
+        placeName = feature.place_name || feature.text || "Unknown location";
+      }
+
+      // Cache the result
+      geocodeCache[cacheKey] = placeName;
+
+      // Update state
+      setLocationPlace(placeName);
+    } catch (error) {
+      console.error("Error fetching place info:", error);
+      setLocationPlace("Location lookup failed");
+    } finally {
+      setIsLoadingPlace(false);
+    }
+  };
 
   // Determine marker color based on number of users
   const getMarkerColor = (count: number) => {
@@ -120,10 +177,11 @@ const LocationMap: React.FC<LocationMapProps> = ({
         key={mapKey}
         {...viewState}
         onMove={(evt) => setViewState(evt.viewState)}
-        mapStyle="mapbox://styles/mapbox/dark-v11"
+        mapStyle="mapbox://styles/mapbox/standard"
         mapboxAccessToken={MAPBOX_TOKEN}
         style={{ width: "100%", height: "100%" }}
         reuseMaps
+        projection={"globe"}
       >
         <NavigationControl position="top-right" />
 
@@ -164,17 +222,19 @@ const LocationMap: React.FC<LocationMapProps> = ({
             onClose={() => setSelectedLocation(null)}
             closeButton={false}
             closeOnClick={true}
+            anchor="bottom"
+            maxWidth="300px"
           >
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
               transition={{ duration: 0.2 }}
-              className="bg-white rounded-lg shadow-lg p-4 w-64"
+              className="bg-white rounded-lg shadow-lg p-4 w-full max-w-[300px]"
             >
               <div className="flex justify-between items-center mb-3">
                 <h3 className="font-semibold text-base text-gray-900">
-                  Users at this location ({selectedLocation.providers.length})
+                  Users at this location
                 </h3>
                 <button
                   onClick={() => setSelectedLocation(null)}
@@ -183,16 +243,51 @@ const LocationMap: React.FC<LocationMapProps> = ({
                   <X className="h-5 w-5" />
                 </button>
               </div>
-              <div className="max-h-40 overflow-y-auto">
-                <ul className="space-y-2">
+
+              {/* Place name */}
+              <div className="mb-3">
+                {isLoadingPlace ? (
+                  <motion.div
+                    animate={{ opacity: [0.5, 1, 0.5] }}
+                    transition={{ duration: 1.5, repeat: Infinity }}
+                    className="text-sm text-gray-500 italic"
+                  >
+                    Loading location info...
+                  </motion.div>
+                ) : (
+                  <div className="text-sm bg-blue-500 py-1.5 px-2 rounded-md text-white">
+                    {locationPlace}
+                  </div>
+                )}
+              </div>
+
+              <div className="flex items-center justify-between mb-3">
+                <div className="text-sm text-gray-500">
+                  Lat: {selectedLocation.latitude.toFixed(6)}
+                </div>
+                <div className="text-sm text-gray-500">
+                  Long: {selectedLocation.longitude.toFixed(6)}
+                </div>
+              </div>
+
+              <div className="flex justify-between items-center mb-2">
+                <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-200 me-2">
+                  {selectedLocation.providers.length} User
+                  {selectedLocation.providers.length !== 1 && "s"}
+                </Badge>
+                <div className="text-xs text-gray-500">
+                  Key: {selectedLocation.key}
+                </div>
+              </div>
+
+              <div className="max-h-40 overflow-y-auto mt-2">
+                <ul className="space-y-1.5">
                   {selectedLocation.providers.map((provider) => (
                     <li
                       key={provider.id}
-                      className="text-sm py-2 px-3 bg-gray-50 border border-gray-200 rounded-md shadow-sm flex items-center"
+                      className="text-sm py-1.5 px-2.5 bg-gray-50 border border-gray-100 rounded flex items-center justify-between"
                     >
-                      <span className="font-medium text-gray-800">
-                        {provider.name}
-                      </span>
+                      <CopyTooltip triggerContent={provider.name} content="provider.id" prefix="ID:" />
                     </li>
                   ))}
                 </ul>
@@ -202,8 +297,10 @@ const LocationMap: React.FC<LocationMapProps> = ({
         )}
       </Map>
 
-      <div className="absolute top-2 left-2 bg-black/60 text-white text-xs px-2 py-1 rounded">
-        Precision: {currentPrecision} | Zoom: {viewState.zoom.toFixed(1)}
+      <div className="absolute top-2 left-2 bg-black/60 text-white text-xs px-2 py-1 rounded flex items-center gap-2">
+        <span>Precision: {currentPrecision}</span>
+        <span>|</span>
+        <span>Zoom: {viewState.zoom.toFixed(1)}</span>
       </div>
     </div>
   );

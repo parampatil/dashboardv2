@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { RefreshCw, Clock, LayoutGrid, Columns } from "lucide-react";
+import { RefreshCw, Clock, LayoutGrid, Columns, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -12,6 +12,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Badge } from "@/components/ui/badge";
 import { type LayoutMode } from "@/app/dashboard/location/active-user-ids/page";
 
 interface MenuOptionsProps {
@@ -29,6 +30,7 @@ interface MenuOptionsProps {
   onPageChange: (page: string) => void;
   layoutMode: LayoutMode;
   setLayoutMode: (mode: LayoutMode) => void;
+  totalActiveUsers?: number;
 }
 
 export const PingDot = ({ refreshSuccess }: { refreshSuccess: boolean }) => {
@@ -77,6 +79,7 @@ export default function MenuOptions({
   refreshSuccess,
   layoutMode,
   setLayoutMode,
+  totalActiveUsers = 0,
 }: MenuOptionsProps) {
   const [showTimeSelector, setShowTimeSelector] = useState(false);
 
@@ -98,9 +101,30 @@ export default function MenuOptions({
       transition={{ delay: 0.2 }}
     >
       <div>
-        <h1 className="text-2xl font-bold text-gray-800 mb-2">
-          Active User IDs
-        </h1>
+        <div className="flex items-center gap-3">
+          <h1 className="text-2xl font-bold text-gray-800 mb-2">
+            Active User IDs
+          </h1>
+          {totalActiveUsers > 0 && (
+            <motion.div
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.3, type: "spring" }}
+            >
+              <Badge className="text-sm py-1.5 px-2.5 bg-green-100 text-green-800 hover:bg-green-200 flex items-center gap-1.5">
+                <Users className="h-4 w-4" />
+                <motion.span
+                  key={totalActiveUsers}
+                  initial={{ scale: 1.2 }}
+                  animate={{ scale: 1 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  {totalActiveUsers} Active Users
+                </motion.span>
+              </Badge>
+            </motion.div>
+          )}
+        </div>
         <p className="text-gray-500">
           View active users and their location data
         </p>
