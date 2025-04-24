@@ -123,10 +123,33 @@ function createServiceClient<T>(
     packageDefinition
   ) as unknown as ProtoGrpcType;
 
-  if (serviceName === "MPSquare") {
+  if (serviceName === "MPSquare" && environment === "prod") {
     return new (protoDescriptor.MPSquare)[serviceName](
       serviceUrl,
       grpc.credentials.createInsecure(),
+    ) as T;
+  }
+
+  if (serviceName === "MPSquare" && environment === "dev") {
+    const rootCertPath = path.resolve("./config/main-ssl.crt");
+    const rootCert = fs.readFileSync(rootCertPath);
+    
+    // Temporary workaround for gRPC-js limitation
+    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'; // Only for development!
+  
+   return new (protoDescriptor.MPSquare)[serviceName](
+    serviceUrl,
+      grpc.credentials.createSsl(
+        rootCert,
+        null,
+        null,
+        {
+          checkServerIdentity: () => {
+            console.warn('Bypassing TLS certificate validation - DEV ONLY');
+            return undefined;
+          }
+        }
+      )
     ) as T;
   }
 
