@@ -66,6 +66,7 @@ const MainDashboard = () => {
           { path: '/dashboard/location/active-user-ids', name: 'Active User IDs'},
           { path: '/dashboard/location/user-priority', name: 'User Priority List' },
           { path: '/dashboard/location/blacklist-user', name: 'Blacklist User' },
+          { path: '/dashboard/location/deny-list', name: 'Deny List' },
         ]
       },
       {

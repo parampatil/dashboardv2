@@ -632,6 +632,39 @@ export interface CheckUserStatusResponse {
   message: string;
 }
 
+// Denylist Service Types
+export interface DenyListServiceClient extends grpc.Client {
+  InsertGeohash: (
+    request: GeohashList,
+    callback: (error: Error | null, response: Response) => void
+  ) => void;
+  DeleteGeohash: (
+    request: GeohashList,
+    callback: (error: Error | null, response: Response) => void
+  ) => void;
+  GetGeohash: (
+    request: Empty,
+    callback: (error: Error | null, response: GeohashList) => void
+  ) => void;
+}
+
+export interface GeohashList {
+  geohashes: string[];
+}
+
+export interface GeohashRequest {
+  geohash: string;
+}
+
+export interface Response {
+  message: string;
+  success: boolean;
+}
+
+export type Empty = Record<string, never>;
+
+
+
 
 // Helper interface to format protobuf timestamp
 export interface ProtoTimestamp {

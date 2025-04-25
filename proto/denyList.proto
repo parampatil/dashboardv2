@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package denyList;
+
+option go_package = "./proto";
+
+service DenyListService {
+  rpc InsertGeohash(GeohashList) returns (Response) {}
+  rpc DeleteGeohash(GeohashList) returns (Response) {}
+  rpc GetGeohash(Empty) returns (GeohashList) {}
+}
+
+message GeohashList {
+  repeated string geohashes = 1;
+}
+
+message GeohashRequest {
+  string geohash = 1;
+}
+
+message Response {
+  string message = 1;
+  bool success = 2;
+}
+
+message Empty {}

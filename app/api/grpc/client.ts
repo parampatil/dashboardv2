@@ -12,6 +12,7 @@ import {
   LocationServiceClient,
   CallManagementServiceClient,
   MPSquareServiceClient,
+  DenyListServiceClient,
 } from "@/types/grpc";
 
 // Default environment if not specified
@@ -26,6 +27,7 @@ const PROTO_PATHS = {
   LOCATION: path.resolve("./proto/location.proto"),
   CALL_MANAGEMENT: path.resolve("./proto/callManagementService.proto"),
   MPSQUARE: path.resolve("./proto/MPSquare.proto"),
+  DENY_LIST: path.resolve("./proto/denyList.proto"),
 };
 
 // Get environment from request header or use default
@@ -90,6 +92,12 @@ export const createServiceClients = (
       SERVICE_URLS.MPSQUARE,
       environment
     ),
+    denyList: createServiceClient<DenyListServiceClient>(
+      "DenyListService",
+      PROTO_PATHS.DENY_LIST,
+      SERVICE_URLS.DENY_LIST,
+      environment
+    ),
   };
 };
 
@@ -117,11 +125,21 @@ function createServiceClient<T>(
     MPSquare: {
       [key: string]: typeof grpc.Client;
     };
+    denyList: {
+      [key: string]: typeof grpc.Client;
+    };
   }
 
   const protoDescriptor = grpc.loadPackageDefinition(
     packageDefinition
   ) as unknown as ProtoGrpcType;
+
+  if (serviceName === "DenyListService") {
+    return new (protoDescriptor.denyList)[serviceName](
+      serviceUrl,
+      grpc.credentials.createSsl(),
+    ) as T;
+  }
 
   if (serviceName === "MPSquare" && environment === "prod") {
     return new (protoDescriptor.MPSquare)[serviceName](

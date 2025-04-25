@@ -29,6 +29,7 @@ export const ROUTES = {
     { path: '/dashboard/location/active-user-ids', name: 'Active User IDs' },
     { path: '/dashboard/location/user-priority', name: 'User Priority List' },
     { path: '/dashboard/location/blacklist-user', name: 'Blacklist User' },
+    { path: '/dashboard/location/deny-list', name: 'Deny List' },
     { path: "/dashboard/mpsquare", name: "MP2 Dashboard" },
     { path: "/dashboard/mpsquare/users-in-jail", name: "Users in Jail" },
     { path: "/dashboard/mpsquare/add-to-jail", name: "Add Users to Jail" },
