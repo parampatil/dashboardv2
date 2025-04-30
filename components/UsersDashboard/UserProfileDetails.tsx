@@ -78,13 +78,14 @@ export function UserProfileDetails({ userData, onProfileUpdate }: UserProfileDet
     setIsLoading(true);
     
     try {
-      const response = await fetch('/api/grpc/profile/update-user-details', {
+      const response = await api.fetch('/api/grpc/profile/update-user-details', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
       });
 
       const result = await response.json();
+      console.log('Update result:', result);
       if (result.success) {
         toast({ title: 'Success', description: 'User details updated successfully' });
         onProfileUpdate();

@@ -67,7 +67,7 @@ export function UserDetails({ userData, onProfileUpdate }: UserDetailsProps) {
     setIsLoading(true);
     
     try {
-      const response = await fetch('/api/grpc/profile/update-user-details', {
+      const response = await api.fetch('/api/grpc/profile/update-user-details', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
@@ -79,7 +79,11 @@ export function UserDetails({ userData, onProfileUpdate }: UserDetailsProps) {
         onProfileUpdate();
         setIsEditing(false);
       } else {
-        toast({ variant: 'destructive', title: 'Error', description: result.message });
+        toast({ 
+          variant: 'destructive', 
+          title: 'Update Failed', 
+          description: result.message || 'An error occurred while updating user details' 
+        });
       }
     } catch {
       toast({ variant: 'destructive', title: 'Error', description: 'Failed to update user details' });
