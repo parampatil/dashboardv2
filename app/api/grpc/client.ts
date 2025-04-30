@@ -142,13 +142,6 @@ function createServiceClient<T>(
   }
 
   if (serviceName === "MPSquare" && environment === "prod") {
-    return new (protoDescriptor.MPSquare)[serviceName](
-      serviceUrl,
-      grpc.credentials.createInsecure(),
-    ) as T;
-  }
-
-  if (serviceName === "MPSquare" && environment === "dev") {
     const rootCertPath = path.resolve("./config/main-ssl.crt");
     const rootCert = fs.readFileSync(rootCertPath);
     
@@ -171,7 +164,7 @@ function createServiceClient<T>(
     ) as T;
   }
 
-  if (environment === "dev") {
+  if (environment === "prod") {
     const rootCertPath = path.resolve("./config/main-ssl.crt");
     const rootCert = fs.readFileSync(rootCertPath);
     
