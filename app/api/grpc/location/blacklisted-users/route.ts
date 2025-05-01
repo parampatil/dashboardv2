@@ -8,6 +8,7 @@ export async function GET(request: Request) {
   try {
     // Get environment from request header
     const environment = getEnvironmentFromRequest(request);
+    console.log('Environment:', environment);
     
     // Create clients for the specified environment
     const clients = createServiceClients(environment);

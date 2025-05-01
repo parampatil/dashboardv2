@@ -28,6 +28,7 @@ export default function FindUserComponent() {
   const [loading, setLoading] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [usersVersion, setUsersVersion] = useState(0); // State to trigger re-fetching
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [userDetails, setUserDetails] = useState(null);
   const [loadingDetails, setLoadingDetails] = useState(false);
@@ -107,7 +108,7 @@ export default function FindUserComponent() {
     } else {
       setUsers([]);
     }
-  }, [searchInput, searchMethod, debouncedFetchUsers, fetchUserById]);
+  }, [searchInput, searchMethod, debouncedFetchUsers, fetchUserById, usersVersion]);
 
   const handleViewUserDetails = async (userId: string) => {
     setSelectedUserId(userId);
@@ -157,6 +158,11 @@ export default function FindUserComponent() {
     setSearchMethod(value as "id" | "email");
     setSearchInput("");
     setUsers([]);
+  };
+
+  const handleUpdate = () => {
+    setUsersVersion((prev) => prev + 1); // Increment version to trigger re-fetching
+    setDrawerOpen(false);
   };
 
   return (
@@ -228,7 +234,7 @@ export default function FindUserComponent() {
                   <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
                 </div>
               ) : (
-                userDetails && <UserDetails userData={userDetails} />
+                userDetails && <UserDetails userData={userDetails} onProfileUpdate={handleUpdate}/>
               )}
             </div>
             <DrawerFooter>

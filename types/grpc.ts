@@ -29,6 +29,10 @@ export interface ProfileServiceClient extends grpc.Client {
       response: GetAllUserIdsAndNamesDashboardResponse
     ) => void
   ) => void;
+  UpdateUserDetails: (
+    request: UpdateUserDetailsRequest,
+    callback: (error: Error | null, response: UpdateUserDetailsResponse) => void
+  ) => void;
 }
 
 export interface PageCountRequest {
@@ -76,6 +80,17 @@ export interface User {
   lastUpdatedTimestamp: ProtoTimestamp;
   phoneNumber?: string;
   userName: string;
+
+  // optional fields
+  firstName?: string;
+  middleName?: string;
+  lastName?: string;
+  dateOfBirth?: string;
+  pin?: string;
+  bio?: string;
+  proximityAsSkill?: string;
+  updatedBy?: string;
+  isActive?: boolean;
 }
 
 export interface UserIdNameMapping {
@@ -86,6 +101,30 @@ export type GetAllUserIdsAndNamesDashboardResponseRequest = object
 
 export interface GetAllUserIdsAndNamesDashboardResponse {
   userIdsAndNames: UserIdNameMapping;
+}
+
+export interface UpdateUserDetailsRequest {
+  userId: number;
+  userName?: string;
+  firstName?: string;
+  middleName?: string;
+  lastName?: string;
+  dateOfBirth?: string;
+  displayName?: string;
+  phoneNumber?: string;
+  email?: string;
+  pin?: string;
+  bio?: string;
+  userType?: string;
+  proximityAsSkill?: string;
+  updatedBy?: string;
+  isActive?: boolean;
+  country?: string;
+}
+
+export interface UpdateUserDetailsResponse {
+  success: boolean;
+  message: string;
 }
 
 // Consumer Purchase Service Types

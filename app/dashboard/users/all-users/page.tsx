@@ -25,6 +25,7 @@ import { User } from "@/types/grpc";
 
 export default function Dashboard1() {
   const [users, setUsers] = useState<User[]>([]);
+  const [usersVersion, setUsersVersion] = useState(0); // State to trigger re-fetching
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -70,7 +71,7 @@ export default function Dashboard1() {
     return () => {
       mounted = false;
     };
-  }, [currentPage, pageSize]);
+  }, [currentPage, pageSize, usersVersion]);
 
   const handlePageSizeChange = (newSize: number) => {
     setPageSize(newSize);
@@ -123,6 +124,13 @@ export default function Dashboard1() {
     )
   }));
 
+  const handleUpdate = async () => {
+    setUsersVersion(prev => prev + 1); // Trigger users list refresh
+    if (selectedUserId) {
+      // Refresh the currently open user details
+      await handleViewUserDetails(selectedUserId);
+    }
+  };
 
   return (
     <ProtectedRoute allowedRoutes={["/dashboard/users/all-users"]}>
@@ -185,7 +193,7 @@ export default function Dashboard1() {
                   <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
                 </div>
               ) : (
-                userDetails && <UserDetails userData={userDetails} />
+                userDetails && <UserDetails userData={userDetails} onProfileUpdate={handleUpdate} />
               )}
             </div>
             <DrawerFooter>
