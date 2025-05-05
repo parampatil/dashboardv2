@@ -45,6 +45,7 @@ const MainDashboard = () => {
           // { path: '/dashboard/users', name: 'Users Dashboard' },
           { path: '/dashboard/users/all-users', name: 'All Users' },
           { path: '/dashboard/users/find-user', name: 'Find User' },
+          { path: '/dashboard/users/active-users-sessions', name: 'Active Users Sessions' },
         ]
       },
       {

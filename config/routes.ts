@@ -10,6 +10,7 @@ export const ROUTES = {
     { path: '/dashboard/users', name: 'Users Dashboard' },
     { path: '/dashboard/users/all-users', name: 'All Users' },
     { path: '/dashboard/users/find-user', name: 'Find User' },
+    { path: '/dashboard/users/active-users-sessions', name: 'Active Users Sessions' },
     { path: '/dashboard/rewards', name: 'Rewards Dashboard' },
     { path: '/dashboard/rewards/available-rewards', name: 'Available Rewards' },
     { path: '/dashboard/rewards/give-rewards', name: 'Give Rewards' },

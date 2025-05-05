@@ -13,6 +13,7 @@ import {
   CallManagementServiceClient,
   MPSquareServiceClient,
   DenyListServiceClient,
+  OneGuardServiceClient,
 } from "@/types/grpc";
 
 // Default environment if not specified
@@ -28,6 +29,7 @@ const PROTO_PATHS = {
   CALL_MANAGEMENT: path.resolve("./proto/callManagementService.proto"),
   MPSQUARE: path.resolve("./proto/MPSquare.proto"),
   DENY_LIST: path.resolve("./proto/denyList.proto"),
+  ONEGUARD: path.resolve("./proto/one-guard-service.proto"),
 };
 
 // Get environment from request header or use default
@@ -98,6 +100,12 @@ export const createServiceClients = (
       SERVICE_URLS.DENY_LIST,
       environment
     ),
+    oneGuard: createServiceClient<OneGuardServiceClient>(
+      "OneGuardService",
+      PROTO_PATHS.ONEGUARD,
+      SERVICE_URLS.ONEGUARD,
+      environment
+    ),
   };
 };
 
@@ -128,6 +136,9 @@ function createServiceClient<T>(
     denyList: {
       [key: string]: typeof grpc.Client;
     };
+    oneguard: {
+      [key: string]: typeof grpc.Client;
+    }
   }
 
   const protoDescriptor = grpc.loadPackageDefinition(
@@ -136,6 +147,13 @@ function createServiceClient<T>(
 
   if (serviceName === "DenyListService") {
     return new (protoDescriptor.denyList)[serviceName](
+      serviceUrl,
+      grpc.credentials.createSsl(),
+    ) as T;
+  }
+
+  if (serviceName === "OneGuardService") {
+    return new (protoDescriptor.oneguard)[serviceName](
       serviceUrl,
       grpc.credentials.createSsl(),
     ) as T;

@@ -25,6 +25,13 @@ const UsersDashboard = () => {
       icon: <Search className="h-5 w-5" />,
       color: 'bg-amber-500'
     },
+    {
+      path: "/dashboard/users/active-users-sessions",
+      name: "Active Users Sessions",
+      description: "View and manage active user sessions",
+      icon: <UserRound className="h-5 w-5" />,
+      color: 'bg-green-500'
+    }
   ];
 
   // Filter routes based on user permissions

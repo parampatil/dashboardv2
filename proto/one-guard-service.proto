@@ -1,0 +1,62 @@
+syntax = "proto3";
+
+package oneguard;
+
+option go_package = "git.360world.com/one-guard/proto";
+
+service OneGuardService {
+  // Check if the user's session is alive and valid (streaming)
+  rpc AmIAlive(AmIAliveRequest) returns (stream AmIAliveResponse);
+
+  // Revoke the user's session
+  rpc RevokeSession(RevokeSessionRequest) returns (RevokeSessionResponse);
+  // Track the active page and call information of a user
+  rpc LogUserPage(LogUserPageRequest) returns (LogUserPageResponse);
+  // Retrieve the list of active users
+  rpc GetActiveUsers(GetActiveUsersRequest) returns (GetActiveUsersResponse);
+
+}
+
+message AmIAliveRequest {
+  string jwt_token = 1; // The JWT token to validate
+}
+
+message AmIAliveResponse {
+  bool alive = 1;       // Indicates if the user's session is valid
+  string message = 2;   // Additional information (e.g., reason for invalidation)
+}
+
+message RevokeSessionRequest {
+  string jwt_token = 1; // The JWT token of the session to revoke
+  int64 user_id = 2;
+}
+
+message RevokeSessionResponse {
+  bool success = 1;     // Indicates if the session was successfully revoked
+  string message = 2;   // Additional information (e.g., reason for failure)
+}
+
+message LogUserPageRequest {
+  string page = 2;      // The current active page of the user
+  string call_id = 3; // Information about the current call (if any)
+  int64 user_id = 4; // The ID of the user
+}
+
+message LogUserPageResponse {
+  bool success = 1;     // Indicates if the activity was successfully tracked
+  string message = 2;   // Additional information (e.g., reason for failure)
+}
+
+message GetActiveUsersRequest {
+}
+
+message GetActiveUsersResponse {
+  repeated ActiveUser users = 1; // The list of active users
+  int64 total_count = 2;         // The total number of active users
+}
+
+message ActiveUser {
+  int64 user_id = 1;     // The ID of the active user
+  string username = 2;   // The username of the active user
+  string status = 3;     // The status of the active user (e.g., online, busy)
+}

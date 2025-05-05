@@ -702,8 +702,38 @@ export interface Response {
 
 export type Empty = Record<string, never>;
 
+// One Guard Service types
+export interface OneGuardServiceClient extends grpc.Client {
+  GetActiveUsers: (
+    request: GetActiveUsersRequest,
+    callback: (error: Error | null, response: GetActiveUsersResponse) => void
+  ) => void;
+  RevokeSession: (
+    request: RevokeSessionRequest,
+    callback: (error: Error | null, response: RevokeSessionResponse) => void
+  ) => void;
+}
 
+  export interface ActiveUser {
+    user_id: number;
+    username: string;
+    status: string;
+  }
 
+  export type GetActiveUsersRequest = object
+
+  export interface GetActiveUsersResponse {
+    users: ActiveUser[];
+  }
+
+  export interface RevokeSessionRequest {
+    user_id: number;
+  }
+
+  export interface RevokeSessionResponse {
+    success: boolean;
+    message: string;
+  }
 
 // Helper interface to format protobuf timestamp
 export interface ProtoTimestamp {
