@@ -6,7 +6,7 @@ include:
 variables:
    CI_PROJECT_NAME: "admin-dashboard-omnipresence"
    GAR_FOLDER: "internal-web-apps"
-   FOLDER: "internal-web-apps"
+   
 
 
 # # .gitlab-ci-template.yml
