@@ -16,7 +16,7 @@ export function EnvironmentSelector() {
     switch (env) {
       case "dev": return "bg-blue-500";
       case "preprod": return "bg-amber-500";
-      case "prod": return "bg-red-500";
+      case "prod": return "bg-green-500";
       default: return "";
     }
   };
