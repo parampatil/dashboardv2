@@ -6,7 +6,7 @@ include:
 variables:
    CI_PROJECT_NAME: "admin-dashboard-omnipresence"
    GAR_FOLDER: "internal-web-apps"
-   FOLDER: "internal-web-apps"
+   
 
 
 # # .gitlab-ci-template.yml
@@ -132,6 +132,7 @@ variables:
 #     - 'curl -k -X PUT https://prod-k8s.360world.com/apis/apps/v1/namespaces/prod-backend/deployments/admin-dashboard-omnipresence -H "Authorization: Bearer ${CI_K8S_TOKEN}" -H "Content-Type: application/yaml" --data-binary "@kubernetes/deployment.yaml"'
 #   dependencies:
 #     - docker-build
+
 
 
 #   rules:
