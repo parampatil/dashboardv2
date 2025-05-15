@@ -1,0 +1,204 @@
+syntax = "proto3";
+
+package auth;
+
+option go_package = "git.360world.com/backend-team/auth-service;";
+
+// The authentication service definition
+service AuthService {
+  // Get current user
+  rpc GetCurrentUser(GetCurrentUserRequest) returns (UserResponse);
+
+  // User login with email and password
+  rpc Login(LoginRequest) returns (LoginResponse);
+
+  // Logging in via Google sign-in provider
+  rpc GoogleSignIn(GoogleSignInRequest) returns (LoginResponse);
+
+  // User sign-up with email and password
+  rpc SignUp(SignUpRequest) returns (LoginResponse);
+
+  // User accepts NDA
+  rpc AcceptNDA(AcceptNDARequest) returns (AcceptNDAResponse);
+
+  // User rejects NDA
+  rpc RejectNDA(RejectNDARequest) returns (RejectNDAResponse);
+
+  // Check existing user by userId
+  rpc IsUserExists(UserExistsRequest) returns (UserExistsResponse);
+
+  // Check existing user by email
+  rpc IsUserExistsByEmail(UserExistsByEmailRequest) returns (UserExistsByEmailResponse);
+
+  // Forgot password
+  rpc ForgotPassword(ForgotPasswordRequest) returns (ForgotPasswordResponse);
+
+  // Reset password confirmation
+  rpc ResetPassword(ResetPasswordRequest) returns (ResetPasswordResponse);
+  // Update user password hash
+  rpc UpdateUserPasswordHash(UpdateUserPasswordHashRequest) returns (UpdateUserPasswordHashResponse);
+
+  // Check if user has accepted NDA
+  rpc HasAcceptedNDA(HasAcceptedNDARequest) returns (HasAcceptedNDAResponse);
+
+  // Get all users
+  rpc GetAllUsers(GetAllUsersRequest) returns (GetAllUsersResponse);
+  
+  // Soft delete user
+  rpc SoftDeleteUser(SoftDeleteUserRequest) returns (SoftDeleteUserResponse);
+ 
+}
+// Request for getting all users
+message GetAllUsersRequest {
+  int32 page = 1;       // Page number for pagination
+  int32 page_size = 2;  // Number of users per page
+}
+
+// Response for getting all users
+message GetAllUsersResponse {
+  repeated UserResponse users = 1; // List of users
+  int32 total_count = 2;           // Total number of users
+}
+// Request for soft deleting a user
+message SoftDeleteUserRequest {
+  int64 user_id = 1;
+}
+
+// Response for soft deleting a user
+message SoftDeleteUserResponse {
+  bool success = 1;
+  string message = 2;
+}
+// Request for checking if user has accepted NDA
+message HasAcceptedNDARequest {
+  string email = 1;
+}
+
+// Response for checking if user has accepted NDA
+message HasAcceptedNDAResponse {
+  bool has_accepted = 1;
+  string message = 2;
+}
+// Request for updating user password hash
+message UpdateUserPasswordHashRequest { 
+}
+
+  // Response for updating user password hash
+message UpdateUserPasswordHashResponse {
+  bool success = 1;
+  string message = 2;
+}
+// Request for get current user
+message GetCurrentUserRequest {
+  int64 user_id = 1;
+}
+
+// Request for user login
+message LoginRequest {
+  string email = 1;
+  string password = 2;
+}
+
+// Request for Google Sign-In
+message GoogleSignInRequest {
+  string token = 1;        // Google Sign-In token
+  int64 referralCode = 2;  // Optional referral code
+}
+
+// Request for user sign-up
+message SignUpRequest {
+  string email = 1;
+  string password = 2;
+  string firstName = 3;
+  string lastName = 4;
+  int64 referralCode = 5;
+}
+
+/// Response for getting current user
+message UserResponse {
+  int64 user_id = 1;
+  string email = 2;
+  string display_name = 3;
+  string first_name = 4;
+  string last_name = 5;
+}
+
+// Response for login and sign-up operations
+message LoginResponse {
+  string token = 1;       // JWT token for authentication
+  string expires_at = 2;  // Token expiration time (ISO 8601)
+  int64 user_id = 3;
+  bool requires_nda_acceptance = 4; // true if NDA acceptance is pending
+}
+
+// Request for checking if user exists by userId
+message UserExistsRequest {
+  int64 user_id = 1;
+}
+
+// Response for checking if user exists by userId
+message UserExistsResponse {
+  bool exists = 1;
+  string message = 2;
+}
+
+// Request for checking if user exists by email
+message UserExistsByEmailRequest {
+  string email = 1;
+}
+
+// Response for checking if user exists by email
+message UserExistsByEmailResponse {
+  bool exists = 1;
+  string message = 2;
+}
+
+// Request for password reset
+message ForgotPasswordRequest {
+  string email = 1;
+}
+
+// Response for password reset
+message ForgotPasswordResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// Request for password reset confirmation
+message ResetPasswordRequest {
+  string otp = 1;
+  string new_password = 2;
+}
+
+// Response for password reset confirmation
+message ResetPasswordResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// Request for accepting NDA
+message AcceptNDARequest {
+  int64 user_id = 1;
+  string legal_full_name = 2;
+  string email = 3;
+  int64 referral_code = 4;  // optional
+  string nda_version = 5;   // e.g., "v1.0"
+}
+
+// Response for accepting NDA
+message AcceptNDAResponse {
+  string nda_document_drive_link = 1; // URL to Google Drive uploaded NDA
+  string timestamp = 2;               // ISO 8601
+}
+
+// Request for rejecting NDA
+message RejectNDARequest {
+  int64 user_id = 1;
+  string email = 2;
+  int64 referral_code = 3;
+}
+
+// Response for rejecting NDA
+message RejectNDAResponse {
+  string timestamp = 1; // ISO 8601
+}

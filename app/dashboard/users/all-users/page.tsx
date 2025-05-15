@@ -20,6 +20,7 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
+import { DeleteUserButton } from '@/components/UsersDashboard/DeleteUserButton';
 
 import { User } from "@/types/grpc";
 
@@ -121,7 +122,11 @@ export default function Dashboard1() {
         <Eye className="h-4 w-4 mr-1" />
         View
       </Button>
-    )
+    ),
+    deleteButton: (
+      <DeleteUserButton userId={user.userId} />
+    ),
+    
   }));
 
   const handleUpdate = async () => {

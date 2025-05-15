@@ -3,8 +3,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { formatProtobufTimestamp } from "@/lib/utils";
 import { User } from "@/types/grpc";
 
+
 interface UserTableUser extends User {
   viewButton: React.ReactNode;
+  deleteButton: React.ReactNode;
 } 
 
 interface UserTableProps {
@@ -99,8 +101,9 @@ export default function UserTable({
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {user.country}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td className="px-6 py-4 flex items-center gap-2 whitespace-nowrap text-sm text-gray-500">
                     {user.viewButton}
+                    {user.deleteButton}
                   </td>
                 </motion.tr>
               ))}

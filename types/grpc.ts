@@ -97,7 +97,7 @@ export interface UserIdNameMapping {
   [userId: string]: string;
 }
 
-export type GetAllUserIdsAndNamesDashboardResponseRequest = object
+export type GetAllUserIdsAndNamesDashboardResponseRequest = object;
 
 export interface GetAllUserIdsAndNamesDashboardResponse {
   userIdsAndNames: UserIdNameMapping;
@@ -138,8 +138,11 @@ export interface ConsumerPurchaseServiceClient extends grpc.Client {
     callback: (error: Error | null, response: CreateOfferResponse) => void
   ) => void;
   GetConsumerPurchaseBalance: (
-    request: GetConsumerPurchaseBalanceRequest ,
-    callback: (error: Error | null, response: GetConsumerPurchaseBalanceResponse ) => void
+    request: GetConsumerPurchaseBalanceRequest,
+    callback: (
+      error: Error | null,
+      response: GetConsumerPurchaseBalanceResponse
+    ) => void
   ) => void;
   GetConsumerPurchaseHistory: (
     request: ConsumerPurchaseHistoryRequest,
@@ -150,16 +153,19 @@ export interface ConsumerPurchaseServiceClient extends grpc.Client {
   ) => void;
   GetTotalConsumerPurchaseAmount: (
     request: GetTotalConsumerPurchaseAmountRequest,
-    callback: (error: Error | null, response: GetTotalConsumerPurchaseAmountResponse) => void
+    callback: (
+      error: Error | null,
+      response: GetTotalConsumerPurchaseAmountResponse
+    ) => void
   ) => void;
   // Add other methods as needed
 }
 
-export interface GetConsumerPurchaseBalanceRequest  {
+export interface GetConsumerPurchaseBalanceRequest {
   userId: string;
 }
 
-export interface GetConsumerPurchaseBalanceResponse  {
+export interface GetConsumerPurchaseBalanceResponse {
   consumerPurchaseBalance: number;
 }
 
@@ -241,8 +247,11 @@ export interface GetTotalConsumerPurchaseAmountResponse {
 // Provider Earning Service Types
 export interface ProviderEarningServiceClient extends grpc.Client {
   GetProviderEarningBalance: (
-    request: GetProviderEarningBalanceRequest ,
-    callback: (error: Error | null, response: GetProviderEarningBalanceResponse ) => void
+    request: GetProviderEarningBalanceRequest,
+    callback: (
+      error: Error | null,
+      response: GetProviderEarningBalanceResponse
+    ) => void
   ) => void;
   GetProviderEarningTransactions: (
     request: ProviderEarningTransactionsRequest,
@@ -253,12 +262,15 @@ export interface ProviderEarningServiceClient extends grpc.Client {
   ) => void;
   GetAllProviderAnalytics: (
     request: GetAllProviderAnalyticsRequest,
-    callback: (error: Error | null, response: GetAllProviderAnalyticsResponse) => void
+    callback: (
+      error: Error | null,
+      response: GetAllProviderAnalyticsResponse
+    ) => void
   ) => void;
   // Add other methods as needed
 }
 
-export interface GetProviderEarningBalanceRequest  {
+export interface GetProviderEarningBalanceRequest {
   userId: string;
 }
 
@@ -280,7 +292,6 @@ export enum ProviderEarningPayoutStatus {
   FAILED = "failed",
   CANCELED = "canceled",
 }
-
 
 export interface ProviderEarningTransaction {
   transactionId: number;
@@ -352,20 +363,50 @@ export interface CreateRewardTransactionResponse {
 
 // Location Service Types
 export interface LocationServiceClient {
-  GetAllActiveUserIds: (request: GetAllActiveUserIdsRequest, callback: (error: Error | null, response: GetAllActiveUserIdsResponse) => void) => void;
-  GetAllPriorityList: (request: GetAllPriorityListRequest, callback: (error: Error | null, response: GetAllPriorityListResponse) => void) => void;
+  GetAllActiveUserIds: (
+    request: GetAllActiveUserIdsRequest,
+    callback: (
+      error: Error | null,
+      response: GetAllActiveUserIdsResponse
+    ) => void
+  ) => void;
+  GetAllPriorityList: (
+    request: GetAllPriorityListRequest,
+    callback: (
+      error: Error | null,
+      response: GetAllPriorityListResponse
+    ) => void
+  ) => void;
   UpdateUserPriorityPositive: (
-    request: UpdateUserPriorityPositiveRequest, 
-    callback: (error: Error | null, response: UpdateUserPriorityPositiveResponse) => void
+    request: UpdateUserPriorityPositiveRequest,
+    callback: (
+      error: Error | null,
+      response: UpdateUserPriorityPositiveResponse
+    ) => void
   ) => void;
-  
+
   UpdateUserPriorityNegative: (
-    request: UpdateUserPriorityNegativeRequest, 
-    callback: (error: Error | null, response: UpdateUserPriorityNegativeResponse) => void
+    request: UpdateUserPriorityNegativeRequest,
+    callback: (
+      error: Error | null,
+      response: UpdateUserPriorityNegativeResponse
+    ) => void
   ) => void;
-  GetAllBlacklistedUsers: (request: GetAllBlacklistedUsersRequest, callback: (error: Error | null, response: GetAllBlacklistedUsersResponse) => void) => void;
-  BlacklistUser: (request: BlacklistUserRequest, callback: (error: Error | null, response: BlacklistUserResponse) => void) => void;
-  UnblacklistUser: (request: UnblacklistUserRequest, callback: (error: Error | null, response: UnblacklistUserResponse) => void) => void;
+  GetAllBlacklistedUsers: (
+    request: GetAllBlacklistedUsersRequest,
+    callback: (
+      error: Error | null,
+      response: GetAllBlacklistedUsersResponse
+    ) => void
+  ) => void;
+  BlacklistUser: (
+    request: BlacklistUserRequest,
+    callback: (error: Error | null, response: BlacklistUserResponse) => void
+  ) => void;
+  UnblacklistUser: (
+    request: UnblacklistUserRequest,
+    callback: (error: Error | null, response: UnblacklistUserResponse) => void
+  ) => void;
 }
 
 export type GetAllActiveUserIdsRequest = Record<string, never>;
@@ -384,7 +425,7 @@ export interface ArrayLocationData {
   providerIds: string[];
 }
 
-export type GetAllPriorityListRequest = object
+export type GetAllPriorityListRequest = object;
 
 export interface GetAllPriorityListResponse {
   priorityList: { [key: string]: string };
@@ -406,7 +447,7 @@ export interface UpdateUserPriorityNegativeResponse {
   message: string;
 }
 
-export type GetAllBlacklistedUsersRequest = object
+export type GetAllBlacklistedUsersRequest = object;
 
 export interface GetAllBlacklistedUsersResponse {
   blacklistedUsers: string[];
@@ -456,12 +497,18 @@ export interface CallManagementServiceClient {
 
   GetUserCallAnalytics: (
     request: GetUserCallAnalyticsRequest,
-    callback: (error: Error | null, response: GetUserCallAnalyticsResponse) => void
+    callback: (
+      error: Error | null,
+      response: GetUserCallAnalyticsResponse
+    ) => void
   ) => void;
 
   GetTotalCallsPageCount: (
     request: GetTotalCallsPageCountRequest,
-    callback: (error: Error | null, response: GetTotalCallsPageCountResponse) => void
+    callback: (
+      error: Error | null,
+      response: GetTotalCallsPageCountResponse
+    ) => void
   ) => void;
 
   GetCallDetails: (
@@ -606,7 +653,6 @@ export interface GetCallDetailsResponse {
   pageSize: number;
 }
 
-
 // MP2 Service Types
 export interface MPSquareServiceClient {
   SetUserJailTime: (
@@ -615,7 +661,10 @@ export interface MPSquareServiceClient {
   ) => void;
   GetIncarceratedUsers: (
     request: GetIncarceratedUsersRequest,
-    callback: (error: Error | null, response: GetIncarceratedUsersResponse) => void
+    callback: (
+      error: Error | null,
+      response: GetIncarceratedUsersResponse
+    ) => void
   ) => void;
   JailbreakUser: (
     request: JailbreakUserRequest,
@@ -646,7 +695,7 @@ export interface SetUserJailTimeResponse {
   jail_time_remaining: number;
 }
 
-export type GetIncarceratedUsersRequest = object
+export type GetIncarceratedUsersRequest = object;
 
 export interface GetIncarceratedUsersResponse {
   users: IncarceratedUser[];
@@ -714,26 +763,43 @@ export interface OneGuardServiceClient extends grpc.Client {
   ) => void;
 }
 
-  export interface ActiveUser {
-    user_id: number;
-    username: string;
-    status: string;
-  }
+export interface ActiveUser {
+  user_id: number;
+  username: string;
+  status: string;
+}
 
-  export type GetActiveUsersRequest = object
+export type GetActiveUsersRequest = object;
 
-  export interface GetActiveUsersResponse {
-    users: ActiveUser[];
-  }
+export interface GetActiveUsersResponse {
+  users: ActiveUser[];
+}
 
-  export interface RevokeSessionRequest {
-    user_id: number;
-  }
+export interface RevokeSessionRequest {
+  user_id: number;
+}
 
-  export interface RevokeSessionResponse {
-    success: boolean;
-    message: string;
-  }
+export interface RevokeSessionResponse {
+  success: boolean;
+  message: string;
+}
+
+// AuthService types
+export interface AuthServiceClient extends grpc.Client {
+  SoftDeleteUser: (
+    request: SoftDeleteUserRequest,
+    callback: (error: Error | null, response: SoftDeleteUserResponse) => void
+  ) => void;
+}
+
+export interface SoftDeleteUserRequest {
+  user_id: string;
+}
+
+export interface SoftDeleteUserResponse {
+  success: boolean;
+  message: string;
+}
 
 // Helper interface to format protobuf timestamp
 export interface ProtoTimestamp {

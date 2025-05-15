@@ -21,6 +21,8 @@ import {
 } from "@/components/ui/drawer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import debounce from "lodash/debounce";
+import { DeleteUserButton } from '@/components/UsersDashboard/DeleteUserButton';
+
 
 export default function FindUserComponent() {
   const [searchMethod, setSearchMethod] = useState<"email" | "id">("email");
@@ -152,6 +154,7 @@ export default function FindUserComponent() {
         View
       </Button>
     ),
+    deleteButton: <DeleteUserButton userId={user.userId} />,
   }));
 
   const handleTabChange = (value: string) => {

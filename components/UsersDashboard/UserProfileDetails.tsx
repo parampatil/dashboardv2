@@ -1,4 +1,5 @@
 // components/UsersDashboard/UserProfileDetails.tsx
+// Not used anywhere
 "use client";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -9,6 +10,7 @@ import { useAuth } from "@/context/AuthContext";
 import { User, UpdateUserDetailsRequest } from "@/types/grpc";
 import { useToast } from "@/hooks/use-toast";
 import { useApi } from "@/hooks/useApi";
+import { DeleteUserButton } from '@/components/UsersDashboard/DeleteUserButton';
 
 interface UserProfileDetailsProps {
   userData: User;
@@ -133,6 +135,7 @@ export function UserProfileDetails({
 
         <motion.div layout>
           {!isEditing ? (
+            <>
             <Button
               variant="default"
               onClick={() => setIsEditing(true)}
@@ -149,6 +152,8 @@ export function UserProfileDetails({
                 ✨
               </motion.span>
             </Button>
+            <DeleteUserButton userId={userData.userId} />
+            </>
           ) : (
             <div className="flex gap-2">
               <Button
@@ -269,6 +274,7 @@ export function UserProfileDetails({
                 </div>
               )}
             </motion.div>
+            {/* Delete User Button */}
           </AnimatePresence>
         </div>
 

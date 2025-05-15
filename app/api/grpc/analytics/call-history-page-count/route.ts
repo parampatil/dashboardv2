@@ -15,14 +15,9 @@ export async function POST(request: Request) {
       getTotalCallsPageCount: promisify(clients.callManagement.GetTotalCallsPageCount.bind(clients.callManagement))
     };
 
-
-  
-
     const response = await callManagementService.getTotalCallsPageCount(
       requestData
     ) as GetTotalCallsPageCountResponse;
-
-    console.log("Total Pages Response:", response);
 
     return NextResponse.json({
       totalCallCount: response.totalCallCount,

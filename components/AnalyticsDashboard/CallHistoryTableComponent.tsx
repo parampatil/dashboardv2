@@ -101,7 +101,9 @@ export function CallHistoryTableComponent({
   const refreshTimerRef = useRef<NodeJS.Timeout | null>(null);
   const [lastRefreshed, setLastRefreshed] = useState<Date>(new Date());
   const [refreshCountdown, setRefreshCountdown] = useState(refreshInterval);
-  const [selectedCall, setSelectedCall] = useState<FormattedCallTransactionDetails | null>(null);
+  const [selectedCall, setSelectedCall] =
+    useState<FormattedCallTransactionDetails | null>(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   // Handle column visibility toggle
   const toggleColumn = (columnId: string) => {
@@ -429,7 +431,9 @@ export function CallHistoryTableComponent({
                     )}
 
                     {visibleColumns.includes("createdAt") && (
-                      <TableCell>{formatTimestampToDate(call.createdAt)}</TableCell>
+                      <TableCell>
+                        {formatTimestampToDate(call.createdAt)}
+                      </TableCell>
                     )}
 
                     {visibleColumns.includes("consumer") && (
@@ -478,15 +482,18 @@ export function CallHistoryTableComponent({
 
                     {visibleColumns.includes("actions") && (
                       <TableCell>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setSelectedCall(call)}
-                      >
-                        <Eye className="h-4 w-4 mr-2" />
-                        View Details
-                      </Button>
-                    </TableCell>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedCall(call);
+                            setIsDrawerOpen(true);
+                          }}
+                        >
+                          <Eye className="h-4 w-4 mr-2" />
+                          View Details
+                        </Button>
+                      </TableCell>
                     )}
                   </motion.tr>
                 ))}
@@ -532,8 +539,9 @@ export function CallHistoryTableComponent({
       </motion.div>
 
       <CallDetailsDrawer
+        isOpen={isDrawerOpen}
         call={selectedCall}
-        onClose={() => setSelectedCall(null)}
+        onClose={() => setIsDrawerOpen(false)}
       />
     </motion.div>
   );
