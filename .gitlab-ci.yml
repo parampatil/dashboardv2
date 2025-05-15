@@ -6,7 +6,6 @@ include:
 variables:
    CI_PROJECT_NAME: "admin-dashboard-omnipresence"
    GAR_FOLDER: "internal-web-apps"
-   HELM_CHART_VERSION: "0.1.1"
    
 
 
