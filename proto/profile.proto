@@ -40,6 +40,7 @@ message User {
     int64 userId = 19;
     string passwordHash = 20;
     string country = 21;
+    bool deleted = 22;
 }
 
 message GetAllUsersRequest {

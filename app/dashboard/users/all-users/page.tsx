@@ -21,6 +21,7 @@ import {
   DrawerTitle,
 } from "@/components/ui/drawer";
 import { DeleteUserButton } from '@/components/UsersDashboard/DeleteUserButton';
+import { RestoreUserButton } from '@/components/UsersDashboard/RestoreUserButton';
 
 import { User } from "@/types/grpc";
 
@@ -126,7 +127,9 @@ export default function Dashboard1() {
     deleteButton: (
       <DeleteUserButton userId={user.userId} />
     ),
-    
+    restoreButton: (
+      <RestoreUserButton userId={user.userId} />
+    ),
   }));
 
   const handleUpdate = async () => {

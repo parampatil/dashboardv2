@@ -11,6 +11,7 @@ import { User, UpdateUserDetailsRequest } from "@/types/grpc";
 import { useToast } from "@/hooks/use-toast";
 import { useApi } from "@/hooks/useApi";
 import { DeleteUserButton } from '@/components/UsersDashboard/DeleteUserButton';
+import { RestoreUserButton } from "@/components/UsersDashboard/RestoreUserButton";
 
 interface UserProfileDetailsProps {
   userData: User;
@@ -152,7 +153,7 @@ export function UserProfileDetails({
                 ✨
               </motion.span>
             </Button>
-            <DeleteUserButton userId={userData.userId} />
+            {userData.deleted ? <RestoreUserButton userId={userData.userId} /> : <DeleteUserButton userId={userData.userId} />}
             </>
           ) : (
             <div className="flex gap-2">

@@ -7,6 +7,7 @@ import { User } from "@/types/grpc";
 interface UserTableUser extends User {
   viewButton: React.ReactNode;
   deleteButton: React.ReactNode;
+  restoreButton: React.ReactNode;
 } 
 
 interface UserTableProps {
@@ -103,7 +104,7 @@ export default function UserTable({
                   </td>
                   <td className="px-6 py-4 flex items-center gap-2 whitespace-nowrap text-sm text-gray-500">
                     {user.viewButton}
-                    {user.deleteButton}
+                    {user.deleted ? user.restoreButton : user.deleteButton}
                   </td>
                 </motion.tr>
               ))}

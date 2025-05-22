@@ -91,6 +91,7 @@ export interface User {
   proximityAsSkill?: string;
   updatedBy?: string;
   isActive?: boolean;
+  deleted?: boolean;
 }
 
 export interface UserIdNameMapping {

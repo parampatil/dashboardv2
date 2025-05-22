@@ -22,6 +22,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import debounce from "lodash/debounce";
 import { DeleteUserButton } from '@/components/UsersDashboard/DeleteUserButton';
+import { RestoreUserButton } from '@/components/UsersDashboard/RestoreUserButton';
 
 
 export default function FindUserComponent() {
@@ -155,6 +156,8 @@ export default function FindUserComponent() {
       </Button>
     ),
     deleteButton: <DeleteUserButton userId={user.userId} />,
+    restoreButton: <RestoreUserButton userId={user.userId} />,
+
   }));
 
   const handleTabChange = (value: string) => {
