@@ -107,6 +107,7 @@ const MainDashboard = () => {
           { path: '/dashboard/analytics/grafana', name: 'Grafana Dashboard' },
           { path: '/dashboard/analytics/call-history-table', name: 'Call History Table' },
           { path: '/dashboard/analytics/call-history-analytics', name: 'Call History Analytics' },
+          { path: '/dashboard/analytics/call-test-analytics', name: 'Call Test Analytics' },
           { path: '/dashboard/analytics/active-user-analytics', name: 'Active User Analytics' },
         ]
       },
@@ -118,6 +119,15 @@ const MainDashboard = () => {
           // { path: "/dashboard/mpsquare", name: "MP2 Dashboard" },
           { path: "/dashboard/mpsquare/users-in-jail", name: "Users in Jail" },
           { path: "/dashboard/mpsquare/add-to-jail", name: "Add Users to Jail" },
+        ]
+      },
+      {
+        name: "Demo",
+        icon: <MapPin className="h-5 w-5" />,
+        color: "bg-blue-500",
+        routes: [
+          // { path: "/dashboard/demo", name: "Demo Dashboard" },
+          { path: "/dashboard/demo/globe", name: "Demo Globe" },
         ]
       }
     ];

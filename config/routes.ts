@@ -40,6 +40,8 @@ export const ROUTES = {
     { path: "/dashboard/sales/sales-analytics", name: 'Sales Analytics' },
     { path: "/dashboard/remoteconfig", name: 'Remote Config Dashboard' },
     { path: "/dashboard/remoteconfig/sparrow-remote-config", name: 'Sparrow Remote Config' },
+    { path: "/dashboard/demo", name: 'Demo Dashboard' },
+    { path: "/dashboard/demo/globe", name: 'Demo Globe' },
     { path: '/profile', name: 'Profile' },
     { path: '/admin', name: 'Admin Panel' },
     { path: '/admin/roles', name: 'Roles' },
