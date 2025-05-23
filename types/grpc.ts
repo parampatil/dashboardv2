@@ -516,6 +516,11 @@ export interface CallManagementServiceClient {
     request: GetCallDetailsRequest,
     callback: (error: Error | null, response: GetCallDetailsResponse) => void
   ) => void;
+
+  GetCallTestAnalytics: (
+    request: GetCallTestAnalyticsRequest,
+    callback: (error: Error | null, response: GetCallTestAnalyticsResponse) => void
+  ) => void;
 }
 
 // Consumer Call History
@@ -652,6 +657,21 @@ export interface GetCallDetailsResponse {
   totalRecords: string;
   pageNumber: number;
   pageSize: number;
+}
+
+export interface GetCallTestAnalyticsRequest {
+  date: ProtoTimestamp;
+}
+
+export interface callTestAnalyticsUser {
+  userId: string;
+  userName: string;
+  callTimeConsumer: number;
+  callTimeProvider: number;
+}
+
+export interface GetCallTestAnalyticsResponse {
+  testAnalytics: callTestAnalyticsUser[];
 }
 
 // MP2 Service Types

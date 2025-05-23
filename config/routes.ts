@@ -23,6 +23,7 @@ export const ROUTES = {
     { path: '/dashboard/analytics/call-history-table', name: 'Call History Table' },
     { path: '/dashboard/analytics/call-history-analytics', name: 'Call History Analytics' },
     { path: '/dashboard/analytics/active-user-analytics', name: 'Active User Analytics' },
+    { path: '/dashboard/analytics/call-test-analytics', name: 'Call Test Analytics' },
     { path: '/dashboard/consumerpurchase', name: 'Consumer Purchase Dashboard' },
     { path: '/dashboard/consumerpurchase/available-offers', name: 'Available Offers' },
     { path: '/dashboard/consumerpurchase/create-offer', name: 'Create Offer' },

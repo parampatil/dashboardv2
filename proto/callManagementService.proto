@@ -13,6 +13,7 @@ service CallManagementService {
     rpc CreateCall(CreateCallRequest) returns (CreateCallResponse);
     rpc CreateCallV2(CreateCallV2Request) returns (CreateCallV2Response);
     rpc CreateCallV3(CreateCallV3Request) returns (CreateCallV3Response);
+    rpc CreateCallV4(CreateCallV3Request) returns (CreateCallV3Response);
     rpc CreateUserToken(CreateUserTokenRequest) returns (CreateUserTokenResponse);
     rpc GetConsumerCallHistory(GetConsumerCallHistoryRequest) returns (GetConsumerCallHistoryResponse);
     rpc RateUserExperience(RateUserExperienceRequest) returns (RateUserExperienceResponse);
@@ -25,6 +26,7 @@ service CallManagementService {
     rpc GetCallDetails(GetCallDetailsRequest) returns (GetCallDetailsResponse);
     rpc GetUserCallAnalytics(GetUserCallAnalyticsRequest) returns (GetUserCallAnalyticsResponse);
     rpc GetTotalCallsPageCount(GetTotalCallsPageCountRequest) returns (GetTotalCallsPageCountResponse);
+    rpc GetCallTestAnalytics(GetCallTestAnalyticsRequest) returns (GetCallTestAnalyticsResponse);
 
 }
 
@@ -222,4 +224,19 @@ message GetUserCallAnalyticsResponse {
     double averageCallTime = 3;
     double medianCallTime = 4;
     repeated DailyCallStats callStatsPerDay = 5;
+}
+
+message GetCallTestAnalyticsRequest {
+    google.protobuf.Timestamp date = 1;
+}
+
+message callTestAnalyticsUser {
+    int64 userId = 1;
+    string userName = 2;
+    int64 callTimeConsumer = 3;
+    int64 callTimeProvider = 4;
+}
+
+message GetCallTestAnalyticsResponse {
+    repeated callTestAnalyticsUser testAnalytics = 1;
 }
