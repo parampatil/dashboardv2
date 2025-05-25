@@ -9,6 +9,7 @@ variables:
    
 
 
+
 # # .gitlab-ci-template.yml
 # stages:
 #   - build
