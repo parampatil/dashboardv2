@@ -128,6 +128,7 @@ const MainDashboard = () => {
         routes: [
           // { path: "/dashboard/demo", name: "Demo Dashboard" },
           { path: "/dashboard/demo/globe", name: "Demo Globe" },
+          { path: "/dashboard/demo/globe2", name: "Demo Globe 2" },
         ]
       }
     ];

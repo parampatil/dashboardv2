@@ -7,7 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useApi } from "@/hooks/useApi";
 import { useEnvironment } from "@/context/EnvironmentContext";
 import { LocationData, GetAllActiveUserIdsResponse } from "@/types/location";
-import LocationMap from "@/components/DemoDashboard/Globe";
+import LocationMap from "@/components/DemoDashboard/Globe2";
 import { Maximize2, Minimize2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -116,7 +116,7 @@ export default function ActiveUserIds() {
   }, [allCachesData, mapPrecision, updateMapData]);
 
   return (
-    <ProtectedRoute allowedRoutes={["/dashboard/demo/globe"]}>
+    <ProtectedRoute allowedRoutes={["/dashboard/demo/globe2"]}>
       <motion.div
         className={`space-y-6 ${isFullScreen ? "fixed inset-0 z-50 bg-white" : ""}`}
         initial={{ opacity: 0, y: 20 }}

@@ -42,6 +42,7 @@ export const ROUTES = {
     { path: "/dashboard/remoteconfig/sparrow-remote-config", name: 'Sparrow Remote Config' },
     { path: "/dashboard/demo", name: 'Demo Dashboard' },
     { path: "/dashboard/demo/globe", name: 'Demo Globe' },
+    { path: "/dashboard/demo/globe2", name: 'Demo Globe 2' },
     { path: '/profile', name: 'Profile' },
     { path: '/admin', name: 'Admin Panel' },
     { path: '/admin/roles', name: 'Roles' },

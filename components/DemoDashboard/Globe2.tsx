@@ -4,7 +4,8 @@ import Map, { Marker } from "react-map-gl/mapbox";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { motion } from "framer-motion";
-import { MapPin } from "lucide-react";
+import Image from "next/image";
+import PinImg from "@/public/images/Enlarged.png";
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || "";
 
@@ -135,19 +136,6 @@ const LocationMap: React.FC<LocationMapProps> = ({ locations, onZoomChange, isFu
     }
   };
 
-  // Marker color by user count
-  const getMarkerColor = (count: number) => {
-    const startColor = [30, 144, 255]; // Dodger Blue
-    const endColor = [255, 0, 0]; // Red
-    const interpolate = (start: number, end: number, factor: number) =>
-      Math.round(start + (end - start) * factor);
-    const factor = Math.min(Math.max((count - 1) / 9, 0), 1);
-    const r = interpolate(startColor[0], endColor[0], factor);
-    const g = interpolate(startColor[1], endColor[1], factor);
-    const b = interpolate(startColor[2], endColor[2], factor);
-    return `rgba(${r}, ${g}, ${b}, 0.9)`;
-  };
-
   useEffect(() => {
     if (mapRef.current) {
       // Short timeout to ensure DOM has updated
@@ -181,13 +169,18 @@ const LocationMap: React.FC<LocationMapProps> = ({ locations, onZoomChange, isFu
           >
             <div className="relative flex flex-col items-center group">
               {/* Lucide MapPinned as marker */}
-              <MapPin
+              {/* <MapPin
                 className="w-8 h-8 drop-shadow-lg"
                 color={getMarkerColor(location.providers.length)}
                 strokeWidth={2.5}
                 absoluteStrokeWidth
-              />
+              /> */}
+              <Image
+                src={PinImg}
+                alt="Marker"
 
+                className="w-10 h-10 drop-shadow-lg object-contain" 
+              />
               {/* User count bubble */}
               {/* <div className="absolute -top-2 left-1/2 -translate-x-1/2 bg-white text-gray-800 text-xs font-bold px-2 py-0.5 rounded-full border border-gray-200 shadow group-hover:scale-105 transition-transform">
                 {location.providers.length}
