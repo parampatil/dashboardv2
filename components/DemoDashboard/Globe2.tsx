@@ -146,7 +146,7 @@ const LocationMap: React.FC<LocationMapProps> = ({ locations, onZoomChange, isFu
   }, [isFullScreen]);
 
   return (
-    <div className="relative rounded-lg overflow-hidden border border-gray-200 mb-6 h-screen">
+    <div className={`${isFullScreen ? "" : "rounded-lg border border-gray-200 mb-6"} relative overflow-hidden h-screen`}>
       <Map
         {...viewState}
         onMove={(evt) => setViewState(evt.viewState)}
@@ -192,7 +192,7 @@ const LocationMap: React.FC<LocationMapProps> = ({ locations, onZoomChange, isFu
                 className="absolute -top-14 left-1/2 -translate-x-1/2 bg-black/80 px-3 py-2 rounded text-white text-sm min-w-[180px] text-center pointer-events-none group-hover:pointer-events-auto group-hover:opacity-100 opacity-0 transition-opacity z-10"
               >
                 {location.providers.length} User
-                {location.providers.length !== 1 && "s"} in{" "}
+                {location.providers.length !== 1 && "s"} near{" "}
                 {loadingPlaces[location.key] ? (
                   <span className="italic opacity-80">loading...</span>
                 ) : (
