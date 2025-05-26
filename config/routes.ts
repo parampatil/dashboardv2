@@ -4,6 +4,7 @@ export const ROUTES = {
     { path: '/', name: 'Home' },
     { path: '/login', name: 'Login' },
     { path: '/signup', name: 'Signup' },
+    { path: '/globe', name: 'Globe' },
   ],
   PROTECTED: [
     { path: '/dashboard', name: 'Dashboard Landing' },
