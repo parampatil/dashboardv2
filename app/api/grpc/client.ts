@@ -177,7 +177,7 @@ function createServiceClient<T>(
     ) as T;
   }
 
-  if (serviceName === "MPSquare" && environment === "prod") {
+  if (serviceName === "MPSquare" && (environment === "prod" || environment === "preprod")) {
     const rootCertPath = path.resolve("./config/main-ssl.crt");
     const rootCert = fs.readFileSync(rootCertPath);
     
@@ -200,7 +200,7 @@ function createServiceClient<T>(
     ) as T;
   }
 
-  if (environment === "prod") {
+  if (environment === "prod" || environment === "preprod") {
     const rootCertPath = path.resolve("./config/main-ssl.crt");
     const rootCert = fs.readFileSync(rootCertPath);
     
