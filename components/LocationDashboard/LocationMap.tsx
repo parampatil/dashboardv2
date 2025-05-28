@@ -4,10 +4,11 @@ import Map, { Marker, Popup, NavigationControl } from "react-map-gl/mapbox";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { LocationData } from "@/types/location";
 import { motion } from "framer-motion";
-import { X } from "lucide-react";
+import { X, Lock, LockOpen } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { type LayoutMode } from "@/app/dashboard/location/active-user-ids/page";
 import CopyTooltip from "../ui/CopyToolTip";
+import { Button } from "@/components/ui/button";
 
 // Replace with your actual Mapbox token
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || "";
@@ -40,6 +41,7 @@ const LocationMap: React.FC<LocationMapProps> = ({
   );
   const [locationPlace, setLocationPlace] = useState<string>("");
   const [isLoadingPlace, setIsLoadingPlace] = useState(false);
+  const [isPrecisionLocked, setIsPrecisionLocked] = useState(false);
 
   // Add a mapContainer ref to track the map element
   const mapContainerRef = useRef<HTMLDivElement>(null);
@@ -73,11 +75,34 @@ const LocationMap: React.FC<LocationMapProps> = ({
     }
   }, []);
 
-  // Update precision when zoom changes
+  // Zoom change handler
   useEffect(() => {
-    const newPrecision = getGeohashPrecision(viewState.zoom);
-    onZoomChange(newPrecision.toString());
-  }, [viewState.zoom, getGeohashPrecision, onZoomChange]);
+    if (!isPrecisionLocked) {
+      const newPrecision = getGeohashPrecision(viewState.zoom);
+      onZoomChange(newPrecision.toString());
+    }
+  }, [viewState.zoom, isPrecisionLocked, getGeohashPrecision, onZoomChange]);
+
+  // Toggle precision lock
+  const togglePrecisionLock = () => {
+    const newLockState = !isPrecisionLocked;
+    setIsPrecisionLocked(newLockState);
+    
+    if (newLockState) {
+      // When locking, use current precision as fixed value
+      onZoomChange(currentPrecision.toString());
+    } else {
+      // When unlocking, recalculate based on current zoom
+      const newPrecision = getGeohashPrecision(viewState.zoom);
+      onZoomChange(newPrecision.toString());
+    }
+  };
+
+  // Update precision when zoom changes
+  // useEffect(() => {
+  //   const newPrecision = getGeohashPrecision(viewState.zoom);
+  //   onZoomChange(newPrecision.toString());
+  // }, [viewState.zoom, getGeohashPrecision, onZoomChange]);
 
   // Center map on the first available location in the data when first loaded or when locations change
   useEffect(() => {
@@ -298,9 +323,24 @@ const LocationMap: React.FC<LocationMapProps> = ({
       </Map>
 
       <div className="absolute top-2 left-2 bg-black/60 text-white text-xs px-2 py-1 rounded flex items-center gap-2">
-        <span>Precision: {currentPrecision}</span>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={togglePrecisionLock}
+          className="p-1 hover:bg-white/80 transition"
+        >
+          {isPrecisionLocked ? (
+            <Lock className="h-4 w-4 mr-1 text-red-500" />
+          ) : (
+            <LockOpen className="h-4 w-4 mr-1" />
+          )}
+          <span>Precision: {currentPrecision}</span>
+        </Button>
         <span>|</span>
         <span>Zoom: {viewState.zoom.toFixed(1)}</span>
+        <Badge className="ml-2 text-white" variant={isPrecisionLocked ? "default" : "outline"}>
+          {isPrecisionLocked ? "Locked" : "Auto"}
+        </Badge>
       </div>
     </div>
   );

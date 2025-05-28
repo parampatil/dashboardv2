@@ -40,6 +40,13 @@ export default function UsersInJail() {
     try {
       const response = await api.fetch("/api/grpc/mp2/get-jailed-users");
       const data = await response.json();
+      // Check if the API response is successful
+      if (!response.ok || !data || !data.users) {
+        throw new Error(`API error: ${data?.error || response.statusText || 'Unknown error'}`);
+      }
+
+      // Log successful data retrieval
+      console.log("Successfully retrieved incarcerated users:", data.users.length);
       setIncarceratedUsers(data.users);
     } catch (error) {
       toast({

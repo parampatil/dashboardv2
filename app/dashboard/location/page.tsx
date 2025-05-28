@@ -31,6 +31,13 @@ const LocationDashboard = () => {
       description: 'Manage user priority settings',
       icon: <BookUser className="h-5 w-5" />,
       color: 'bg-green-500'
+    },
+    {
+      path: '/dashboard/location/deny-list',
+      name: 'Deny List',
+      description: 'View and manage the deny list',
+      icon: <MapPin className="h-5 w-5" />,
+      color: 'bg-yellow-500'
     }
   ];
 
