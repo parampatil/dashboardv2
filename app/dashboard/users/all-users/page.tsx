@@ -49,13 +49,13 @@ export default function Dashboard1() {
       try {
         const response = await api.fetch(`/api/grpc/users/all-users/?page=${currentPage}&pageSize=${pageSize}`);
         const data = await response.json();
+        
+        if (!response.ok) {
+          throw new Error(data.error.details || data.error.errorMessage);
+        }
         if (mounted) {
           setUsers(data.users);
           setTotalPages(data.totalPages);
-        }
-
-        if (!response.ok) {
-          throw new Error(data.error.details || data.error.errorMessage);
         }
       } catch (error) {
         toast({

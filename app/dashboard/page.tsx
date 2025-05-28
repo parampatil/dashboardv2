@@ -56,6 +56,7 @@ const MainDashboard = () => {
           // { path: '/dashboard/rewards', name: 'Rewards Dashboard' },
           { path: '/dashboard/rewards/available-rewards', name: 'Available Rewards' },
           { path: '/dashboard/rewards/give-rewards', name: 'Give Rewards' },
+          { path: '/dashboard/rewards/create-reward', name: 'Create Reward' },
         ]
       },
       {

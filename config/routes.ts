@@ -15,6 +15,7 @@ export const ROUTES = {
     { path: '/dashboard/rewards', name: 'Rewards Dashboard' },
     { path: '/dashboard/rewards/available-rewards', name: 'Available Rewards' },
     { path: '/dashboard/rewards/give-rewards', name: 'Give Rewards' },
+    { path: '/dashboard/rewards/create-reward', name: 'Create Reward' },
     { path: '/dashboard/customersupport', name: 'Customer Support Dashboard' },
     { path: '/dashboard/customersupport/bug-report', name: 'Bug Report' },
     { path: '/dashboard/devops', name: 'Devops Dashboard' },

@@ -16,6 +16,13 @@ const DemoDashboard = () => {
       icon: <MapPin className="h-5 w-5" />,
       color: "bg-blue-500",
     },
+    {
+      path: "/dashboard/demo/globe2",
+      name: "Globe 2",
+      description: "View active users on a globe with enhanced features.",
+      icon: <MapPin className="h-5 w-5" />,
+      color: "bg-green-500",
+    },
   ];
 
   const containerVariants = {

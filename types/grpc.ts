@@ -337,6 +337,10 @@ export interface RewardServiceClient extends grpc.Client {
       response: CreateRewardTransactionResponse
     ) => void
   ) => void;
+  CreateReward: (
+    request: CreateRewardRequest,
+    callback: (error: Error | null, response: CreateRewardResponse) => void
+  ) => void;
   // Add other methods as needed
 }
 
@@ -360,6 +364,19 @@ export interface CreateRewardTransactionRequest {
 
 export interface CreateRewardTransactionResponse {
   rewardTransactionId: number;
+}
+
+export interface CreateRewardRequest {
+  rewardName: string;
+  rewardDescription: string;
+  amount: number;
+  currency: string;
+  rate: number;
+}
+
+export interface CreateRewardResponse {
+  rewardId: number;
+  message: string;
 }
 
 // Location Service Types

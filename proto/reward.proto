@@ -10,7 +10,6 @@ service RewardService {
 
 }
 
-
 message CreateRewardRequest {
     string rewardName = 1;
     string rewardDescription = 2;

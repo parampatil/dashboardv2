@@ -19,7 +19,7 @@ import {
 
 // Default environment if not specified
 const DEFAULT_ENV =
-  (process.env.DEFAULT_API_ENVIRONMENT as "dev" | "preprod" | "prod") || "dev";
+  (process.env.DEFAULT_API_ENVIRONMENT as "dev" | "preprod" | "prod");
 
 const PROTO_PATHS = {
   PROFILE: path.resolve("./proto/profile.proto"),

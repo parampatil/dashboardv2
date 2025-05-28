@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { useAuth } from "@/context/AuthContext";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import Link from "next/link";
-import { Award, Gift, ChevronRight } from "lucide-react";
+import { Award, Gift, ChevronRight, FilePlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const RewardsDashboard = () => {
@@ -24,6 +24,13 @@ const RewardsDashboard = () => {
       description: 'Assign rewards to users based on their activities',
       icon: <Gift className="h-5 w-5" />,
       color: 'bg-green-500'
+    },
+    {
+      path: '/dashboard/rewards/create-reward',
+      name: 'Create Reward',
+      description: 'Create new rewards to be distributed to users',
+      icon: <FilePlus className="h-5 w-5" />,
+      color: 'bg-blue-500'
     }
   ];
 
