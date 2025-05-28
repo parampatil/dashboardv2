@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils";
 import CopyTooltip from "@/components/ui/CopyToolTip";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { Badge } from "@/components/ui/badge";
+import { useApi } from "@/hooks/useApi";
 
 export default function ActiveUsersPage() {
   const [users, setUsers] = useState<ActiveUser[]>([]);
@@ -25,11 +26,12 @@ export default function ActiveUsersPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const api = useApi();
 
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const response = await fetch("/api/grpc/one-guard/get-active-users");
+      const response = await api.fetch("/api/grpc/one-guard/get-active-users");
       const data = await response.json();
       setUsers(data.users);
       setFilteredUsers(data.users);
@@ -62,7 +64,7 @@ export default function ActiveUsersPage() {
 
   const handleRevoke = async (userId: number) => {
     try {
-      const response = await fetch("/api/grpc/one-guard/revoke-session", {
+      const response = await api.fetch("/api/grpc/one-guard/revoke-session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ user_id: userId }),
