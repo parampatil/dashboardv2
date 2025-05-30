@@ -256,10 +256,9 @@ export default function SalesAnalytics() {
 
         {/* Data Display Section */}
         {loading ? (
-          <div className="flex flex-col justify-center items-center h-96 space-y-4">
-            <Loader2 className="h-16 w-16 animate-spin text-primary" />
-            <p className="text-slate-600 text-lg">Loading sales analytics...</p>
-          </div>
+          <div className="flex flex-col items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
         ) : (
           <div className="space-y-8">
             {/* User Call Analytics */}

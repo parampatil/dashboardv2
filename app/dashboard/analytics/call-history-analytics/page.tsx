@@ -9,6 +9,8 @@ import { useEnvironment } from "@/context/EnvironmentContext";
 import { subDays } from "date-fns";
 import {
   Search,
+  ArrowUp,
+  ArrowDown,
   ArrowUpDown,
   Loader2,
   FilterIcon,
@@ -205,7 +207,7 @@ export default function CallHistoryAnalytics() {
         animate={{ opacity: 1 }}
       >
         <Card className="shadow-xl border-none rounded-xl">
-          <CardHeader className="pb-4 border-b bg-slate-100 rounded-t-xl">
+          <CardHeader className="pb-0 rounded-t-xl">
             <CardTitle className="text-xl font-bold text-slate-800 flex items-center">
               <Users className="mr-3 h-7 w-7 text-primary" />
               User Call Time Analytics
@@ -220,12 +222,6 @@ export default function CallHistoryAnalytics() {
               {/* Desktop Date Range Picker and Search Button */}
               <div className="hidden md:flex md:items-end md:gap-4">
                 <div>
-                  <Label
-                    htmlFor="date-range-picker-desktop"
-                    className="text-sm font-medium text-slate-700 mb-1 block"
-                  >
-                    Date Range
-                  </Label>
                   <DateRangePicker
                     dateRange={dateRange}
                     onDateChange={setDateRange}
@@ -373,57 +369,92 @@ export default function CallHistoryAnalytics() {
             </div>
 
             {loading ? (
-              <div className="flex flex-col justify-center items-center h-96 space-y-3">
-                <Loader2 className="h-12 w-12 animate-spin text-primary" />
-                <p className="text-slate-500">Fetching call data...</p>
-              </div>
+              <div className="flex flex-col items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
             ) : (
               <div className="rounded-lg border overflow-x-auto bg-white">
                 <Table className="min-w-full">
                   <TableHeader className="bg-slate-50">
                     <TableRow>
-                      <TableHead className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                      <TableHead className="px-6 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
                         User ID
                       </TableHead>
-                      <TableHead className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                      <TableHead className="px-6 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
                         User Name
                       </TableHead>
-                      <TableHead className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                      <TableHead className="px-6 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
                         <Button
                           variant="ghost"
                           onClick={() => handleSort("numberOfCalls")}
                           className="px-0 hover:bg-slate-200"
                         >
-                          # Calls <ArrowUpDown className="ml-2 h-3 w-3" />
+                          # Calls{" "}
+                          {sortField === "numberOfCalls" ? (
+                          sortDirection === "asc" ? (
+                            <ArrowUp className="ml-2 h-3 w-3 text-blue-500" />
+                          ) : (
+                            <ArrowDown className="ml-2 h-3 w-3 text-blue-500" />
+                          )
+                          ) : (
+                          <ArrowUpDown className="ml-2 h-3 w-3 opacity-50" />
+                          )}
                         </Button>
                       </TableHead>
-                      <TableHead className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                        <TableHead className="px-6 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
                         <Button
                           variant="ghost"
                           onClick={() => handleSort("totalCallTime")}
-                          className="p-0 hover:bg-slate-200"
+                          className="px-0 hover:bg-slate-200"
                         >
-                          Total Time <ArrowUpDown className="ml-2 h-3 w-3" />
+                          Total Time{" "}
+                          {sortField === "totalCallTime" ? (
+                          sortDirection === "asc" ? (
+                            <ArrowUp className="ml-2 h-3 w-3 text-blue-500" />
+                          ) : (
+                            <ArrowDown className="ml-2 h-3 w-3 text-blue-500" />
+                          )
+                          ) : (
+                          <ArrowUpDown className="ml-2 h-3 w-3 opacity-50" />
+                          )}
                         </Button>
-                      </TableHead>
-                      <TableHead className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                        </TableHead>
+                        <TableHead className="px-6 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
                         <Button
                           variant="ghost"
                           onClick={() => handleSort("callTimeAsProvider")}
-                          className="p-0 hover:bg-slate-200"
+                          className="px-0 hover:bg-slate-200"
                         >
-                          Provider Time <ArrowUpDown className="ml-2 h-3 w-3" />
+                          Provider Time{" "}
+                          {sortField === "callTimeAsProvider" ? (
+                          sortDirection === "asc" ? (
+                            <ArrowUp className="ml-2 h-3 w-3 text-blue-500" />
+                          ) : (
+                            <ArrowDown className="ml-2 h-3 w-3 text-blue-500" />
+                          )
+                          ) : (
+                          <ArrowUpDown className="ml-2 h-3 w-3 opacity-50" />
+                          )}
                         </Button>
-                      </TableHead>
-                      <TableHead className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                        </TableHead>
+                        <TableHead className="px-6 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
                         <Button
                           variant="ghost"
                           onClick={() => handleSort("callTimeAsConsumer")}
-                          className="p-0 hover:bg-slate-200"
+                          className="px-0 hover:bg-slate-200"
                         >
-                          Consumer Time <ArrowUpDown className="ml-2 h-3 w-3" />
+                          Consumer Time{" "}
+                          {sortField === "callTimeAsConsumer" ? (
+                          sortDirection === "asc" ? (
+                            <ArrowUp className="ml-2 h-3 w-3 text-blue-500" />
+                          ) : (
+                            <ArrowDown className="ml-2 h-3 w-3 text-blue-500" />
+                          )
+                          ) : (
+                          <ArrowUpDown className="ml-2 h-3 w-3 opacity-50" />
+                          )}
                         </Button>
-                      </TableHead>
+                        </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody className="divide-y divide-slate-200">
@@ -471,7 +502,7 @@ export default function CallHistoryAnalytics() {
         </Card>
 
         <Card className="shadow-xl border-none rounded-xl mt-8">
-          <CardHeader className="pb-4 border-b bg-slate-100 rounded-t-xl">
+          <CardHeader className="pb-0 rounded-t-xl">
             <CardTitle className="text-xl font-bold text-slate-800 flex items-center">
               <LineChart className="mr-3 h-6 w-6 text-primary" />
               Call Time Distribution
@@ -498,10 +529,9 @@ export default function CallHistoryAnalytics() {
               </div>
             ) : null}
             {loading && (
-              <div className="flex flex-col justify-center items-center h-80 space-y-3">
-                <Loader2 className="h-10 w-10 animate-spin text-primary" />
-                <p className="text-slate-500">Loading chart data...</p>
-              </div>
+             <div className="flex flex-col items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
             )}
           </CardContent>
         </Card>

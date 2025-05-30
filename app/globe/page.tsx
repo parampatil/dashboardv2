@@ -14,7 +14,7 @@ export default function ActiveUserIds() {
   // Map data state
   const [mapPrecision, setMapPrecision] = useState(1);
   const [mapLocations, setMapLocations] = useState<LocationData[]>([]);
-  const [isFullScreen, setIsFullScreen] = useState(false);
+  const [isFullScreen, setIsFullScreen] = useState(true);
 
   // UI state
   const [allCachesData, setAllCachesData] =
