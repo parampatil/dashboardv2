@@ -1,21 +1,22 @@
 // app/dashboard/analytics/call-history-analytics/page.tsx
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { useToast } from "@/hooks/use-toast";
 import { useApi } from "@/hooks/useApi";
 import { useEnvironment } from "@/context/EnvironmentContext";
-import { format } from "date-fns";
-import { Calendar as CalendarIcon, Search, ArrowUpDown } from "lucide-react";
+import { subDays } from "date-fns";
+import {
+  Search,
+  ArrowUpDown,
+  Loader2,
+  FilterIcon,
+  Users,
+  LineChart,
+} from "lucide-react"; // Added FilterIcon, Users, LineChart
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import {
   Table,
   TableBody,
@@ -24,8 +25,31 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { cn } from "@/lib/utils";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card"; // Added Card components
 import { CallHistoryAnalyticsDashboard } from "@/components/AnalyticsDashboard/CallHistoryAnalyticsDashboard";
+import { DateRangePicker } from "@/components/ui/DateRangePicker";
+import {
+  dateToProtoTimestamp,
+  formatDuration as formatDurationUtil,
+} from "@/lib/utils";
+import { DateRange } from "react-day-picker";
+import { Label } from "@/components/ui/label";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+  SheetFooter,
+  SheetClose,
+} from "@/components/ui/sheet";
 
 interface UserCallTime {
   userId: number;
@@ -49,84 +73,90 @@ export default function CallHistoryAnalytics() {
   const [loading, setLoading] = useState(false);
   const [userIdFilter, setUserIdFilter] = useState("");
   const [userNameFilter, setUserNameFilter] = useState("");
-  const [startDate, setStartDate] = useState<Date | undefined>(() => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    return today;
+
+  const [dateRange, setDateRange] = useState<DateRange | undefined>({
+    from: subDays(new Date(), 29),
+    to: new Date(),
   });
-  const [endDate, setEndDate] = useState<Date | undefined>(() => {
-    const today = new Date();
-    today.setHours(23, 59, 59, 999);
-    return today;
-  });
+
   const [sortField, setSortField] = useState<SortField | null>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
+  const [isFiltersSheetOpen, setIsFiltersSheetOpen] = useState(false);
 
   const { toast } = useToast();
   const api = useApi();
   const { currentEnvironment } = useEnvironment();
 
-  const fetchCallTimeData = async () => {
-    if (!startDate || !endDate) {
-      toast({
-        variant: "destructive",
-        title: "Date range required",
-        description: "Please select both start and end dates",
-      });
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const startTimestamp = {
-        seconds: Math.floor(startDate.getTime() / 1000),
-        nanos: (startDate.getTime() % 1000) * 1000000,
-      };
-
-      const endTimestamp = {
-        seconds: Math.floor(endDate.getTime() / 1000),
-        nanos: (endDate.getTime() % 1000) * 1000000,
-      };
-
-      const response = await api.fetch(
-        "/api/grpc/analytics/call-history-analytics",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            startTime: startTimestamp,
-            endTime: endTimestamp,
-          }),
-        }
-      );
-
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(
-          data.error?.details ||
-            data.message ||
-            "Failed to fetch call time data"
-        );
+  const fetchCallTimeData = useCallback(
+    async (currentDateRange?: DateRange) => {
+      const targetDateRange = currentDateRange || dateRange;
+      if (!targetDateRange?.from || !targetDateRange?.to) {
+        toast({
+          variant: "destructive",
+          title: "Date range required",
+          description: "Please select both start and end dates",
+        });
+        return;
       }
 
-      setUserCallTimes(data.userCallTime || []);
-      setFilteredData(data.userCallTime || []);
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Failed to fetch call time data",
-        description: (error as Error).message,
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+      setLoading(true);
+      try {
+        const startTimestamp = dateToProtoTimestamp(targetDateRange.from);
+        const endTimestamp = dateToProtoTimestamp(targetDateRange.to);
+
+        if (!startTimestamp || !endTimestamp) {
+          toast({ variant: "destructive", title: "Invalid date range" });
+          setLoading(false);
+          return;
+        }
+
+        const response = await api.fetch(
+          "/api/grpc/analytics/call-history-analytics",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              startTime: startTimestamp,
+              endTime: endTimestamp,
+            }),
+          }
+        );
+
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(
+            data.error?.details ||
+              data.message ||
+              "Failed to fetch call time data"
+          );
+        }
+
+        setUserCallTimes(data.userCallTime || []);
+        setFilteredData(data.userCallTime || []);
+      } catch (error) {
+        toast({
+          variant: "destructive",
+          title: "Failed to fetch call time data",
+          description: (error as Error).message,
+        });
+        setUserCallTimes([]); // Clear data on error
+        setFilteredData([]);
+      } finally {
+        setLoading(false);
+        setIsFiltersSheetOpen(false); // Close sheet after applying filters
+      }
+    },
+    [api, dateRange, toast]
+  ); // dateRange is a dependency for the callback itself
 
   useEffect(() => {
-    fetchCallTimeData();
-  }, [currentEnvironment]);
+    if (dateRange?.from && dateRange?.to) {
+      fetchCallTimeData(dateRange);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentEnvironment]); // Only run on environment change or initial load with default dateRange
 
   useEffect(() => {
     const filtered = userCallTimes.filter((item) => {
@@ -143,15 +173,9 @@ export default function CallHistoryAnalytics() {
       filtered.sort((a, b) => {
         const aValue = a[sortField];
         const bValue = b[sortField];
-
-        if (sortDirection === "asc") {
-          return aValue - bValue;
-        } else {
-          return bValue - aValue;
-        }
+        return sortDirection === "asc" ? aValue - bValue : bValue - aValue;
       });
     }
-
     setFilteredData(filtered);
   }, [userIdFilter, userNameFilter, userCallTimes, sortField, sortDirection]);
 
@@ -164,232 +188,323 @@ export default function CallHistoryAnalytics() {
     }
   };
 
-  const formatTime = (seconds: number) => {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    const secs = (seconds % 60).toFixed(0);
-    return `${hours}h ${minutes}m ${secs}s`;
-  };
-
-  const handleStartDateChange = (date: Date | undefined) => {
-    if (date) {
-      const newDate = new Date(date);
-      newDate.setHours(0, 0, 0, 0);
-      setStartDate(newDate);
-    } else {
-      setStartDate(undefined);
-    }
-  };
-
-  const handleEndDateChange = (date: Date | undefined) => {
-    if (date) {
-      const newDate = new Date(date);
-      newDate.setHours(23, 59, 59, 999);
-      setEndDate(newDate);
-    } else {
-      setEndDate(undefined);
-    }
+  const handleApplyFiltersFromSheet = () => {
+    fetchCallTimeData(dateRange); // Use current dateRange state
   };
 
   return (
     <ProtectedRoute
-      allowedRoutes={["/dashboard/analytics/call-history-analytics"]}
+      allowedRoutes={[
+        "/dashboard/analytics",
+        "/dashboard/analytics/call-history-analytics",
+      ]}
     >
       <motion.div
-        className="space-y-6"
+        className="space-y-6 min-h-screen"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
       >
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h1 className="text-2xl font-bold text-gray-800 mb-6">
-            Call History Analytics
-          </h1>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Start Date</label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant={"outline"}
-                    className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !startDate && "text-muted-foreground"
-                    )}
+        <Card className="shadow-xl border-none rounded-xl">
+          <CardHeader className="pb-4 border-b bg-slate-100 rounded-t-xl">
+            <CardTitle className="text-xl font-bold text-slate-800 flex items-center">
+              <Users className="mr-3 h-7 w-7 text-primary" />
+              User Call Time Analytics
+            </CardTitle>
+            <CardDescription className="text-slate-600">
+              Analyze call time data for users within a selected date range.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="p-6">
+            {/* Filter Section - Button for Mobile, Inline for Desktop */}
+            <div className="mb-6 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+              {/* Desktop Date Range Picker and Search Button */}
+              <div className="hidden md:flex md:items-end md:gap-4">
+                <div>
+                  <Label
+                    htmlFor="date-range-picker-desktop"
+                    className="text-sm font-medium text-slate-700 mb-1 block"
                   >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {startDate ? (
-                      format(startDate, "PPP")
-                    ) : (
-                      <span>Pick a date</span>
-                    )}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={startDate}
-                    onSelect={handleStartDateChange}
-                    initialFocus
+                    Date Range
+                  </Label>
+                  <DateRangePicker
+                    dateRange={dateRange}
+                    onDateChange={setDateRange}
+                    className="h-12"
                   />
-                </PopoverContent>
-              </Popover>
-            </div>
+                </div>
+                <Button
+                  onClick={() => fetchCallTimeData(dateRange)}
+                  className="h-12 bg-primary hover:bg-primary/90 text-white"
+                  disabled={loading || !dateRange?.from || !dateRange?.to}
+                >
+                  <Search className="mr-2 h-4 w-4" />
+                  {loading ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    "Apply"
+                  )}
+                </Button>
+              </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium">End Date</label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant={"outline"}
-                    className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !endDate && "text-muted-foreground"
-                    )}
+              {/* Mobile Filter Trigger Button */}
+              <div className="md:hidden w-full">
+                <Sheet
+                  open={isFiltersSheetOpen}
+                  onOpenChange={setIsFiltersSheetOpen}
+                >
+                  <SheetTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="w-full justify-center text-slate-700 border-slate-300 hover:bg-slate-100"
+                    >
+                      <FilterIcon className="mr-2 h-4 w-4" />
+                      Filters & Date Range
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent side="bottom" className="rounded-t-2xl p-0">
+                    <SheetHeader className="p-6 pb-4 border-b">
+                      <SheetTitle className="text-lg">
+                        Filters & Date
+                      </SheetTitle>
+                      <SheetDescription>
+                        Select a date range and apply filters.
+                      </SheetDescription>
+                    </SheetHeader>
+                    <div className="p-6 space-y-6 overflow-y-auto max-h-[calc(100vh-150px)]">
+                      <div>
+                        <Label
+                          htmlFor="date-range-picker-mobile"
+                          className="text-sm font-medium text-slate-700 mb-1 block"
+                        >
+                          Date Range
+                        </Label>
+                        <DateRangePicker
+                          dateRange={dateRange}
+                          onDateChange={setDateRange}
+                        />
+                      </div>
+                      <div>
+                        <Label
+                          htmlFor="userIdFilterMobile"
+                          className="text-sm font-medium text-slate-700 mb-1 block"
+                        >
+                          Filter by User ID
+                        </Label>
+                        <Input
+                          id="userIdFilterMobile"
+                          placeholder="Enter User ID"
+                          value={userIdFilter}
+                          onChange={(e) => setUserIdFilter(e.target.value)}
+                          className="h-10"
+                        />
+                      </div>
+                      <div>
+                        <Label
+                          htmlFor="userNameFilterMobile"
+                          className="text-sm font-medium text-slate-700 mb-1 block"
+                        >
+                          Filter by User Name
+                        </Label>
+                        <Input
+                          id="userNameFilterMobile"
+                          placeholder="Enter User Name"
+                          value={userNameFilter}
+                          onChange={(e) => setUserNameFilter(e.target.value)}
+                          className="h-10"
+                        />
+                      </div>
+                    </div>
+                    <SheetFooter className="p-6 border-t">
+                      <SheetClose asChild>
+                        <Button variant="outline" className="w-full sm:w-auto">
+                          Cancel
+                        </Button>
+                      </SheetClose>
+                      <Button
+                        onClick={handleApplyFiltersFromSheet}
+                        className="w-full sm:w-auto"
+                        disabled={loading || !dateRange?.from || !dateRange?.to}
+                      >
+                        {loading ? (
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        ) : (
+                          <Search className="mr-2 h-4 w-4" />
+                        )}
+                        Apply Filters
+                      </Button>
+                    </SheetFooter>
+                  </SheetContent>
+                </Sheet>
+              </div>
+
+              {/* Desktop Filters */}
+              <div className="hidden md:flex md:gap-4 md:items-end">
+                <div>
+                  <Label
+                    htmlFor="userIdFilterDesktop"
+                    className="text-sm font-medium text-slate-700 mb-1 block"
                   >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {endDate ? (
-                      format(endDate, "PPP")
-                    ) : (
-                      <span>Pick a date</span>
-                    )}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={endDate}
-                    onSelect={handleEndDateChange}
-                    initialFocus
+                    Filter by User ID
+                  </Label>
+                  <Input
+                    id="userIdFilterDesktop"
+                    placeholder="User ID"
+                    value={userIdFilter}
+                    onChange={(e) => setUserIdFilter(e.target.value)}
+                    className="h-10"
                   />
-                </PopoverContent>
-              </Popover>
+                </div>
+                <div>
+                  <Label
+                    htmlFor="userNameFilterDesktop"
+                    className="text-sm font-medium text-slate-700 mb-1 block"
+                  >
+                    Filter by User Name
+                  </Label>
+                  <Input
+                    id="userNameFilterDesktop"
+                    placeholder="User Name"
+                    value={userNameFilter}
+                    onChange={(e) => setUserNameFilter(e.target.value)}
+                    className="h-10"
+                  />
+                </div>
+              </div>
             </div>
 
-            <div className="flex items-end">
-              <Button
-                onClick={fetchCallTimeData}
-                className="w-full"
-                disabled={loading || !startDate || !endDate}
-              >
-                <Search className="mr-2 h-4 w-4" />
-                {loading ? "Loading..." : "Search"}
-              </Button>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-            <div>
-              <Input
-                placeholder="Filter by User ID"
-                value={userIdFilter}
-                onChange={(e) => setUserIdFilter(e.target.value)}
-                className="w-full"
-              />
-            </div>
-            <div>
-              <Input
-                placeholder="Filter by User Name"
-                value={userNameFilter}
-                onChange={(e) => setUserNameFilter(e.target.value)}
-                className="w-full"
-              />
-            </div>
-          </div>
-
-          {loading ? (
-            <div className="flex justify-center items-center h-64">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-            </div>
-          ) : (
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>User ID</TableHead>
-                    <TableHead>User Name</TableHead>
-                    <TableHead>
-                      <Button
-                        variant="ghost"
-                        onClick={() => handleSort("numberOfCalls")}
-                        className="flex items-center p-0"
-                      >
-                        Number of Calls
-                        <ArrowUpDown className="ml-2 h-4 w-4" />
-                      </Button>
-                    </TableHead>
-                    <TableHead>
-                      <Button
-                        variant="ghost"
-                        onClick={() => handleSort("totalCallTime")}
-                        className="flex items-center p-0"
-                      >
-                        Total Call Time
-                        <ArrowUpDown className="ml-2 h-4 w-4" />
-                      </Button>
-                    </TableHead>
-                    <TableHead>
-                      <Button
-                        variant="ghost"
-                        onClick={() => handleSort("callTimeAsProvider")}
-                        className="flex items-center p-0"
-                      >
-                        Call Time as Provider
-                        <ArrowUpDown className="ml-2 h-4 w-4" />
-                      </Button>
-                    </TableHead>
-                    <TableHead>
-                      <Button
-                        variant="ghost"
-                        onClick={() => handleSort("callTimeAsConsumer")}
-                        className="flex items-center p-0"
-                      >
-                        Call Time as Consumer
-                        <ArrowUpDown className="ml-2 h-4 w-4" />
-                      </Button>
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredData.length > 0 ? (
-                    filteredData.map((user) => (
-                      <TableRow key={user.userId}>
-                        <TableCell>{user.userId}</TableCell>
-                        <TableCell>{user.userName}</TableCell>
-                        <TableCell>{user.numberOfCalls}</TableCell>
-                        <TableCell>{formatTime(user.totalCallTime)}</TableCell>
-                        <TableCell>
-                          {formatTime(user.callTimeAsProvider)}
-                        </TableCell>
-                        <TableCell>
-                          {formatTime(user.callTimeAsConsumer)}
+            {loading ? (
+              <div className="flex flex-col justify-center items-center h-96 space-y-3">
+                <Loader2 className="h-12 w-12 animate-spin text-primary" />
+                <p className="text-slate-500">Fetching call data...</p>
+              </div>
+            ) : (
+              <div className="rounded-lg border overflow-x-auto bg-white">
+                <Table className="min-w-full">
+                  <TableHeader className="bg-slate-50">
+                    <TableRow>
+                      <TableHead className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                        User ID
+                      </TableHead>
+                      <TableHead className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                        User Name
+                      </TableHead>
+                      <TableHead className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                        <Button
+                          variant="ghost"
+                          onClick={() => handleSort("numberOfCalls")}
+                          className="px-0 hover:bg-slate-200"
+                        >
+                          # Calls <ArrowUpDown className="ml-2 h-3 w-3" />
+                        </Button>
+                      </TableHead>
+                      <TableHead className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                        <Button
+                          variant="ghost"
+                          onClick={() => handleSort("totalCallTime")}
+                          className="p-0 hover:bg-slate-200"
+                        >
+                          Total Time <ArrowUpDown className="ml-2 h-3 w-3" />
+                        </Button>
+                      </TableHead>
+                      <TableHead className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                        <Button
+                          variant="ghost"
+                          onClick={() => handleSort("callTimeAsProvider")}
+                          className="p-0 hover:bg-slate-200"
+                        >
+                          Provider Time <ArrowUpDown className="ml-2 h-3 w-3" />
+                        </Button>
+                      </TableHead>
+                      <TableHead className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                        <Button
+                          variant="ghost"
+                          onClick={() => handleSort("callTimeAsConsumer")}
+                          className="p-0 hover:bg-slate-200"
+                        >
+                          Consumer Time <ArrowUpDown className="ml-2 h-3 w-3" />
+                        </Button>
+                      </TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody className="divide-y divide-slate-200">
+                    {filteredData.length > 0 ? (
+                      filteredData.map((user) => (
+                        <TableRow
+                          key={user.userId}
+                          className="hover:bg-slate-50 transition-colors"
+                        >
+                          <TableCell className="px-6 py-2 whitespace-nowrap text-sm text-slate-700">
+                            {user.userId}
+                          </TableCell>
+                          <TableCell className="px-6 py-2 whitespace-nowrap text-sm font-medium text-slate-900">
+                            {user.userName}
+                          </TableCell>
+                          <TableCell className="px-6 py-2 whitespace-nowrap text-sm text-slate-700">
+                            {user.numberOfCalls}
+                          </TableCell>
+                          <TableCell className="px-6 py-2 whitespace-nowrap text-sm text-slate-700">
+                            {formatDurationUtil(user.totalCallTime)}
+                          </TableCell>
+                          <TableCell className="px-6 py-2 whitespace-nowrap text-sm text-slate-700">
+                            {formatDurationUtil(user.callTimeAsProvider)}
+                          </TableCell>
+                          <TableCell className="px-6 py-2 whitespace-nowrap text-sm text-slate-700">
+                            {formatDurationUtil(user.callTimeAsConsumer)}
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell
+                          colSpan={6}
+                          className="text-center py-10 text-slate-500"
+                        >
+                          No data available for the selected criteria.
                         </TableCell>
                       </TableRow>
-                    ))
-                  ) : (
-                    <TableRow>
-                      <TableCell
-                        colSpan={6}
-                        className="text-center py-6 text-gray-500"
-                      >
-                        No data available
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-        </div>
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
-        <div className="bg-white rounded-lg shadow-md p-6">
-          {!loading && filteredData.length > 0 && (
-            <CallHistoryAnalyticsDashboard
-              data={filteredData}
-              formatTime={formatTime}
-            />
-          )}
-        </div>
+        <Card className="shadow-xl border-none rounded-xl mt-8">
+          <CardHeader className="pb-4 border-b bg-slate-100 rounded-t-xl">
+            <CardTitle className="text-xl font-bold text-slate-800 flex items-center">
+              <LineChart className="mr-3 h-6 w-6 text-primary" />
+              Call Time Distribution
+            </CardTitle>
+            <CardDescription className="text-slate-600">
+              Visual representation of call time data for the filtered users.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="p-6">
+            {!loading && filteredData.length > 0 ? (
+              <CallHistoryAnalyticsDashboard
+                data={filteredData}
+                formatTime={formatDurationUtil}
+              />
+            ) : !loading &&
+              userCallTimes.length > 0 &&
+              filteredData.length === 0 ? (
+              <div className="text-center py-10 text-slate-500">
+                No users match the current filter criteria for the chart.
+              </div>
+            ) : !loading && userCallTimes.length === 0 ? (
+              <div className="text-center py-10 text-slate-500">
+                No call data available to display charts.
+              </div>
+            ) : null}
+            {loading && (
+              <div className="flex flex-col justify-center items-center h-80 space-y-3">
+                <Loader2 className="h-10 w-10 animate-spin text-primary" />
+                <p className="text-slate-500">Loading chart data...</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </motion.div>
     </ProtectedRoute>
   );

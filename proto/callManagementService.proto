@@ -27,7 +27,8 @@ service CallManagementService {
     rpc GetUserCallAnalytics(GetUserCallAnalyticsRequest) returns (GetUserCallAnalyticsResponse);
     rpc GetTotalCallsPageCount(GetTotalCallsPageCountRequest) returns (GetTotalCallsPageCountResponse);
     rpc GetCallTestAnalytics(GetCallTestAnalyticsRequest) returns (GetCallTestAnalyticsResponse);
-
+    rpc GetCallMetrics(GetCallMetricsRequest) returns (GetCallMetricsResponse);
+    rpc GetCallDurationMetrics(GetCallDurationMetricsRequest) returns (GetCallDurationMetricsResponse);
 }
 
 
@@ -235,8 +236,69 @@ message callTestAnalyticsUser {
     string userName = 2;
     int64 callTimeConsumer = 3;
     int64 callTimeProvider = 4;
+    int64 numberOfCallsAsConsumer = 5;
+    int64 numberOfCallsAsProvider = 6;
 }
 
 message GetCallTestAnalyticsResponse {
     repeated callTestAnalyticsUser testAnalytics = 1;
+}
+
+message GetCallMetricsRequest {
+    google.protobuf.Timestamp startDate = 1;
+    google.protobuf.Timestamp endDate = 2;
+}
+message DailyCallMetrics {
+    google.protobuf.Timestamp date = 1;
+    int64 totalCalls = 2;
+    int64 totalSuccessfulCalls = 3;
+    int64 totalFailedCalls = 4;
+}
+
+message TotalCallMetrics {
+    int64 totalCalls = 1;
+    int64 totalSuccessfulCalls = 2;
+    int64 totalFailedCalls = 3;
+}
+
+message DailyCumulativeCallMetrics {
+    google.protobuf.Timestamp date = 1;
+    int64 totalCalls = 2;
+    int64 totalSuccessfulCalls = 3;
+    int64 totalFailedCalls = 4;
+}
+
+
+message GetCallMetricsResponse {
+    repeated DailyCallMetrics dailyCallMetrics = 1;
+    TotalCallMetrics totalCallMetrics = 2;
+    repeated DailyCumulativeCallMetrics dailyCumulativeCallMetrics = 3;
+}
+
+message GetCallDurationMetricsRequest {
+    google.protobuf.Timestamp startDate = 1;
+    google.protobuf.Timestamp endDate = 2;
+}
+
+message DailyCallDurationMetrics {
+    google.protobuf.Timestamp date = 1;
+    int64 totalCallDuration = 2;
+    int64 averageCallDuration = 3;
+}
+
+message TotalCallDurationMetrics {
+    int64 totalCallDuration = 1;
+    int64 averageCallDuration = 2;
+}
+
+message DailyCumulativeCallDurationMetrics {    
+    google.protobuf.Timestamp date = 1;
+    int64 totalCallDuration = 2;
+    int64 averageCallDuration = 3;
+}
+
+message GetCallDurationMetricsResponse {
+    repeated DailyCallDurationMetrics dailyCallDurationMetrics = 1;
+    TotalCallDurationMetrics totalCallDurationMetrics = 2;
+    repeated DailyCumulativeCallDurationMetrics dailyCumulativeCallDurationMetrics = 3;
 }

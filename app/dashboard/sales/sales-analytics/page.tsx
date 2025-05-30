@@ -1,34 +1,46 @@
 // app/dashboard/sales/sales-analytics/page.tsx
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { useToast } from "@/hooks/use-toast";
 import { useApi } from "@/hooks/useApi";
 import { useEnvironment } from "@/context/EnvironmentContext";
-import { format, subDays } from "date-fns";
+import { subDays, format } from "date-fns";
 import {
-  Calendar as CalendarIcon,
   Search,
   Phone,
   Clock,
   Calculator,
+  Loader2,
+  BarChart3,
+  FilterIcon,
+  DollarSign,
+  TrendingUp
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
+  CardDescription,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { DateRangePicker } from "@/components/ui/DateRangePicker";
+import { dateToProtoTimestamp, formatDuration as formatDurationUtil } from "@/lib/utils";
+import { DateRange } from "react-day-picker";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+  SheetFooter,
+  SheetClose,
+} from "@/components/ui/sheet";
 
 // Import chart components
 import CallTimeLineChart from "@/components/charts/CallTimeLineChart";
@@ -50,23 +62,20 @@ export default function SalesAnalytics() {
   const [providerEarnings, setProviderEarnings] =
     useState<ProviderAnalytics | null>(null);
   const [loading, setLoading] = useState(false);
-  const [startDate, setStartDate] = useState<Date | undefined>(() => {
-    const date = subDays(new Date(), 30);
-    date.setHours(0, 0, 0, 0);
-    return date;
+  
+  const [dateRange, setDateRange] = useState<DateRange | undefined>({
+    from: subDays(new Date(), 29), // Default to last 30 days
+    to: new Date(),
   });
-  const [endDate, setEndDate] = useState<Date | undefined>(() => {
-    const today = new Date();
-    today.setHours(23, 59, 59, 999);
-    return today;
-  });
+  const [isFiltersSheetOpen, setIsFiltersSheetOpen] = useState(false);
 
   const { toast } = useToast();
   const api = useApi();
   const { currentEnvironment } = useEnvironment();
 
-  const fetchAnalytics = async () => {
-    if (!startDate || !endDate) {
+  const fetchAnalyticsData = useCallback(async (currentDateRange?: DateRange) => {
+    const targetDateRange = currentDateRange || dateRange;
+    if (!targetDateRange?.from || !targetDateRange?.to) {
       toast({
         variant: "destructive",
         title: "Missing required fields",
@@ -77,330 +86,264 @@ export default function SalesAnalytics() {
 
     setLoading(true);
     try {
-      const startTimestamp = {
-        seconds: Math.floor(startDate.getTime() / 1000),
-        nanos: (startDate.getTime() % 1000) * 1000000,
-      };
+      const startTimestamp = dateToProtoTimestamp(targetDateRange.from);
+      const endTimestamp = dateToProtoTimestamp(targetDateRange.to);
 
-      const endTimestamp = {
-        seconds: Math.floor(endDate.getTime() / 1000),
-        nanos: (endDate.getTime() % 1000) * 1000000,
-      };
+      if (!startTimestamp || !endTimestamp) {
+        toast({ variant: "destructive", title: "Invalid date range" });
+        setLoading(false);
+        return;
+      }
       
-      // Fetch user call analytics
-      const callAnalyticsResponse = await api.fetch(
-        "/api/grpc/sales/user-call-analytics",
-        {
+      const [callAnalyticsRes, purchaseRes, earningsRes] = await Promise.all([
+        api.fetch("/api/grpc/sales/user-call-analytics", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            userId: parseInt(userId),
-            startTimestamp,
-            endTimestamp,
-          }),
-        }
-      );
+          body: JSON.stringify({ userId: parseInt(userId), startTimestamp, endTimestamp }),
+        }),
+        api.fetch("/api/grpc/sales/total-purchase-amount", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ startDate: startTimestamp, endDate: endTimestamp }),
+        }),
+        api.fetch("/api/grpc/sales/provider-analytics", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ startDate: startTimestamp, endDate: endTimestamp }),
+        })
+      ]);
 
-      const callAnalyticsData = await callAnalyticsResponse.json();
-      if (!callAnalyticsResponse.ok) {
-        throw new Error(
-          callAnalyticsData.error?.details ||
-            callAnalyticsData.message ||
-            "Failed to fetch user call analytics"
-        );
-      }
+      const callAnalyticsData = await callAnalyticsRes.json();
+      if (!callAnalyticsRes.ok) throw new Error(callAnalyticsData.message || "Failed to fetch user call analytics");
       setAnalytics(callAnalyticsData);
 
-      // Fetch consumer purchase analytics
-      const purchaseResponse = await api.fetch(
-        "/api/grpc/sales/total-purchase-amount",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            startDate: startTimestamp,
-            endDate: endTimestamp,
-          }),
-        }
-      );
-
-      const purchaseData = await purchaseResponse.json();
-      if (!purchaseResponse.ok) {
-        throw new Error(
-          purchaseData.error?.details ||
-            purchaseData.message ||
-            "Failed to fetch consumer purchase analytics"
-        );
-      }
+      const purchaseData = await purchaseRes.json();
+      if (!purchaseRes.ok) throw new Error(purchaseData.message || "Failed to fetch consumer purchase analytics");
       setConsumerPurchase(purchaseData);
 
-      // Fetch provider earnings
-      const earningsResponse = await api.fetch(
-        "/api/grpc/sales/provider-analytics",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            startDate: startTimestamp,
-            endDate: endTimestamp,
-          }),
-        }
-      );
-
-      const earningsData = await earningsResponse.json();
-      if (!earningsResponse.ok) {
-        throw new Error(
-          earningsData.error?.details ||
-            earningsData.message ||
-            "Failed to fetch provider earnings"
-        );
-      }
+      const earningsData = await earningsRes.json();
+      if (!earningsRes.ok) throw new Error(earningsData.message || "Failed to fetch provider earnings");
       setProviderEarnings(earningsData);
+
     } catch (error) {
       toast({
         variant: "destructive",
         title: "Failed to fetch analytics",
         description: (error as Error).message,
       });
+      setAnalytics(null);
+      setConsumerPurchase(null);
+      setProviderEarnings(null);
     } finally {
       setLoading(false);
+      setIsFiltersSheetOpen(false); 
     }
-  };
+  }, [api, dateRange, toast, userId]);
 
   useEffect(() => {
-    fetchAnalytics();
-  }, [currentEnvironment]);
-
-  const handleStartDateChange = (date: Date | undefined) => {
-    if (date) {
-      const newDate = new Date(date);
-      newDate.setHours(0, 0, 0, 0);
-      setStartDate(newDate);
-    } else {
-      setStartDate(undefined);
+    if (dateRange?.from && dateRange?.to) {
+        fetchAnalyticsData(dateRange);
     }
-  };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentEnvironment]); // Initial fetch on environment change
 
-  const handleEndDateChange = (date: Date | undefined) => {
-    if (date) {
-      const newDate = new Date(date);
-      newDate.setHours(23, 59, 59, 999);
-      setEndDate(newDate);
-    } else {
-      setEndDate(undefined);
-    }
+  const handleApplyFiltersFromSheet = () => {
+    fetchAnalyticsData(dateRange); 
   };
-
-  const formatTime = (seconds: number) => {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${hours}h ${minutes}m ${secs}s`;
-  };
+  
+  const handleApplyFiltersDesktop = () => {
+    fetchAnalyticsData(dateRange);
+  }
 
   return (
-    <ProtectedRoute allowedRoutes={["/dashboard/sales/sales-analytics"]}>
+    <ProtectedRoute allowedRoutes={["/dashboard/sales", "/dashboard/sales/sales-analytics"]}>
       <motion.div
-        className="space-y-6"
+        className="space-y-4 bg-white rounded-lg p-8"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
       >
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h1 className="text-2xl font-bold text-gray-800 mb-6">
-            Sales Analytics
-          </h1>
+        {/* Page Header */}
+        <div>
+            <h1 className="text-xl font-bold text-slate-800 flex items-center">
+              <BarChart3 className="mr-3 h-8 w-8 text-primary" />
+              Sales & Call Analytics
+            </h1>
+            <p className="text-slate-600 mt-1">
+              Comprehensive overview of sales performance, call statistics, and earnings.
+            </p>
+        </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">User ID (Optional)</label>
-              <Input
-                type="number"
-                placeholder="Enter user ID (0 for all)"
-                value={userId}
-                onChange={(e) => setUserId(e.target.value)}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Start Date</label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant={"outline"}
-                    className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !startDate && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {startDate ? (
-                      format(startDate, "PPP")
-                    ) : (
-                      <span>Pick a date</span>
-                    )}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={startDate}
-                    onSelect={handleStartDateChange}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium">End Date</label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant={"outline"}
-                    className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !endDate && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {endDate ? (
-                      format(endDate, "PPP")
-                    ) : (
-                      <span>Pick a date</span>
-                    )}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={endDate}
-                    onSelect={handleEndDateChange}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-
-            <div className="flex items-end">
-              <Button
-                onClick={fetchAnalytics}
-                className="w-full"
-                disabled={loading || !startDate || !endDate}
-              >
-                <Search className="mr-2 h-4 w-4" />
-                {loading ? "Loading..." : "Fetch Analytics"}
-              </Button>
-            </div>
-          </div>
-
-          {loading ? (
-            <div className="flex justify-center items-center h-64">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-            </div>
-          ) : (
-            <div className="space-y-6">
-              {/* User Call Analytics */}
-              {analytics && (
-                <div className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <Card>
-                      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">
-                          Total Calls
-                        </CardTitle>
-                        <Phone className="h-4 w-4 text-muted-foreground" />
-                      </CardHeader>
-                      <CardContent>
-                        <div className="text-2xl font-bold">
-                          {analytics.totalCalls}
-                        </div>
-                      </CardContent>
-                    </Card>
-
-                    <Card>
-                      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">
-                          Total Call Time
-                        </CardTitle>
-                        <Clock className="h-4 w-4 text-muted-foreground" />
-                      </CardHeader>
-                      <CardContent>
-                        <div className="text-2xl font-bold">
-                          {formatTime(analytics.totalCallTime)}
-                        </div>
-                      </CardContent>
-                    </Card>
-
-                    <Card>
-                      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">
-                          Average Call Time
-                        </CardTitle>
-                        <Calculator className="h-4 w-4 text-muted-foreground" />
-                      </CardHeader>
-                      <CardContent>
-                        <div className="text-2xl font-bold">
-                          {formatTime(analytics.averageCallTime)}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </div>
-
-                  <Card>
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-sm font-medium">
-                        Call Time Analytics Over Time
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="h-[400px]">
-                      <CallTimeLineChart callStatsPerDay={analytics.callStatsPerDay || []} />
-                    </CardContent>
-                  </Card>
+        {/* Filter Section - Responsive */}
+        <Card className="mb-8 shadow-lg rounded-xl border border-slate-200">
+            <CardContent className="p-4 md:p-4">
+               {/* Desktop Filters - Updated for inline labels and compact height */}
+            <div className="hidden md:flex md:items-center md:gap-6 flex-wrap"> {/* Increased gap for better spacing */}
+                <div className="flex items-center gap-2"> {/* Inline group for Date Range */}
+                    <DateRangePicker
+                        dateRange={dateRange}
+                        onDateChange={setDateRange}
+                        className="h-12" // Adjusted height to h-10 for consistency
+                    />
                 </div>
-              )}
+                <div className="flex items-center gap-2"> {/* Inline group for User ID */}
+                    <Label htmlFor="userIdInputDesktop" className="text-sm font-medium text-slate-700 whitespace-nowrap">User ID:</Label>
+                    <Input
+                        id="userIdInputDesktop"
+                        type="number"
+                        placeholder="0 for all"
+                        value={userId}
+                        onChange={(e) => setUserId(e.target.value)}
+                        className="h-12 w-36" // Adjusted height and width
+                    />
+                </div>
+                <Button
+                    onClick={handleApplyFiltersDesktop}
+                    className="h-12 bg-primary hover:bg-primary/90 text-white px-5" // Adjusted height
+                    disabled={loading || !dateRange?.from || !dateRange?.to}
+                >
+                    <Search className="mr-2 h-4 w-4" />
+                    {loading ? (<Loader2 className="h-4 w-4 animate-spin" />) : "Apply"}
+                </Button>
+            </div>
 
-              {/* Analytics Cards with Pie Charts */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Consumer Purchase Analytics Card */}
-                <Card className="flex flex-col h-full">
-                  <CardHeader>
-                    <CardTitle>Consumer Purchase Analytics</CardTitle>
-                    <div className="text-sm text-gray-500">
-                      {startDate && endDate
-                        ? `${format(startDate, "PPP")} - ${format(
-                            endDate,
-                            "PPP"
-                          )}`
-                        : "Select a date range"}
+                {/* Mobile Filter Trigger Button */}
+                <div className="md:hidden w-full">
+                     <Sheet open={isFiltersSheetOpen} onOpenChange={setIsFiltersSheetOpen}>
+                        <SheetTrigger asChild>
+                            <Button variant="outline" className="w-full justify-center text-slate-700 border-slate-300 hover:bg-slate-100 h-12">
+                                <FilterIcon className="mr-2 h-5 w-5" />
+                                Filters & Date Range
+                            </Button>
+                        </SheetTrigger>
+                        <SheetContent side="bottom" className="rounded-t-2xl p-0">
+                            <SheetHeader className="p-6 pb-4 border-b">
+                                <SheetTitle className="text-lg">Filters & Date</SheetTitle>
+                                <SheetDescription>
+                                Select a date range and User ID to refine analytics.
+                                </SheetDescription>
+                            </SheetHeader>
+                            <div className="p-6 space-y-6 overflow-y-auto max-h-[calc(100vh-200px)]"> {/* Adjusted max-h */}
+                                <div>
+                                    <Label htmlFor="date-range-picker-mobile" className="text-sm font-medium text-slate-700 mb-1 block">Date Range</Label>
+                                    <DateRangePicker dateRange={dateRange} onDateChange={setDateRange} className="h-12"/>
+                                </div>
+                                <div>
+                                    <Label htmlFor="userIdInputMobile" className="text-sm font-medium text-slate-700 mb-1 block">User ID (Optional)</Label>
+                                    <Input
+                                        id="userIdInputMobile"
+                                        type="number"
+                                        placeholder="0 for all users"
+                                        value={userId}
+                                        onChange={(e) => setUserId(e.target.value)}
+                                        className="h-12"
+                                    />
+                                </div>
+                            </div>
+                             <SheetFooter className="p-6 border-t flex flex-col sm:flex-row gap-2">
+                                <SheetClose asChild>
+                                     <Button variant="outline" className="w-full sm:flex-1 h-11">Cancel</Button>
+                                </SheetClose>
+                                <Button onClick={handleApplyFiltersFromSheet} className="w-full sm:flex-1 bg-primary text-white h-11" disabled={loading || !dateRange?.from || !dateRange?.to}>
+                                    {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> :  <Search className="mr-2 h-4 w-4" />}
+                                    Apply Filters
+                                </Button>
+                            </SheetFooter>
+                        </SheetContent>
+                    </Sheet>
+                </div>
+            </CardContent>
+        </Card>
+
+        {/* Data Display Section */}
+        {loading ? (
+          <div className="flex flex-col justify-center items-center h-96 space-y-4">
+            <Loader2 className="h-16 w-16 animate-spin text-primary" />
+            <p className="text-slate-600 text-lg">Loading sales analytics...</p>
+          </div>
+        ) : (
+          <div className="space-y-8">
+            {/* User Call Analytics */}
+            {analytics && (
+              <Card className="rounded-xl border shadow-lg">
+                <CardHeader className="bg-slate-50 rounded-t-xl">
+                  <CardTitle className="text-xl font-semibold text-slate-700 flex items-center">
+                    <Phone className="mr-3 h-6 w-6 text-blue-600" /> User Call Summary
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-6 space-y-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <InfoCard title="Total Calls" value={analytics.totalCalls.toString()} icon={<TrendingUp className="text-green-500"/>} />
+                    <InfoCard title="Total Call Time" value={formatDurationUtil(Number(analytics.totalCallTime))} icon={<Clock className="text-sky-500"/>} />
+                    <InfoCard title="Average Call Time" value={formatDurationUtil(analytics.averageCallTime)} icon={<Calculator className="text-purple-500"/>} />
                     </div>
+                    {analytics.callStatsPerDay && analytics.callStatsPerDay.length > 0 && (
+                        <div className="h-[500px] mt-6 bg-white p-4 pb-16 rounded-lg border border-slate-200 shadow-inner">
+                            <h4 className="text-md font-semibold text-slate-600 mb-3 text-center">Call Volume & Duration Over Time</h4>
+                            <CallTimeLineChart callStatsPerDay={analytics.callStatsPerDay || []} />
+                        </div>
+                    )}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Financial Analytics (Purchases & Earnings) */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {consumerPurchase && (
+                <Card className="rounded-xl border shadow-lg">
+                  <CardHeader className="bg-slate-50 rounded-t-xl">
+                    <CardTitle className="text-xl font-semibold text-slate-700 flex items-center">
+                      <DollarSign className="mr-3 h-6 w-6 text-emerald-600" /> Consumer Purchases
+                    </CardTitle>
+                     <CardDescription className="text-sm text-slate-500 pt-1">
+                        {dateRange?.from && dateRange?.to
+                            ? `Data for ${format(dateRange.from, "MMM d, y")} - ${format(dateRange.to, "MMM d, y")}`
+                            : "Select a date range"}
+                    </CardDescription>
                   </CardHeader>
-                  <CardContent className="flex-1">
+                  <CardContent className="p-6 h-[350px] sm:h-[400px]">
                     <ConsumerPurchasePieChart data={consumerPurchase} />
                   </CardContent>
                 </Card>
+              )}
 
-                {/* Provider Earnings Analytics Card */}
-                <Card className="flex flex-col h-full">
-                  <CardHeader>
-                    <CardTitle>Provider Earnings Analytics</CardTitle>
-                    <div className="text-sm text-gray-500">
-                      {startDate && endDate
-                        ? `${format(startDate, "PPP")} - ${format(
-                            endDate,
-                            "PPP"
-                          )}`
-                        : "Select a date range"}
-                    </div>
+              {providerEarnings && (
+                 <Card className="rounded-xl border shadow-lg">
+                  <CardHeader className="bg-slate-50 rounded-t-xl">
+                    <CardTitle className="text-xl font-semibold text-slate-700 flex items-center">
+                        <TrendingUp className="mr-3 h-6 w-6 text-amber-600" /> Provider Earnings
+                    </CardTitle>
+                     <CardDescription className="text-sm text-slate-500 pt-1">
+                        {dateRange?.from && dateRange?.to
+                            ? `Data for ${format(dateRange.from, "MMM d, y")} - ${format(dateRange.to, "MMM d, y")}`
+                            : "Select a date range"}
+                    </CardDescription>
                   </CardHeader>
-                  <CardContent className="flex-1">
+                  <CardContent className="p-6 h-[350px] sm:h-[400px]">
                     <ProviderEarningsPieChart data={providerEarnings} />
                   </CardContent>
                 </Card>
-              </div>
+              )}
             </div>
-          )}
-        </div>
+             {(!analytics && !consumerPurchase && !providerEarnings && !loading) && (
+                <div className="text-center py-16 text-slate-500 bg-white rounded-xl shadow-md">
+                    <BarChart3 className="mx-auto h-16 w-16 text-slate-400 mb-4"/>
+                    <p className="text-xl">No analytics data to display.</p>
+                    <p className="text-sm">Please adjust your filters or date range.</p>
+                </div>
+             )}
+          </div>
+        )}
       </motion.div>
     </ProtectedRoute>
   );
 }
+
+const InfoCard = ({ title, value, icon }: { title: string; value: string; icon: React.ReactNode }) => (
+    <div className="bg-white p-5 rounded-lg border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+        <div className="flex items-center text-sm font-medium text-slate-500 mb-1">
+            {icon}
+            <span className="ml-2">{title}</span>
+        </div>
+        <p className="text-xl font-bold text-slate-800">{value}</p>
+    </div>
+);

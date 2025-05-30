@@ -1,6 +1,6 @@
 // app/dashboard/analytics/call-test-analytics/page.tsx
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,45 +11,51 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Calendar } from "@/components/ui/calendar";
-import { format } from "date-fns";
+import { Calendar as ShadCalendar } from "@/components/ui/calendar"; // Renamed to avoid conflict
 import { useToast } from "@/hooks/use-toast";
 import {
   Popover,
   PopoverTrigger,
   PopoverContent,
 } from "@/components/ui/popover";
-import { CalendarIcon, Loader2 } from "lucide-react";
+import { CalendarIcon, Loader2, RefreshCw, PhoneCall } from "lucide-react"; // Added PhoneCall
 import { cn } from "@/lib/utils";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { useApi } from "@/hooks/useApi";
-
-interface CallTestAnalyticsUser {
-  userId: string;
-  userName: string;
-  callTimeConsumer: number;
-  callTimeProvider: number;
-}
+import { GetCallTestAnalyticsResponse, callTestAnalyticsUser } from "@/types/grpc";
+import { formatDuration, formatDate } from "@/lib/utils"; // Using standardized utils
+import { motion } from "framer-motion";
 
 export default function CallTestAnalyticsPage() {
   const [date, setDate] = useState<Date | undefined>(new Date());
-  const [analytics, setAnalytics] = useState<CallTestAnalyticsUser[]>([]);
+  const [analytics, setAnalytics] = useState<callTestAnalyticsUser[]>([]);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const api = useApi();
 
-  const fetchAnalytics = async () => {
-    if (!date) return;
+  const fetchAnalytics = useCallback(async (selectedDate?: Date) => {
+    const targetDate = selectedDate || date;
+    if (!targetDate) {
+        toast({
+            variant: "destructive",
+            title: "Date required",
+            description: "Please select a date to fetch analytics.",
+        });
+        return;
+    }
     try {
       setLoading(true);
       const response = await api.fetch("/api/grpc/analytics/call-test-analytics", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ date }),
+        body: JSON.stringify({ date: targetDate.toISOString() }), // Send ISO string
       });
-      if (!response.ok) throw new Error("Failed to fetch analytics");
-      const data = await response.json();
-      setAnalytics(data.testAnalytics);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to fetch analytics");
+      }
+      const data: GetCallTestAnalyticsResponse = await response.json();
+      setAnalytics(data.testAnalytics || []);
     } catch (error) {
       toast({
         variant: "destructive",
@@ -57,114 +63,139 @@ export default function CallTestAnalyticsPage() {
         description:
           error instanceof Error ? error.message : "Failed to load analytics",
       });
+      setAnalytics([]); // Clear data on error
     } finally {
       setLoading(false);
     }
-  };
+  }, [api, date, toast]);
 
   useEffect(() => {
-    fetchAnalytics();
+    fetchAnalytics(new Date());
   }, []);
 
-  const formatTime = (seconds: number) => {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    const secs = seconds % 60;
-    return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(
-      2,
-      "0"
-    )}:${String(secs).padStart(2, "0")}`;
+  const handleDateChange = (newDate: Date | undefined) => {
+    setDate(newDate);
+    if (newDate) {
+        fetchAnalytics(newDate);
+    } else {
+        setAnalytics([]);
+    }
   };
 
   return (
     <ProtectedRoute allowedRoutes={["/dashboard/analytics/call-test-analytics"]}>
-    <div className="p-6 space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <CalendarIcon className="h-5 w-5 text-muted-foreground" />
-            <span>Call Test Analytics</span>
+    <motion.div
+        className="p-4 md:p-6 space-y-6"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+    >
+      <Card className="shadow-lg border border-gray-200 rounded-xl overflow-hidden">
+        <CardHeader className="bg-gray-50 border-b border-gray-200">
+          <CardTitle className="flex items-center gap-2 text-lg font-semibold text-gray-700">
+            <CalendarIcon className="h-5 w-5 text-primary" />
+            <span>Call Test Analytics Report</span>
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="flex flex-col md:flex-row md:items-center gap-4 mb-6">
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    "w-[240px] justify-start text-left font-normal",
-                    !date && "text-muted-foreground"
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {date ? (
-                    format(date, "MMM dd, yyyy")
-                  ) : (
-                    <span>Pick a date</span>
-                  )}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={date}
-                  onSelect={setDate}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
-            <Button onClick={fetchAnalytics} disabled={loading || !date}>
+        <CardContent className="p-6">
+          <div className="flex flex-col md:flex-row md:items-end gap-4 mb-6">
+            <div className="flex-grow">
+                <label htmlFor="date-picker" className="block text-sm font-medium text-gray-700 mb-1">Select Date</label>
+                <Popover>
+                <PopoverTrigger asChild>
+                    <Button
+                    id="date-picker"
+                    variant="outline"
+                    className={cn(
+                        "w-full md:w-[280px] justify-start text-left font-normal",
+                        !date && "text-muted-foreground"
+                    )}
+                    >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {date ? (
+                        formatDate(date, "PPP")
+                    ) : (
+                        <span>Pick a date</span>
+                    )}
+                    </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                    <ShadCalendar
+                    mode="single"
+                    selected={date}
+                    onSelect={handleDateChange}
+                    initialFocus
+                    disabled={(d) => d > new Date() || d < new Date("2000-01-01")}
+                    />
+                </PopoverContent>
+                </Popover>
+            </div>
+            <Button onClick={() => fetchAnalytics(date)} disabled={loading || !date} className="w-full md:w-auto">
               {loading ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : (
-                "Generate Report"
+                <RefreshCw className="mr-2 h-4 w-4" />
               )}
+              {loading ? "Fetching..." : "Refresh Report"}
             </Button>
           </div>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>User Name</TableHead>
-                <TableHead className="text-right">Consumer Time</TableHead>
-                <TableHead className="text-right">Provider Time</TableHead>
-                <TableHead className="text-right">Total Time</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {analytics.map((user) => (
-                <TableRow key={user.userId}>
-                  <TableCell>{user.userName}</TableCell>
-                  <TableCell className="text-right">
-                    {formatTime(user.callTimeConsumer)}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    {formatTime(user.callTimeProvider)}
-                  </TableCell>
-                  <TableCell className="text-right font-semibold">
-                    {formatTime(user.callTimeConsumer + user.callTimeProvider)}
-                  </TableCell>
-                </TableRow>
-              ))}
-              {analytics.length === 0 && !loading && (
+          <div className="rounded-md border overflow-x-auto">
+            <Table>
+                <TableHeader>
                 <TableRow>
-                  <TableCell colSpan={4} className="h-24 text-center">
-                    No results
-                  </TableCell>
+                    <TableHead className="w-[200px]">User Name</TableHead>
+                    <TableHead className="text-right">
+                        <div className="flex items-center justify-end">
+                            <PhoneCall className="h-4 w-4 mr-1 text-blue-500" /> Calls (Consumer)
+                        </div>
+                    </TableHead>
+                    <TableHead className="text-right">Consumer Time</TableHead>
+                     <TableHead className="text-right">
+                        <div className="flex items-center justify-end">
+                            <PhoneCall className="h-4 w-4 mr-1 text-green-500" /> Calls (Provider)
+                        </div>
+                    </TableHead>
+                    <TableHead className="text-right">Provider Time</TableHead>
+                    <TableHead className="text-right font-semibold">Total Time</TableHead>
                 </TableRow>
-              )}
-              {loading && (
-                <TableRow>
-                  <TableCell colSpan={4} className="h-24 text-center">
-                    <Loader2 className="mx-auto h-6 w-6 animate-spin" />
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+                </TableHeader>
+                <TableBody>
+                {analytics.map((user) => (
+                    <TableRow key={user.userId} className="hover:bg-gray-50">
+                    <TableCell className="font-medium">{user.userName}</TableCell>
+                    <TableCell className="text-right">{user.numberOfCallsAsConsumer ?? 0}</TableCell>
+                    <TableCell className="text-right">
+                        {formatDuration(user.callTimeConsumer)}
+                    </TableCell>
+                    <TableCell className="text-right">{user.numberOfCallsAsProvider ?? 0}</TableCell>
+                    <TableCell className="text-right">
+                        {formatDuration(user.callTimeProvider)}
+                    </TableCell>
+                    <TableCell className="text-right font-semibold">
+                        {formatDuration(parseInt(user.callTimeConsumer || "0") + parseInt(user.callTimeProvider || "0"))}
+                    </TableCell>
+                    </TableRow>
+                ))}
+                {analytics.length === 0 && !loading && (
+                    <TableRow>
+                    <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
+                        No results for the selected date.
+                    </TableCell>
+                    </TableRow>
+                )}
+                {loading && (
+                    <TableRow>
+                    <TableCell colSpan={6} className="h-24 text-center">
+                        <Loader2 className="mx-auto h-6 w-6 animate-spin text-primary" />
+                    </TableCell>
+                    </TableRow>
+                )}
+                </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
-    </div>
+    </motion.div>
     </ProtectedRoute>
   );
 }

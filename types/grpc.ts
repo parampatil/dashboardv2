@@ -538,6 +538,16 @@ export interface CallManagementServiceClient {
     request: GetCallTestAnalyticsRequest,
     callback: (error: Error | null, response: GetCallTestAnalyticsResponse) => void
   ) => void;
+
+    GetCallMetrics: (
+    request: GetCallMetricsRequest,
+    callback: (error: Error | null, response: GetCallMetricsResponse) => void
+  ) => void;
+
+  GetCallDurationMetrics: (
+    request: GetCallDurationMetricsRequest,
+    callback: (error: Error | null, response: GetCallDurationMetricsResponse) => void
+  ) => void;
 }
 
 // Consumer Call History
@@ -683,12 +693,60 @@ export interface GetCallTestAnalyticsRequest {
 export interface callTestAnalyticsUser {
   userId: string;
   userName: string;
-  callTimeConsumer: number;
-  callTimeProvider: number;
+  callTimeConsumer: string;
+  callTimeProvider: string;
+  numberOfCallsAsConsumer: string;
+  numberOfCallsAsProvider: string;
 }
 
 export interface GetCallTestAnalyticsResponse {
   testAnalytics: callTestAnalyticsUser[];
+}
+
+// Call Metrics (New)
+export interface GetCallMetricsRequest {
+  startDate: ProtoTimestamp;
+  endDate: ProtoTimestamp;
+}
+
+export interface DailyCallMetric {
+  date: ProtoTimestamp;
+  totalCalls: number;
+  successfulCalls: number;
+  failedCalls: number;
+}
+
+export interface TotalCallMetrics {
+  totalCalls: number;
+  successfulCalls: number;
+  failedCalls: number;
+}
+
+export interface GetCallMetricsResponse {
+  dailyBreakdown: DailyCallMetric[];
+  totals: TotalCallMetrics;
+}
+
+// Call Duration Metrics (New)
+export interface GetCallDurationMetricsRequest {
+  startDate: ProtoTimestamp;
+  endDate: ProtoTimestamp;
+}
+
+export interface DailyCallDurationMetric {
+  date: ProtoTimestamp;
+  averageCallDuration: number; // in seconds
+  totalCallTime: number; // in seconds
+}
+
+export interface TotalCallDurationMetrics {
+  averageDurationAcrossPeriod: number; // in seconds
+  totalCallTimeForDateRange: number; // in seconds
+}
+
+export interface GetCallDurationMetricsResponse {
+  dailyBreakdown: DailyCallDurationMetric[];
+  totals: TotalCallDurationMetrics;
 }
 
 // MP2 Service Types

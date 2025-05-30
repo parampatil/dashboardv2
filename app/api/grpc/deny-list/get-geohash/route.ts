@@ -10,7 +10,6 @@ export async function GET() {
         getGeohash: promisify(clients.denyList.GetGeohash.bind(clients.denyList))
       };
       const response = await denyListService.getGeohash({});
-      console.log('Fetched geohashes:', response.geohashes);
       return NextResponse.json(response);
     } catch (error) {
         console.error('Error fetching deny list:', error);
