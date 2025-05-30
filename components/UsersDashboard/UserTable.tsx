@@ -1,6 +1,6 @@
 // components/UsersDashboard/UserTable.tsx
 import { motion, AnimatePresence } from "framer-motion";
-import { formatProtobufTimestamp } from "@/lib/utils";
+import { formatProtoTimestamp } from "@/lib/utils";
 import { User } from "@/types/grpc";
 
 
@@ -97,7 +97,7 @@ export default function UserTable({
                     {user.email}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {formatProtobufTimestamp(user.createdTimestamp)}
+                    {formatProtoTimestamp(user.createdTimestamp)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {user.country}

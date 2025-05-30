@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
-import { formatProtobufTimestamp } from "@/lib/utils";
+import { formatProtoTimestamp } from "@/lib/utils";
 import {
   UserDetailsResponse,
   GetProviderEarningBalanceResponse,
@@ -247,11 +247,11 @@ export function UserDetails({ userData, onProfileUpdate }: UserDetailsProps) {
             <div className="col-span-2">
               <InfoField
                 label="Created At"
-                value={formatProtobufTimestamp(userData.user.createdTimestamp)}
+                value={formatProtoTimestamp(userData.user.createdTimestamp)}
               />
               <InfoField
                 label="Updated At"
-                value={formatProtobufTimestamp(
+                value={formatProtoTimestamp(
                   userData.user.lastUpdatedTimestamp
                 )}
               />

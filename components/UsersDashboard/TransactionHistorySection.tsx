@@ -1,7 +1,7 @@
 // components/UsersDashboard/TransactionHistorySection.tsx
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { formatProtobufTimestamp } from "@/lib/utils";
+import { formatProtoTimestamp } from "@/lib/utils";
 import { ConsumerPurchaseTransaction, ProviderEarningTransaction, TransactionStatus, RefundStatus, ProviderEarningPayoutStatus } from "@/types/grpc";
 
 interface TransactionHistorySectionProps {
@@ -90,7 +90,7 @@ function PurchaseHistoryTable({ purchases, loadingHistory }: { purchases: Consum
                       {item.purchaseAmount} {item.purchaseCurrency}
                     </td>
                     <td className="p-3 text-sm">
-                      {formatProtobufTimestamp(item.purchaseTimestamp)}
+                      {formatProtoTimestamp(item.purchaseTimestamp)}
                     </td>
                     <td className="p-3 text-sm">
                       <span
@@ -196,7 +196,7 @@ function EarningTransactionsTable({
                     >
                       <td className="p-3 text-sm">{item.transactionId}</td>
                       <td className="p-3 text-sm">
-                        {formatProtobufTimestamp(item.transactionTimestamp)}
+                        {formatProtoTimestamp(item.transactionTimestamp)}
                       </td>
                       <td className="p-3 text-sm">{item.callDuration}</td>
                       <td className="p-3 text-sm">
