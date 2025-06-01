@@ -27,7 +27,7 @@ export default function AdminPage() {
   ];
 
   return (
-    <ProtectedRoute allowedRoutes={["/admin/roles", "/admin/users"]}>
+    <ProtectedRoute allowedRoutes={["/admin"]}>
       <motion.div
         className="bg-white p-8 rounded-lg shadow-md"
         initial={{ opacity: 0 }}

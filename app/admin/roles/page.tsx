@@ -7,6 +7,7 @@ import { RolesList } from "./RolesList";
 import { CreateRoleForm } from "./CreateRoleForm";
 import { motion } from "framer-motion";
 import { Role } from "@/types";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
 
 export default function RolesManagement() {
   const [roles, setRoles] = useState<Role[]>([]);
@@ -30,6 +31,7 @@ export default function RolesManagement() {
   }, []);
 
   return (
+    <ProtectedRoute allowedRoutes={["/admin/roles"]}>
     <motion.div 
       className="min-h-screen bg-gray-100 p-8"
       initial={{ opacity: 0 }}
@@ -55,5 +57,6 @@ export default function RolesManagement() {
         </div>
       </div>
     </motion.div>
+    </ProtectedRoute>
   );
 }

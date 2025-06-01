@@ -28,6 +28,7 @@ import {
   addEnvironmentToUser,
   removeEnvironmentFromUser,
 } from "@/app/actions/users";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
 
 export default function UserManagement() {
   const [users, setUsers] = useState<User[]>([]);
@@ -153,6 +154,7 @@ export default function UserManagement() {
   };
 
   return (
+    <ProtectedRoute allowedRoutes={["/admin/users"]}>
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
@@ -330,5 +332,6 @@ export default function UserManagement() {
         </DialogContent>
       </Dialog>
     </motion.div>
+    </ProtectedRoute>
   );
 }
