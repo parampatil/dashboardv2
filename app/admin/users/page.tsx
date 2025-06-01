@@ -154,7 +154,6 @@ export default function UserManagement() {
 
   return (
     <motion.div
-      className="bg-gray-50 p-8"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
     >
