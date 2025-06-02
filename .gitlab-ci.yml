@@ -8,8 +8,6 @@ variables:
    GAR_FOLDER: "internal-web-apps"
    
 
-
-
 # # .gitlab-ci-template.yml
 # stages:
 #   - build
