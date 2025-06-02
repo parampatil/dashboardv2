@@ -19,28 +19,25 @@ service ProfileService {
 }
 
 message User {
-    string uid = 1;
-    string userName = 2;
-    string firstName = 3;
-    string middleName = 4;
-    string lastName = 5;
-    string dateOfBirth = 6;  // Using string for DATE type
-    string displayName = 7;
-    string phoneNumber = 8;
-    string email = 9;
-    string pin = 10;
-    string bio = 11;
-    string userType = 12;
-    string proximityAsSkill = 13;
-    google.protobuf.Timestamp createdTimestamp = 14;
-    google.protobuf.Timestamp lastUpdatedTimestamp = 15;
-    string createdBy = 16;
-    string updatedBy = 17;
-    bool isActive = 18;
-    int64 userId = 19;
-    string passwordHash = 20;
-    string country = 21;
-    bool deleted = 22;
+    string userName = 1;
+    string firstName = 2;
+    string middleName = 3;
+    string lastName = 4;
+    string dateOfBirth = 5;  // Using string for DATE type
+    string displayName = 6;
+    string phoneNumber = 7;
+    string email = 8;
+    string bio = 9;
+    string userType = 10;
+    string proximityAsSkill = 11;
+    google.protobuf.Timestamp createdTimestamp = 12;
+    google.protobuf.Timestamp lastUpdatedTimestamp = 13;
+    string createdBy = 14;
+    string updatedBy = 15;
+    bool isActive = 16;
+    int64 userId = 17;
+    string country = 18;
+    bool deleted = 19;
 }
 
 message GetAllUsersRequest {

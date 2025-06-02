@@ -86,7 +86,7 @@ export interface User {
   middleName?: string;
   lastName?: string;
   dateOfBirth?: string;
-  pin?: string;
+  // pin?: string;
   bio?: string;
   proximityAsSkill?: string;
   updatedBy?: string;
