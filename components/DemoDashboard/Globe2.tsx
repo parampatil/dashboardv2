@@ -191,7 +191,7 @@ const LocationMap: React.FC<LocationMapProps> = ({ locations, onZoomChange, isFu
                 animate={{ opacity: 1, y: 0 }}
                 className="absolute -top-14 left-1/2 -translate-x-1/2 bg-black/80 px-3 py-2 rounded text-white text-sm min-w-[180px] text-center pointer-events-none group-hover:pointer-events-auto group-hover:opacity-100 opacity-0 transition-opacity z-10"
               >
-                {location.providers.length} User
+                {location.providers.length} Bubble
                 {location.providers.length !== 1 && "s"} near{" "}
                 {loadingPlaces[location.key] ? (
                   <span className="italic opacity-80">loading...</span>
