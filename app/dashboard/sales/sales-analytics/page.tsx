@@ -261,30 +261,6 @@ export default function SalesAnalytics() {
       </div>
         ) : (
           <div className="space-y-8">
-            {/* User Call Analytics */}
-            {analytics && (
-              <Card className="rounded-xl border shadow-lg">
-                <CardHeader className="bg-slate-50 rounded-t-xl">
-                  <CardTitle className="text-xl font-semibold text-slate-700 flex items-center">
-                    <Phone className="mr-3 h-6 w-6 text-blue-600" /> User Call Summary
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-6 space-y-6">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <InfoCard title="Total Calls" value={analytics.totalCalls.toString()} icon={<TrendingUp className="text-green-500"/>} />
-                    <InfoCard title="Total Call Time" value={formatDurationUtil(Number(analytics.totalCallTime))} icon={<Clock className="text-sky-500"/>} />
-                    <InfoCard title="Average Call Time" value={formatDurationUtil(analytics.averageCallTime)} icon={<Calculator className="text-purple-500"/>} />
-                    </div>
-                    {analytics.callStatsPerDay && analytics.callStatsPerDay.length > 0 && (
-                        <div className="h-[500px] mt-6 bg-white p-4 pb-16 rounded-lg border border-slate-200 shadow-inner">
-                            <h4 className="text-md font-semibold text-slate-600 mb-3 text-center">Call Volume & Duration Over Time</h4>
-                            <CallTimeLineChart callStatsPerDay={analytics.callStatsPerDay || []} />
-                        </div>
-                    )}
-                </CardContent>
-              </Card>
-            )}
-
             {/* Financial Analytics (Purchases & Earnings) */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {consumerPurchase && (
@@ -323,6 +299,32 @@ export default function SalesAnalytics() {
                 </Card>
               )}
             </div>
+            
+            {/* User Call Analytics */}
+            {analytics && (
+              <Card className="rounded-xl border shadow-lg">
+                <CardHeader className="bg-slate-50 rounded-t-xl">
+                  <CardTitle className="text-xl font-semibold text-slate-700 flex items-center">
+                    <Phone className="mr-3 h-6 w-6 text-blue-600" /> User Call Summary
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-6 space-y-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <InfoCard title="Total Calls" value={analytics.totalCalls.toString()} icon={<TrendingUp className="text-green-500"/>} />
+                    <InfoCard title="Total Call Time" value={formatDurationUtil(Number(analytics.totalCallTime))} icon={<Clock className="text-sky-500"/>} />
+                    <InfoCard title="Average Call Time" value={formatDurationUtil(analytics.averageCallTime)} icon={<Calculator className="text-purple-500"/>} />
+                    </div>
+                    {analytics.callStatsPerDay && analytics.callStatsPerDay.length > 0 && (
+                        <div className="h-[500px] mt-6 bg-white p-4 pb-16 rounded-lg border border-slate-200 shadow-inner">
+                            <h4 className="text-md font-semibold text-slate-600 mb-3 text-center">Call Volume & Duration Over Time</h4>
+                            <CallTimeLineChart callStatsPerDay={analytics.callStatsPerDay || []} />
+                        </div>
+                    )}
+                </CardContent>
+              </Card>
+            )}
+
+            
              {(!analytics && !consumerPurchase && !providerEarnings && !loading) && (
                 <div className="text-center py-16 text-slate-500 bg-white rounded-xl shadow-md">
                     <BarChart3 className="mx-auto h-16 w-16 text-slate-400 mb-4"/>

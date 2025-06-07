@@ -49,7 +49,7 @@ export async function POST(request: Request) {
         
         // Format durations and charges
         callDuration: formatSecondsToHMS(Number(call.callDuration)),
-        charge: formatSecondsToHMS(Number(call.charge)),
+        charge: (Number(call.charge)/100),
         
         // Keep original data for reference if needed
         // callDurationSeconds: call.callDuration,

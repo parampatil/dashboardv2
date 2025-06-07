@@ -142,7 +142,7 @@ export const CallDetailsDrawer: React.FC<CallDetailsDrawerProps> = ({
                   <InfoCard
                     icon={<DollarSign className="h-5 w-5 text-green-500" />}
                     title="Charge"
-                    value={call.charge}
+                    value={"$" + call.charge}
                   />
                   <InfoCard
                     icon={<MessageSquare className="h-5 w-5 text-purple-500" />}

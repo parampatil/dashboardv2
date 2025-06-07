@@ -18,8 +18,10 @@ import {
 } from "@/types/grpc";
 
 // Default environment if not specified
-const DEFAULT_ENV =
-  (process.env.DEFAULT_API_ENVIRONMENT as "dev" | "preprod" | "prod");
+const DEFAULT_ENV = process.env.DEFAULT_API_ENVIRONMENT as
+  | "dev"
+  | "preprod"
+  | "prod";
 
 const PROTO_PATHS = {
   PROFILE: path.resolve("./proto/profile.proto"),
@@ -109,11 +111,11 @@ export const createServiceClients = (
       environment
     ),
     auth: createServiceClient<AuthServiceClient>(
-    "AuthService",
-    PROTO_PATHS.AUTH,
-    SERVICE_URLS.AUTH,
-    environment
-  ),
+      "AuthService",
+      PROTO_PATHS.AUTH,
+      SERVICE_URLS.AUTH,
+      environment
+    ),
   };
 };
 
@@ -121,7 +123,8 @@ function createServiceClient<T>(
   serviceName: string,
   protoPath: string,
   serviceUrl: string,
-  environment: string,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  environment: string
 ): T {
   const packageDefinition = protoLoader.loadSync(protoPath, {
     keepCase: true,
@@ -146,86 +149,96 @@ function createServiceClient<T>(
     };
     oneguard: {
       [key: string]: typeof grpc.Client;
-    }
+    };
     auth: {
       [key: string]: typeof grpc.Client;
     };
   }
+
+  // Load the root certificate for secure connections
+  const rootCertPath = path.resolve("./config/main-ssl.crt");
+  const rootCert = fs.readFileSync(rootCertPath);
+
+  // Temporary workaround for gRPC-js limitation
+  process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"; // Only for development!
 
   const protoDescriptor = grpc.loadPackageDefinition(
     packageDefinition
   ) as unknown as ProtoGrpcType;
 
   if (serviceName === "DenyListService") {
-    return new (protoDescriptor.denyList)[serviceName](
+    return new protoDescriptor.denyList[serviceName](
       serviceUrl,
-      grpc.credentials.createSsl(),
+      grpc.credentials.createSsl(rootCert, null, null, {
+      checkServerIdentity: () => {
+        console.warn("Bypassing TLS certificate validation - DEV ONLY");
+        return undefined;
+      },
+    })
     ) as T;
   }
 
   if (serviceName === "OneGuardService") {
-    return new (protoDescriptor.oneguard)[serviceName](
+    return new protoDescriptor.oneguard[serviceName](
       serviceUrl,
-      grpc.credentials.createSsl(),
+      grpc.credentials.createSsl(rootCert, null, null, {
+      checkServerIdentity: () => {
+        console.warn("Bypassing TLS certificate validation - DEV ONLY");
+        return undefined;
+      },
+    })
     ) as T;
   }
 
   if (serviceName === "AuthService") {
-    return new (protoDescriptor.auth)[serviceName](
+    return new protoDescriptor.auth[serviceName](
       serviceUrl,
-      grpc.credentials.createSsl(),
+      grpc.credentials.createSsl(rootCert, null, null, {
+      checkServerIdentity: () => {
+        console.warn("Bypassing TLS certificate validation - DEV ONLY");
+        return undefined;
+      },
+    })
     ) as T;
   }
 
-  if (serviceName === "MPSquare" && (environment === "prod" || environment === "preprod")) {
-    const rootCertPath = path.resolve("./config/main-ssl.crt");
-    const rootCert = fs.readFileSync(rootCertPath);
-    
-    // Temporary workaround for gRPC-js limitation
-    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'; // Only for development!
-  
-   return new (protoDescriptor.MPSquare)[serviceName](
-    serviceUrl,
-      grpc.credentials.createSsl(
-        rootCert,
-        null,
-        null,
-        {
-          checkServerIdentity: () => {
-            console.warn('Bypassing TLS certificate validation - DEV ONLY');
-            return undefined;
-          }
-        }
-      )
+  if (serviceName === "MPSquare") {
+    return new protoDescriptor.MPSquare[serviceName](
+      serviceUrl,
+      grpc.credentials.createSsl(rootCert, null, null, {
+      checkServerIdentity: () => {
+        console.warn("Bypassing TLS certificate validation - DEV ONLY");
+        return undefined;
+      },
+    })
     ) as T;
   }
 
-  if (environment === "prod" || environment === "preprod") {
-    const rootCertPath = path.resolve("./config/main-ssl.crt");
-    const rootCert = fs.readFileSync(rootCertPath);
-    
-    // Temporary workaround for gRPC-js limitation
-    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'; // Only for development!
-  
-   return new (protoDescriptor[serviceName as keyof ProtoGrpcType] as typeof grpc.Client)(
-    serviceUrl,
-      grpc.credentials.createSsl(
-        rootCert,
-        null,
-        null,
-        {
-          checkServerIdentity: () => {
-            console.warn('Bypassing TLS certificate validation - DEV ONLY');
-            return undefined;
-          }
-        }
-      )
-    ) as T;
-  }
+  // Create the gRPC client with secure credentials without TLS validation
+  // return new (protoDescriptor[
+  //   serviceName as keyof ProtoGrpcType
+  // ] as typeof grpc.Client)(
+  //   serviceUrl,
+  //   grpc.credentials.createSsl()
+  // ) as T;
 
-  return new (protoDescriptor[serviceName as keyof ProtoGrpcType] as typeof grpc.Client)(
+
+  // Create the gRPC client with secure credentials
+  return new (protoDescriptor[
+    serviceName as keyof ProtoGrpcType
+  ] as typeof grpc.Client)(
     serviceUrl,
-    grpc.credentials.createInsecure(),
+    grpc.credentials.createSsl(rootCert, null, null, {
+      checkServerIdentity: () => {
+        console.warn("Bypassing TLS certificate validation - DEV ONLY");
+        return undefined;
+      },
+    })
   ) as T;
 
+  // use insecure credentials for onprem server
+  // return new (protoDescriptor[serviceName as keyof ProtoGrpcType] as typeof grpc.Client)(
+  //   serviceUrl,
+  //   grpc.credentials.createInsecure(),
+  // ) as T;
 }

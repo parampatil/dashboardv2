@@ -21,9 +21,8 @@ import {
 } from "@/components/ui/drawer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import debounce from "lodash/debounce";
-import { DeleteUserButton } from '@/components/UsersDashboard/DeleteUserButton';
-import { RestoreUserButton } from '@/components/UsersDashboard/RestoreUserButton';
-
+import { DeleteUserButton } from "@/components/UsersDashboard/DeleteUserButton";
+import { RestoreUserButton } from "@/components/UsersDashboard/RestoreUserButton";
 
 export default function FindUserComponent() {
   const [searchMethod, setSearchMethod] = useState<"email" | "id">("email");
@@ -111,7 +110,13 @@ export default function FindUserComponent() {
     } else {
       setUsers([]);
     }
-  }, [searchInput, searchMethod, debouncedFetchUsers, fetchUserById, usersVersion]);
+  }, [
+    searchInput,
+    searchMethod,
+    debouncedFetchUsers,
+    fetchUserById,
+    usersVersion,
+  ]);
 
   const handleViewUserDetails = async (userId: string) => {
     setSelectedUserId(userId);
@@ -150,6 +155,7 @@ export default function FindUserComponent() {
         variant="ghost"
         size="sm"
         onClick={() => handleViewUserDetails(user.userId)}
+        className="bg-gray-100 hover:bg-gray-200 text-gray-800 flex items-center justify-center"
       >
         <Eye className="h-4 w-4 mr-1" />
         View
@@ -157,7 +163,6 @@ export default function FindUserComponent() {
     ),
     deleteButton: <DeleteUserButton userId={user.userId} />,
     restoreButton: <RestoreUserButton userId={user.userId} />,
-
   }));
 
   const handleTabChange = (value: string) => {
@@ -204,15 +209,74 @@ export default function FindUserComponent() {
               />
             </TabsContent>
           </Tabs>
-          {loading && <p>Loading...</p>}
+
+          {loading && (
+            <div className="flex justify-center items-center h-64">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+              </div>)}
           {!loading && users.length > 0 && (
-            <UserTable
-              users={usersWithViewButton}
-              loading={false}
-              currentPage={1}
-              pageSize={users.length}
-              selectedUserId={selectedUserId}
-            />
+            <>
+              <motion.div
+                className="flex flex-col md:flex-row md:justify-between md:items-end gap-4 pb-2"
+                initial={{ y: -20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: -20, opacity: 0 }}
+                transition={{ type: "spring", stiffness: 70, damping: 15 }}
+              >
+                <div className="flex flex-col flex-1">
+                  <div className="flex flex-wrap gap-4">
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      transition={{ delay: 0.05 }}
+                      className="flex items-center justify-between  bg-white border border-gray-100 rounded-md px-3 py-2 gap-4"
+                    >
+                      <span className="text-gray-500">Total Users Found</span>
+                      <span className="mt-1 text-xl font-extrabold bg-cyan-100 text-cyan-800 px-2 py-0.5 rounded">
+                        {loading ? "..." : users.length}
+                      </span>
+                    </motion.div>
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      transition={{ delay: 0.12 }}
+                      className="flex items-center justify-between bg-white border border-gray-100 rounded-md px-3 py-2 gap-4"
+                    >
+                      <span className="text-gray-500">360 Users</span>
+                      <span className="mt-1 text-xl font-extrabold bg-green-100 text-green-800 px-2 py-0.5 rounded">
+                        {loading
+                          ? "..."
+                          : users.filter((user) =>
+                              user.email?.includes("@360world.com")
+                            ).length}
+                      </span>
+                    </motion.div>
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      transition={{ delay: 0.19 }}
+                      className="flex items-center justify-between bg-white border border-gray-100 rounded-md px-3 py-2 gap-4"
+                    >
+                      <span className="text-gray-500">Non-360 Users</span>
+                      <span className="mt-1 text-xl font-extrabold bg-purple-100 text-purple-800 px-2 py-0.5 rounded">
+                        {loading
+                          ? "..."
+                          : users.filter(
+                              (user) => !user.email?.includes("@360world.com")
+                            ).length}
+                      </span>
+                    </motion.div>
+                  </div>
+                </div>
+              </motion.div>
+              <UserTable
+                users={usersWithViewButton}
+                loading={false}
+                currentPage={1}
+                pageSize={users.length}
+                selectedUserId={selectedUserId}
+              />
+            </>
           )}
           {!loading && users.length === 0 && searchInput && (
             <p>No users found</p>
@@ -240,7 +304,12 @@ export default function FindUserComponent() {
                   <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
                 </div>
               ) : (
-                userDetails && <UserDetails userData={userDetails} onProfileUpdate={handleUpdate}/>
+                userDetails && (
+                  <UserDetails
+                    userData={userDetails}
+                    onProfileUpdate={handleUpdate}
+                  />
+                )
               )}
             </div>
             <DrawerFooter>

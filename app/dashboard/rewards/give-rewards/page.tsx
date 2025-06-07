@@ -191,29 +191,36 @@ export default function RewardsPage() {
                         align="end"
                         className="min-w-[200px] rounded-xl shadow-lg"
                       >
-                        {(rewardsData?.rewards || []).map((reward) => (
-                          <DropdownMenuItem
-                            key={reward.rewardId}
-                            onSelect={() =>
-                              assignReward(userId, reward.rewardId)
-                            }
-                            className="flex items-center gap-2"
-                            disabled={assigning === userId + reward.rewardId}
-                          >
-                            <Gift className="w-4 h-4 text-pink-400" />
-                            <span className="flex-1">
-                              {reward.rewardName}
-                              <span className="ml-2 text-xs text-gray-400">
-                                {reward.points ?? reward.amount ?? ""} min
+                        {(rewardsData?.rewards || [])
+                          .slice() // avoid mutating original
+                          .sort((a, b) => {
+                            const aMin = a.points ?? a.amount ?? 0;
+                            const bMin = b.points ?? b.amount ?? 0;
+                            return aMin - bMin;
+                          })
+                          .map((reward) => (
+                            <DropdownMenuItem
+                              key={reward.rewardId}
+                              onSelect={() =>
+                                assignReward(userId, reward.rewardId)
+                              }
+                              className="flex items-center gap-2"
+                              disabled={assigning === userId + reward.rewardId}
+                            >
+                              <Gift className="w-4 h-4 text-pink-400" />
+                              <span className="flex-1">
+                                {reward.rewardName}
+                                <span className="ml-2 text-xs text-gray-400">
+                                  {reward.points ?? reward.amount ?? ""} min
+                                </span>
                               </span>
-                            </span>
-                            {assigning === userId + reward.rewardId && (
-                              <span className="ml-2 animate-spin text-pink-500">
-                                &#9696;
-                              </span>
-                            )}
-                          </DropdownMenuItem>
-                        ))}
+                              {assigning === userId + reward.rewardId && (
+                                <span className="ml-2 animate-spin text-pink-500">
+                                  &#9696;
+                                </span>
+                              )}
+                            </DropdownMenuItem>
+                          ))}
                         {(rewardsData?.rewards?.length ?? 0) === 0 && (
                           <DropdownMenuItem disabled>
                             No rewards available

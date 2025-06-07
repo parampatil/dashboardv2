@@ -20,8 +20,8 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
-import { DeleteUserButton } from '@/components/UsersDashboard/DeleteUserButton';
-import { RestoreUserButton } from '@/components/UsersDashboard/RestoreUserButton';
+import { DeleteUserButton } from "@/components/UsersDashboard/DeleteUserButton";
+import { RestoreUserButton } from "@/components/UsersDashboard/RestoreUserButton";
 
 import { User } from "@/types/grpc";
 
@@ -39,7 +39,6 @@ export default function Dashboard1() {
   const { toast } = useToast();
   const api = useApi();
 
-
   useEffect(() => {
     // Add a cleanup function
     let mounted = true;
@@ -47,9 +46,11 @@ export default function Dashboard1() {
     const fetchUsers = async () => {
       setLoading(true);
       try {
-        const response = await api.fetch(`/api/grpc/users/all-users/?page=${currentPage}&pageSize=${pageSize}`);
+        const response = await api.fetch(
+          `/api/grpc/users/all-users/?page=${currentPage}&pageSize=${pageSize}`
+        );
         const data = await response.json();
-        
+
         if (!response.ok) {
           throw new Error(data.error.details || data.error.errorMessage);
         }
@@ -94,7 +95,6 @@ export default function Dashboard1() {
         body: JSON.stringify({ userId }),
       });
 
-      
       const data = await response.json();
       if (!response.ok) {
         throw new Error(data.error.details || data.error.errorMessage);
@@ -112,75 +112,139 @@ export default function Dashboard1() {
     }
   };
 
-  const usersWithViewButton = users.map(user => ({
+  const usersWithViewButton = users.map((user) => ({
     ...user,
     viewButton: (
-      <Button 
-        variant="ghost" 
-        size="sm" 
+      <Button
+        variant="ghost"
+        size="sm"
         onClick={() => handleViewUserDetails(user.userId)}
+        className="bg-gray-100 hover:bg-gray-200 text-gray-800 flex items-center justify-center"
       >
         <Eye className="h-4 w-4 mr-1" />
         View
       </Button>
     ),
-    deleteButton: (
-      <DeleteUserButton userId={user.userId} />
-    ),
-    restoreButton: (
-      <RestoreUserButton userId={user.userId} />
-    ),
+    deleteButton: <DeleteUserButton userId={user.userId} />,
+    restoreButton: <RestoreUserButton userId={user.userId} />,
   }));
 
   const handleUpdate = async () => {
-    setUsersVersion(prev => prev + 1); // Trigger users list refresh
+    setUsersVersion((prev) => prev + 1); // Trigger users list refresh
     if (selectedUserId) {
       // Refresh the currently open user details
       await handleViewUserDetails(selectedUserId);
     }
   };
 
+  
   return (
     <ProtectedRoute allowedRoutes={["/dashboard/users/all-users"]}>
-    <motion.div
-      className="space-y-2 flex flex-col h-full w-full"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-    >
       <motion.div
-        className="flex justify-between items-center"
-        initial={{ y: -20 }}
-        animate={{ y: 0 }}
+        className="space-y-2 flex flex-col h-full w-full"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
       >
-        <h1 className="text-2xl font-bold text-gray-800">User Management</h1>
-        <PageSizeSelector
-          pageSize={pageSize}
-          onPageSizeChange={handlePageSizeChange}
-        />
-      </motion.div>
+        <motion.div
+          className="flex flex-col md:flex-row md:justify-between md:items-end gap-4 pb-2"
+          initial={{ y: -20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ type: "spring", stiffness: 70, damping: 15 }}
+        >
+          <div className="flex flex-col flex-1">
+            <motion.div
+              className="flex items-center justify-between mb-4"
+              initial="hidden"
+              animate="visible"
+              variants={{
+                hidden: { opacity: 0, y: -20 },
+                visible: { opacity: 1, y: 0, transition: { duration: 0.3 } },
+              }}
+            >
+              <h1 className="text-lg font-bold text-gray-800 mb-1">
+                User Management
+              </h1>
+              <div className="flex-shrink-0">
+                <PageSizeSelector
+                  pageSize={pageSize}
+                  onPageSizeChange={handlePageSizeChange}
+                />
+              </div>
+            </motion.div>
+            <div className="flex flex-wrap gap-4">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                transition={{ delay: 0.05 }}
+                className="flex items-center justify-between  bg-white border border-gray-100 rounded-md px-3 py-2 gap-4"
+              >
+                <span className="text-gray-500">
+                  Total Users
+                </span>
+                <span className="mt-1 text-xl font-extrabold bg-cyan-100 text-cyan-800 px-2 py-0.5 rounded">
+                  {loading ? "..." : users.length}
+                </span>
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                transition={{ delay: 0.12 }}
+                className="flex items-center justify-between bg-white border border-gray-100 rounded-md px-3 py-2 gap-4"
+              >
+                <span className="text-gray-500">
+                  360 Users
+                </span>
+                <span className="mt-1 text-xl font-extrabold bg-green-100 text-green-800 px-2 py-0.5 rounded">
+                  {loading
+                    ? "..."
+                    : users.filter((user) =>
+                        user.email?.includes("@360world.com")
+                      ).length}
+                </span>
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                transition={{ delay: 0.19 }}
+                className="flex items-center justify-between bg-white border border-gray-100 rounded-md px-3 py-2 gap-4"
+              >
+                <span className="text-gray-500">
+                  Non-360 Users
+                </span>
+                <span className="mt-1 text-xl font-extrabold bg-purple-100 text-purple-800 px-2 py-0.5 rounded">
+                  {loading
+                    ? "..."
+                    : users.filter(
+                        (user) => !user.email?.includes("@360world.com")
+                      ).length}
+                </span>
+              </motion.div>
+            </div>
+          </div>
+        </motion.div>
 
-      <UserTable
-        users={usersWithViewButton}
-        loading={loading}
-        currentPage={currentPage}
-        pageSize={pageSize}
-        selectedUserId={selectedUserId}
-      />
-
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex justify-center"
-      >
-        <Pagination
+        <UserTable
+          users={usersWithViewButton}
+          loading={loading}
           currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={setCurrentPage}
+          pageSize={pageSize}
+          selectedUserId={selectedUserId}
         />
-      </motion.div>
 
-      {/* User Details Drawer */}
-      <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex justify-center"
+        >
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+          />
+        </motion.div>
+
+        {/* User Details Drawer */}
+        <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
           <DrawerContent className="max-h-screen !select-text">
             <DrawerHeader className="bg-cyan-100 flex justify-between items-center">
               <div>
@@ -201,7 +265,12 @@ export default function Dashboard1() {
                   <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
                 </div>
               ) : (
-                userDetails && <UserDetails userData={userDetails} onProfileUpdate={handleUpdate} />
+                userDetails && (
+                  <UserDetails
+                    userData={userDetails}
+                    onProfileUpdate={handleUpdate}
+                  />
+                )
               )}
             </div>
             <DrawerFooter>
@@ -211,7 +280,7 @@ export default function Dashboard1() {
             </DrawerFooter>
           </DrawerContent>
         </Drawer>
-    </motion.div>
+      </motion.div>
     </ProtectedRoute>
   );
 }
