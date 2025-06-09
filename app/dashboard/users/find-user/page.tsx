@@ -1,10 +1,11 @@
 "use client";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useApi } from "@/hooks/useApi";
+import { useEnvironment } from "@/context/EnvironmentContext";
 import { UserDetails } from "@/components/UsersDashboard/UserDetails";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import UserTable from "@/components/UsersDashboard/UserTable";
@@ -36,6 +37,7 @@ export default function FindUserComponent() {
   const [loadingDetails, setLoadingDetails] = useState(false);
   const { toast } = useToast();
   const api = useApi();
+  const { currentEnvironment } = useEnvironment();
 
   const fetchUserById = useCallback(async (userId: string) => {
     setLoading(true);
@@ -62,7 +64,7 @@ export default function FindUserComponent() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [currentEnvironment]);
 
   const fetchUsersByEmail = useCallback(async (prefix: string) => {
     if (prefix.length < 3) return;
@@ -93,28 +95,32 @@ export default function FindUserComponent() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [currentEnvironment]);
 
-  const debouncedFetchUsers = useCallback(
-    (prefix: string) => {
-      debounce(() => fetchUsersByEmail(prefix), 300)();
-    },
-    [fetchUsersByEmail]
-  );
+const debouncedFetchUsersByEmail = useMemo(
+  () => debounce((prefix: string) => fetchUsersByEmail(prefix), 500),
+  [fetchUsersByEmail]
+);
+
+const debouncedFetchUsersById = useMemo(
+  () => debounce((userId: string) => fetchUserById(userId), 500),
+  [fetchUserById]
+);
+
 
   useEffect(() => {
     if (searchMethod === "email" && searchInput.length >= 3) {
-      debouncedFetchUsers(searchInput);
+      debouncedFetchUsersByEmail(searchInput);
     } else if (searchMethod === "id" && searchInput) {
-      fetchUserById(searchInput);
+      debouncedFetchUsersById(searchInput);
     } else {
       setUsers([]);
     }
   }, [
     searchInput,
     searchMethod,
-    debouncedFetchUsers,
-    fetchUserById,
+    debouncedFetchUsersByEmail,
+    debouncedFetchUsersById,
     usersVersion,
   ]);
 

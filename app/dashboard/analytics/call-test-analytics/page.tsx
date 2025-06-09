@@ -25,6 +25,7 @@ import { useApi } from "@/hooks/useApi";
 import { GetCallTestAnalyticsResponse, callTestAnalyticsUser } from "@/types/grpc";
 import { formatDuration, formatDate } from "@/lib/utils"; // Using standardized utils
 import { motion } from "framer-motion";
+import { useEnvironment } from "@/context/EnvironmentContext";
 
 export default function CallTestAnalyticsPage() {
   const [date, setDate] = useState<Date | undefined>(new Date());
@@ -32,6 +33,7 @@ export default function CallTestAnalyticsPage() {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const api = useApi();
+    const {currentEnvironment} = useEnvironment();
 
   const fetchAnalytics = useCallback(async (selectedDate?: Date) => {
     const targetDate = selectedDate || date;
@@ -71,7 +73,7 @@ export default function CallTestAnalyticsPage() {
 
   useEffect(() => {
     fetchAnalytics(new Date());
-  }, []);
+  }, [currentEnvironment]);
 
   const handleDateChange = (newDate: Date | undefined) => {
     setDate(newDate);

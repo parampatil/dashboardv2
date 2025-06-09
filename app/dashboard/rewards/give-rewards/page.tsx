@@ -22,6 +22,7 @@ import { useToast } from "@/hooks/use-toast";
 import CopyTooltip from "@/components/ui/CopyToolTip";
 import { useApi } from "@/hooks/useApi";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import { useEnvironment } from "@/context/EnvironmentContext";
 
 // --- Types ---
 interface UserIdNameMapping {
@@ -56,6 +57,7 @@ export default function RewardsPage() {
   const [assigning, setAssigning] = useState<string | null>(null);
   const { toast } = useToast();
   const api = useApi();
+  const {currentEnvironment} = useEnvironment();
 
   // Fetch users and rewards on mount
   useEffect(() => {
@@ -72,7 +74,7 @@ export default function RewardsPage() {
         toast({ variant: "destructive", title: "Error loading data" });
       })
       .finally(() => setLoading(false));
-  }, [toast]);
+  }, [currentEnvironment]);
 
   // Memoized filtered user IDs
   const filteredUserIds = useMemo(() => {

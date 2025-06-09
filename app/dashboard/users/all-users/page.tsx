@@ -24,6 +24,7 @@ import { DeleteUserButton } from "@/components/UsersDashboard/DeleteUserButton";
 import { RestoreUserButton } from "@/components/UsersDashboard/RestoreUserButton";
 
 import { User } from "@/types/grpc";
+import { useEnvironment } from "@/context/EnvironmentContext";
 
 export default function Dashboard1() {
   const [users, setUsers] = useState<User[]>([]);
@@ -38,6 +39,7 @@ export default function Dashboard1() {
   const [loadingDetails, setLoadingDetails] = useState(false);
   const { toast } = useToast();
   const api = useApi();
+  const {currentEnvironment} = useEnvironment();
 
   useEffect(() => {
     // Add a cleanup function
@@ -74,7 +76,7 @@ export default function Dashboard1() {
     return () => {
       mounted = false;
     };
-  }, [currentPage, pageSize, usersVersion]);
+  }, [currentPage, pageSize, usersVersion, currentEnvironment]);
 
   const handlePageSizeChange = (newSize: number) => {
     setPageSize(newSize);
@@ -171,6 +173,7 @@ export default function Dashboard1() {
                 />
               </div>
             </motion.div>
+            <div className="text-sm text-gray-500">*Stats for current page</div>
             <div className="flex flex-wrap gap-4">
               <motion.div
                 initial={{ opacity: 0, scale: 0.95, y: 10 }}

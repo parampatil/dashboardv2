@@ -37,6 +37,7 @@ export function PageSizeSelector({
           <SelectItem value="25">25</SelectItem>
           <SelectItem value="30">30</SelectItem>
           <SelectItem value="50">50</SelectItem>
+          <SelectItem value="100000000">All</SelectItem>
         </SelectContent>
       </Select>
     </motion.div>

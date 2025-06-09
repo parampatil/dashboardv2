@@ -10,10 +10,12 @@ import { useToast } from "@/hooks/use-toast";
 import { useApi } from "@/hooks/useApi";
 import { startOfDay, endOfDay } from "date-fns";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import { useEnvironment } from "@/context/EnvironmentContext";
 
 const CallHistoryTable = () => {
   const { toast } = useToast();
   const api = useApi();
+    const {currentEnvironment} = useEnvironment();
   
   const [loading, setLoading] = useState(false);
   const [callDetails, setCallDetails] = useState<FormattedCallTransactionDetails[]>([]);
@@ -134,7 +136,7 @@ const CallHistoryTable = () => {
   useEffect(() => {
     fetchCallDetails();
     fetchTotalPages();
-  }, [filters.pageNumber, filters.pageSize, filters.sortOrder]);
+  }, [filters.pageNumber, filters.pageSize, filters.sortOrder, currentEnvironment]);
 
   return (
     <ProtectedRoute allowedRoutes={['/dashboard/analytics/call-history-table']}>

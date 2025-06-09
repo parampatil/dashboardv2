@@ -1,8 +1,20 @@
 "use client";
 import { motion } from "framer-motion";
-import { Clock, Rocket, Wand2, Bug } from "lucide-react";
+import { Notebook, Clock, Rocket, Wand2, Bug } from "lucide-react";
 
 const updates = [
+  {
+    id: 4,
+    date: "2025-06-09",
+    title: "New Features and Fixes",
+    icon: <Notebook className="w-4 h-4" />,
+    color: "text-orange-500",
+    description: "Updates to enhance user experience",
+    bulletPoints: [
+      "Added refresh trigger when switching between environments",
+      "Added All options for page size selector in users table",
+    ]
+  },
   {
     id: 3,
     date: "2025-06-07",
@@ -18,7 +30,7 @@ const updates = [
     ]
   },
   {
-    id: 1,
+    id: 2,
     date: "2025-06-05",
     title: "Map Visualization Update",
     icon: <Bug className="w-4 h-4" />,
@@ -29,7 +41,7 @@ const updates = [
     ]
   },
   {
-    id: 2,
+    id: 1,
     date: "2025-06-01",
     title: "Data Management Features",
     icon: <Wand2 className="w-4 h-4" />,
