@@ -6,7 +6,7 @@ import { SidebarContentLayout } from "./SidebarContentLayout";
 import { Button } from "@/components/ui/button";
 import { 
     Pin, PinOff, Settings, LogOut, UserCircle, ChevronDown, 
-    LayoutDashboard, LogInIcon, Menu as MenuIcon
+    LayoutDashboard, LogInIcon, Menu as MenuIcon, Home
 } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
@@ -192,6 +192,10 @@ export function DashboardSidebar({ onDesktopWidthChange }: DashboardSidebarProps
         >
             <DropdownMenuLabel>{user?.name || user?.email}</DropdownMenuLabel>
             <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => { router.push('/'); if(inSheetContext) setIsMobileSheetOpen(false); }}>
+                <Home className="mr-2 h-4 w-4" />
+                <span>Home</span>
+            </DropdownMenuItem>
             <DropdownMenuItem onClick={() => { router.push('/profile'); if(inSheetContext) setIsMobileSheetOpen(false); }}>
                 <UserCircle className="mr-2 h-4 w-4" />
                 <span>Profile</span>
