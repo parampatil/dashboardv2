@@ -16,6 +16,9 @@ service ProfileService {
     rpc GetUserRating(GetUserRatingRequest) returns (GetUserRatingResponse);
     rpc GetAllUserIdsAndNames(GetAllUserIdsAndNamesRequest) returns (GetAllUserIdsAndNamesResponse);
     rpc GetAllUserIdsAndNamesDashboard(GetAllUserIdsAndNamesDashboardRequest) returns (GetAllUserIdsAndNamesDashboardResponse);
+
+    // Analytics related RPCs
+    rpc GetAllUserStats(GetAllUserStatsRequest) returns (GetAllUserStatsResponse);
 }
 
 message User {
@@ -154,4 +157,13 @@ message GetAllUserIdsAndNamesDashboardRequest {
 
 message GetAllUserIdsAndNamesDashboardResponse {
     map<string, string> userIdsAndNames = 1;
+}
+
+message GetAllUserStatsRequest {
+}
+
+message GetAllUserStatsResponse {
+    int64 totalCount = 1;
+    int64 world360Users = 2;
+    int64 nonWorld360Users = 3;
 }

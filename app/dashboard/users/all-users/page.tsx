@@ -25,6 +25,7 @@ import { RestoreUserButton } from "@/components/UsersDashboard/RestoreUserButton
 
 import { User } from "@/types/grpc";
 import { useEnvironment } from "@/context/EnvironmentContext";
+import UserStats from "@/components/UsersDashboard/UserStats";
 
 export default function Dashboard1() {
   const [users, setUsers] = useState<User[]>([]);
@@ -173,56 +174,7 @@ export default function Dashboard1() {
                 />
               </div>
             </motion.div>
-            <div className="text-sm text-gray-500">*Stats for current page</div>
-            <div className="flex flex-wrap gap-4">
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                transition={{ delay: 0.05 }}
-                className="flex items-center justify-between  bg-white border border-gray-100 rounded-md px-3 py-2 gap-4"
-              >
-                <span className="text-gray-500">
-                  Total Users
-                </span>
-                <span className="mt-1 text-xl font-extrabold bg-cyan-100 text-cyan-800 px-2 py-0.5 rounded">
-                  {loading ? "..." : users.length}
-                </span>
-              </motion.div>
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                transition={{ delay: 0.12 }}
-                className="flex items-center justify-between bg-white border border-gray-100 rounded-md px-3 py-2 gap-4"
-              >
-                <span className="text-gray-500">
-                  360 Users
-                </span>
-                <span className="mt-1 text-xl font-extrabold bg-green-100 text-green-800 px-2 py-0.5 rounded">
-                  {loading
-                    ? "..."
-                    : users.filter((user) =>
-                        user.email?.includes("@360world.com")
-                      ).length}
-                </span>
-              </motion.div>
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                transition={{ delay: 0.19 }}
-                className="flex items-center justify-between bg-white border border-gray-100 rounded-md px-3 py-2 gap-4"
-              >
-                <span className="text-gray-500">
-                  Non-360 Users
-                </span>
-                <span className="mt-1 text-xl font-extrabold bg-purple-100 text-purple-800 px-2 py-0.5 rounded">
-                  {loading
-                    ? "..."
-                    : users.filter(
-                        (user) => !user.email?.includes("@360world.com")
-                      ).length}
-                </span>
-              </motion.div>
-            </div>
+            <UserStats />
           </div>
         </motion.div>
 

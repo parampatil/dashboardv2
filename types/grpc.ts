@@ -33,6 +33,12 @@ export interface ProfileServiceClient extends grpc.Client {
     request: UpdateUserDetailsRequest,
     callback: (error: Error | null, response: UpdateUserDetailsResponse) => void
   ) => void;
+
+  // Analytics
+  GetAllUserStats: (
+    request: GetAllUserStatsRequest,
+    callback: (error: Error | null, response: GetAllUserStatsResponse) => void
+  ) => void;
 }
 
 export interface PageCountRequest {
@@ -126,6 +132,14 @@ export interface UpdateUserDetailsRequest {
 export interface UpdateUserDetailsResponse {
   success: boolean;
   message: string;
+}
+
+export type GetAllUserStatsRequest = object
+
+export interface GetAllUserStatsResponse {
+  totalCount: string;
+  world360Users: string;
+  nonWorld360Users: string;
 }
 
 // Consumer Purchase Service Types
