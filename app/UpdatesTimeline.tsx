@@ -4,6 +4,28 @@ import { Notebook, Clock, Rocket, Wand2, Bug } from "lucide-react";
 
 const updates = [
   {
+    id: 6,
+    date: "2025-06-17",
+    title: "Demo Globe Update",
+    icon: <Bug className="w-4 h-4" />,
+    color: "text-purple-500",
+    description: "Made the glob spin faster",
+    bulletPoints: [],
+  },
+  {
+    id: 5,
+    date: "2025-06-12",
+    title: "User Stats Update",
+    icon: <Rocket className="w-4 h-4" />,
+    color: "text-blue-500",
+    description: "New metrics added to user statistics",
+    bulletPoints: [
+      "Added total users count",
+      "Added 360 users count",
+      "Added non-360 users count",
+    ]
+  },
+  {
     id: 4,
     date: "2025-06-09",
     title: "New Features and Fixes",

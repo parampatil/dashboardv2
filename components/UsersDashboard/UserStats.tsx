@@ -68,6 +68,7 @@ const UserStats = () => {
           className={`
             flex flex-row items-center justify-between
             w-full px-3 py-2
+            md:w-56
             ${idx < statCards.length - 1 ? "md:border-r md:border-gray-300" : ""}
           `}
         >

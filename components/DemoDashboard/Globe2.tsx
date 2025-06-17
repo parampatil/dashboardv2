@@ -39,9 +39,15 @@ interface LocationMapProps {
   currentPrecision: number;
   onZoomChange: (precision: string) => void;
   isFullScreen: boolean;
+  rotationSpeed?: number;
 }
 
-const LocationMap: React.FC<LocationMapProps> = ({ locations, onZoomChange, isFullScreen }) => {
+const LocationMap: React.FC<LocationMapProps> = ({
+  locations,
+  onZoomChange,
+  isFullScreen,
+  rotationSpeed = 1,
+}) => {
   const [viewState, setViewState] = useState({
     longitude: -95,
     latitude: 40,
@@ -49,8 +55,12 @@ const LocationMap: React.FC<LocationMapProps> = ({ locations, onZoomChange, isFu
     pitch: 0,
     bearing: 0,
   });
-  const [locationPlaces, setLocationPlaces] = useState<Record<string, string>>({});
-  const [loadingPlaces, setLoadingPlaces] = useState<Record<string, boolean>>({});
+  const [locationPlaces, setLocationPlaces] = useState<Record<string, string>>(
+    {}
+  );
+  const [loadingPlaces, setLoadingPlaces] = useState<Record<string, boolean>>(
+    {}
+  );
   const mapRef = useRef<mapboxgl.Map | null>(null);
 
   // Geohash precision logic (unchanged)
@@ -75,7 +85,7 @@ const LocationMap: React.FC<LocationMapProps> = ({ locations, onZoomChange, isFu
   useEffect(() => {
     let animationId: number;
     let lastTime = 0;
-    const rotationSpeed = 1; // degrees per second
+    const rotationSpeedLocal = rotationSpeed; // degrees per second, by default 1
 
     const animate = (time: number) => {
       if (lastTime === 0) lastTime = time;
@@ -84,14 +94,15 @@ const LocationMap: React.FC<LocationMapProps> = ({ locations, onZoomChange, isFu
       if (viewState.zoom < 3) {
         setViewState((prev) => ({
           ...prev,
-          longitude: (prev.longitude + rotationSpeed * deltaTime / 1000) % 360,
+          longitude:
+            (prev.longitude + (rotationSpeedLocal * deltaTime) / 1000) % 360,
         }));
       }
       animationId = requestAnimationFrame(animate);
     };
     animationId = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(animationId);
-  }, [viewState.zoom]);
+  }, [viewState.zoom, rotationSpeed]);
 
   // Fetch geocoding for all locations
   useEffect(() => {
@@ -102,7 +113,11 @@ const LocationMap: React.FC<LocationMapProps> = ({ locations, onZoomChange, isFu
   }, [locations]);
 
   // Fetch place info with Mapbox Geocoding
-  const fetchPlaceInfo = async (latitude: number, longitude: number, locationKey: string) => {
+  const fetchPlaceInfo = async (
+    latitude: number,
+    longitude: number,
+    locationKey: string
+  ) => {
     const cacheKey = `${latitude.toFixed(6)},${longitude.toFixed(6)}`;
     setLoadingPlaces((prev) => ({ ...prev, [locationKey]: true }));
     if (geocodeCache[cacheKey]) {
@@ -146,7 +161,11 @@ const LocationMap: React.FC<LocationMapProps> = ({ locations, onZoomChange, isFu
   }, [isFullScreen]);
 
   return (
-    <div className={`${isFullScreen ? "" : "rounded-lg border border-gray-200 mb-6"} relative overflow-hidden h-screen`}>
+    <div
+      className={`${
+        isFullScreen ? "" : "rounded-lg border border-gray-200 mb-6"
+      } relative overflow-hidden h-screen`}
+    >
       <Map
         {...viewState}
         onMove={(evt) => setViewState(evt.viewState)}
@@ -178,8 +197,7 @@ const LocationMap: React.FC<LocationMapProps> = ({ locations, onZoomChange, isFu
               <Image
                 src={PinImg}
                 alt="Marker"
-
-                className="w-10 h-10 drop-shadow-lg object-contain" 
+                className="w-10 h-10 drop-shadow-lg object-contain"
               />
               {/* User count bubble */}
               {/* <div className="absolute -top-2 left-1/2 -translate-x-1/2 bg-white text-gray-800 text-xs font-bold px-2 py-0.5 rounded-full border border-gray-200 shadow group-hover:scale-105 transition-transform">
@@ -209,9 +227,14 @@ const LocationMap: React.FC<LocationMapProps> = ({ locations, onZoomChange, isFu
         <span>Zoom: {viewState.zoom.toFixed(1)}</span> */}
         <div className="flex items-center">
           <div className="flex items-center gap-2">
-            <span className="font-medium text-sm">Total Users:</span> 
+            <span className="font-medium text-sm">Total Users:</span>
             <span className="text-blue-300 font-bold text-base">
-              {locations.reduce((total, location) => total + location.providers.length, 0).toLocaleString()}
+              {locations
+                .reduce(
+                  (total, location) => total + location.providers.length,
+                  0
+                )
+                .toLocaleString()}
             </span>
           </div>
           <div className="w-2.5 h-2.5 rounded-full bg-blue-400 animate-pulse mx-3"></div>
