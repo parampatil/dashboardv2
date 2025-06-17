@@ -135,7 +135,7 @@ export default function ActiveUserIds() {
             <Button
               variant="outline"
               size="sm"
-              className="absolute top-2 right-2 z-10"
+              className="absolute top-2 right-2 z-10 bg-white/30 backdrop-blur-md border-none shadow-sm hover:bg-white/40 transition-colors"
               onClick={toggleFullScreen}
             >
               {isFullScreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
