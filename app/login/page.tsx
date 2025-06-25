@@ -53,99 +53,104 @@ export default function LoginPage() {
     getAutoInviteEnabled().then(setIsRequestEnabled);
   }, []);
 
-  const handleGoogleLogin = async () => {
-    setLoading(true);
-    setInviteMessage(null);
-    setIsNotAllowed(false);
-    try {
-      const provider = new GoogleAuthProvider();
-      const result = await signInWithPopup(auth, provider);
-      const user = result.user;
-      const userEmail = user.email || "";
-      setEmail(userEmail);
+const handleGoogleLogin = async () => {
+  setLoading(true);
+  setInviteMessage(null);
+  setIsNotAllowed(false);
+  try {
+    const provider = new GoogleAuthProvider();
+    const result = await signInWithPopup(auth, provider);
+    const user = result.user;
+    const userEmail = user.email || "";
+    setEmail(userEmail);
 
-      // Check invitation status
-      const invitesRef = collection(db, "invitations");
-      const q = query(
-        invitesRef,
-        where("email", "==", userEmail),
-        where("status", "in", ["invited", "joined", "deleted"])
-      );
-      const snapshot = await getDocs(q);
+    // 1. FIRST check if user exists in users collection
+    const userDocRef = doc(db, "users", user.uid);
+    const userDoc = await getDoc(userDocRef);
 
-      let isValidInvite = false;
-      if (!snapshot.empty) {
-        const invite = snapshot.docs[0].data();
-        if (invite.status === "deleted") {
-          setInviteMessage({
-            kind: MessageKind.ERROR,
-            text: "Your account has been deleted. Please contact support.",
-          });
-        } else if (invite.status === "joined") {
-          setInviteMessage({
-            kind: MessageKind.WARNING,
-            text: "You have already joined the platform. But your account have some problem.",
-          });
-        } else if (
-          !invite.expiry ||
-          new Date() < new Date(invite.expiry.seconds * 1000)
-        ) {
-          isValidInvite = true;
-        } else {
-          setInviteMessage({
-            kind: MessageKind.ERROR,
-            text: "Your invitation has expired. Please contact support.",
-          });
-        }
-      } else {
+    // 2. If user exists, log them in immediately
+    if (userDoc.exists()) {
+      router.push("/");
+      return; // Exit early
+    }
+
+    // 3. Only check invitations if user doesn't exist
+    const invitesRef = collection(db, "invitations");
+    const q = query(
+      invitesRef,
+      where("email", "==", userEmail),
+      where("status", "in", ["invited", "joined", "deleted"])
+    );
+    const snapshot = await getDocs(q);
+
+    let isValidInvite = false;
+    if (!snapshot.empty) {
+      const invite = snapshot.docs[0].data();
+      if (invite.status === "deleted") {
+        setInviteMessage({
+          kind: MessageKind.ERROR,
+          text: "Your account has been deleted. Please contact support.",
+        });
+      } else if (invite.status === "joined") {
         setInviteMessage({
           kind: MessageKind.WARNING,
-          text: "You are not invited. Please contact the administrator.",
+          text: "You have already joined but your account has issues.",
+        });
+      } else if (
+        !invite.expiry ||
+        new Date() < new Date(invite.expiry.seconds * 1000)
+      ) {
+        isValidInvite = true;
+      } else {
+        setInviteMessage({
+          kind: MessageKind.ERROR,
+          text: "Your invitation has expired.",
         });
       }
-
-      if (isValidInvite) {
-        // Check if user exists
-        const userDocRef = doc(db, "users", user.uid);
-        const userDoc = await getDoc(userDocRef);
-        if (!userDoc.exists()) {
-          // Create new user
-          const createResponse = await createNewUser({
-            uid: user.uid,
-            email: user.email || "",
-            name: user.displayName || user.email?.split("@")[0] || "User",
-            imageUrl: user.photoURL || undefined,
-          });
-          if (!createResponse.success) {
-            throw new Error(createResponse.message || "Failed to create user");
-          }
-        }
-        router.push("/");
-      } else {
-        await signOut(auth);
-        if (isRequestEnabled) {
-          setShowRequest(true);
-          setInviteMessage(inviteMessage);
-        } else {
-          setIsNotAllowed(true);
-          setInviteMessage({
-            kind: MessageKind.ERROR,
-            text: "You are not allowed to access this platform. Please contact the administrator.",
-          });
-        }
-      }
-    } catch (err: Error | unknown) {
-      const error = err as Error;
-      toast({
-        variant: "destructive",
-        title: "Login Failed",
-        description:
-          error.message || "There was an error logging in with Google.",
+    } else {
+      setInviteMessage({
+        kind: MessageKind.WARNING,
+        text: "You are not invited. Contact administrator.",
       });
-    } finally {
-      setLoading(false);
     }
-  };
+
+    if (isValidInvite) {
+      // Create new user since they don't exist
+      const createResponse = await createNewUser({
+        uid: user.uid,
+        email: user.email || "",
+        name: user.displayName || user.email?.split("@")[0] || "User",
+        imageUrl: user.photoURL || undefined,
+      });
+      if (!createResponse.success) {
+        throw new Error(createResponse.message || "User creation failed");
+      }
+      router.push("/");
+    } else {
+      await signOut(auth);
+      if (isRequestEnabled) {
+        setShowRequest(true);
+      } else {
+        setIsNotAllowed(true);
+        setInviteMessage({
+          kind: MessageKind.ERROR,
+          text: "You are not allowed to access this platform. Please contact the administrator.",
+        });
+      }
+    }
+  } catch (err: Error | unknown) {
+    const error = err as Error;
+    toast({
+      variant: "destructive",
+      title: "Login Failed",
+      description:
+        error.message || "There was an error logging in with Google.",
+    });
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const handleRequestAccess = async () => {
     setInviteMessage(null);

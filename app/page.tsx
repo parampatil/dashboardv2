@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import UpdatesTimeline from "@/app/UpdatesTimeline";
 import { motion } from "framer-motion";
+import LandingBannerImg from "@/public/images/360 World Banner.png";
 
 export default function Home() {
   const { user, loading } = useAuth();
@@ -26,8 +27,16 @@ export default function Home() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.6 }}
-      className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg flex flex-col"
-    >
+      className="flex-grow bg-white rounded-lg flex flex-col"
+      >
+      <motion.img
+        src={LandingBannerImg.src}
+        alt="360 Dashboards Banner"
+        className="hidden md:block w-full mx-auto rounded-t-lg shadow-lg mb-6 h-[40vh] object-cover"
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.7, delay: 0.2 }}
+      />
       {/* Hero Section */}
       <motion.section
         initial={{ opacity: 0, y: 40 }}
@@ -66,15 +75,15 @@ export default function Home() {
             {user ? (
               <Button
                 onClick={() => router.push("/dashboard")}
-                className="px-8 py-4 text-lg font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-lg transition-all duration-300"
+                className="h-15 px-8 py-4 text-lg font-semibold bg-gradient-to-r from-cyan-500 to-blue-600 hover:shadow-sm hover:opacity-90 text-white shadow-lg transition-all duration-300"
                 aria-label="Go to Main Dashboard"
               >
-                Go to Main Dashboard
+                Go to Dashboard Menu
               </Button>
             ) : (
               <Button
                 onClick={() => router.push("/login")}
-                className="px-8 py-4 text-lg font-semibold bg-gradient-to-r from-cyan-500 to-blue-600 hover:shadow-sm hover:opacity-90 text-white shadow-xl transition-all duration-300"
+                className="h-12 px-8 py-4 text-lg font-semibold bg-gradient-to-r from-cyan-500 to-blue-600 hover:shadow-sm hover:opacity-90 text-white shadow-xl transition-all duration-300"
                 aria-label="Get Started - Login"
               >
                 Get Started – Login
@@ -85,30 +94,24 @@ export default function Home() {
       </motion.section>
 
       {/* Updates / Timeline Section */}
-      <motion.section
-        initial={{ opacity: 0, y: 40 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.7, delay: 0.2, type: "spring" }}
-        className="container mx-auto mb-16 p-6"
-      >
-        <motion.h2
-          initial={{ opacity: 0, y: 10 }}
+      {user && (
+        <motion.section
+          initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-          className="text-2xl font-bold text-blue-700 mb-6 text-center"
+          viewport={{ once: true }}
+          transition={{ duration: 0.7, delay: 0.2, type: "spring" }}
+          className="container mx-auto p-6"
         >
-          Latest Updates
-        </motion.h2>
-        <motion.div
-          initial={{ opacity: 0, scale: 0.97 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className="bg-white rounded-xl shadow-md p-6"
-        >
-          <UpdatesTimeline />
-        </motion.div>
-      </motion.section>
+          <motion.div
+        initial={{ opacity: 0, scale: 0.97 }}
+        whileInView={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.6, delay: 0.2 }}
+        className="bg-gray-50 rounded-xl shadow-md p-6"
+          >
+        <UpdatesTimeline />
+          </motion.div>
+        </motion.section>
+      )}
 
       {/* Footer */}
       <motion.footer

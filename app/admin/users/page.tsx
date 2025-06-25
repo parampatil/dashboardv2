@@ -30,6 +30,7 @@ import {
   removeEnvironmentFromUser,
 } from "@/app/actions/users";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import { Input } from "@/components/ui/input";
 
 export default function UserManagement() {
   const { user } = useAuth();
@@ -37,6 +38,10 @@ export default function UserManagement() {
   const [roles, setRoles] = useState<Role[]>([]);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+
+   // --- Add search state ---
+  const [search, setSearch] = useState("");
+
 
   const { toast } = useToast();
 
@@ -155,6 +160,13 @@ export default function UserManagement() {
     }
   };
 
+  // --- Filter users based on search ---
+  const filteredUsers = users.filter(
+    (u) =>
+      (u.name && u.name.toLowerCase().includes(search.toLowerCase())) ||
+      (u.email && u.email.toLowerCase().includes(search.toLowerCase()))
+  );
+
   return (
     <ProtectedRoute allowedRoutes={["/admin/users"]}>
     <motion.div
@@ -168,12 +180,24 @@ export default function UserManagement() {
           animate={{ y: 0 }}
         >
           <div className="p-6">
-            <div className="flex justify-between items-center mb-6">
-              <h1 className="text-2xl font-bold">User Management</h1>
-              <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
-                {users.length} Users
-              </span>
-            </div>
+              <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-6">
+                <div className="flex items-center gap-2">
+                  <h1 className="text-2xl font-bold">User Management</h1>
+                  <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
+                    {filteredUsers.length} Users
+                  </span>
+                </div>
+                {/* --- Search Bar --- */}
+                <div className="w-full md:w-72">
+                  <Input
+                    type="text"
+                    placeholder="Search by name or email"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="w-full"
+                  />
+                </div>
+              </div>
 
             {loading ? (
               <div className="flex justify-center items-center h-64">
@@ -202,8 +226,8 @@ export default function UserManagement() {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    <AnimatePresence>
-                      {users.map((user, index) => (
+                    <AnimatePresence mode="popLayout">
+                      {filteredUsers.map((user, index) => (
                         <motion.tr
                           key={user.uid}
                           initial={{ opacity: 0, y: 20 }}

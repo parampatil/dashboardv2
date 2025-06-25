@@ -98,55 +98,92 @@ export default function UpdatesTimeline() {
     }).format(date);
   };
 
+  // Variants for staggered animations
+  const container = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.3,
+      },
+    },
+  };
+
+  const item = {
+    hidden: { opacity: 0, y: 20 },
+    show: { 
+      opacity: 1, 
+      y: 0,
+      transition: { duration: 0.5, ease: "easeOut" }
+    },
+  };
+
   return (
-    <div className="w-full mx-auto mt-12 px-4">
+    <div className="w-full mx-auto px-4">
       <h2 className="text-2xl font-bold mb-8 flex items-center gap-2">
         <Clock className="text-orange-500" />
         Release Timeline
       </h2>
-      <div className="relative">
-        <div className="absolute left-5 top-0 w-0.5 h-full bg-gradient-to-b from-blue-100 to-purple-100" />
-        {updates.map((update, idx) => (
+      
+      <motion.div
+        className="relative"
+        variants={container}
+        initial="hidden"
+        animate="show"
+      >
+        {/* Timeline line */}
+        <div className="absolute left-4 md:left-5 top-0 w-0.5 h-full bg-gradient-to-b from-blue-100 to-purple-100" />
+        
+        {updates.map((update) => (
           <motion.div
             key={update.id}
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: idx * 0.15 }}
-            className="relative pl-16 mb-8 group"
+            variants={item}
+            className="relative pl-12 md:pl-16 mb-8 group"
           >
-            <div
-              className={`absolute left-0 top-1 w-10 h-10 rounded-full flex items-center justify-center ${update.color} bg-white border-4 border-gray-50 group-hover:scale-110 transition-transform`}
+            {/* Icon with animation */}
+            <motion.div
+              whileHover={{ scale: 1.1 }}
+              className={`absolute left-0 top-1 w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center ${update.color} bg-white border-4 border-gray-50 transition-transform`}
             >
               {update.icon}
-            </div>
-            <div className="p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow border border-gray-100">
-              {idx === 0 && (
+            </motion.div>
+            
+            {/* Card with responsive padding */}
+            <motion.div
+              whileHover={{ y: -5 }}
+              className="p-4 md:p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow border border-gray-100"
+            >
+              {update.id === 7 && (
                 <div className="absolute top-2 right-2 inline-flex items-center gap-1 px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded-full">
                   ⚡ Latest
                 </div>
               )}
-              <span className="text-sm text-gray-400">
+              
+              <span className="text-xs md:text-sm text-gray-400">
                 {formatDate(update.date)}
               </span>
-              <h3 className="text-lg font-semibold mt-1">{update.title}</h3>
+              
+              <h3 className="text-base md:text-lg font-semibold mt-1">
+                {update.title}
+              </h3>
 
               {update.description && (
-                <p className="text-gray-600 mt-2 text-sm">
+                <p className="text-gray-600 mt-2 text-xs md:text-sm">
                   {update.description}
                 </p>
               )}
 
-              {update.bulletPoints && (
-                <ul className="mt-2 space-y-1 text-sm text-gray-600 list-disc list-inside">
+              {update.bulletPoints && update.bulletPoints.length > 0 && (
+                <ul className="mt-2 space-y-1 text-xs md:text-sm text-gray-600 list-disc list-inside">
                   {update.bulletPoints.map((point, i) => (
                     <li key={i}>{point}</li>
                   ))}
                 </ul>
               )}
-            </div>
+            </motion.div>
           </motion.div>
         ))}
-      </div>
+      </motion.div>
     </div>
   );
 }

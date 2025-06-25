@@ -17,6 +17,7 @@ import {
 import PreviewDialog from "@/components/LocationDashboard/GeoHashPreviewDialog";
 import AddGeohashDialog from "@/components/LocationDashboard/AddGeohashDialog";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import { useEnvironment } from "@/context/EnvironmentContext";
 
 export default function DenyListPage() {
   const { toast } = useToast();
@@ -29,6 +30,7 @@ export default function DenyListPage() {
   const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const api = useApi();
+    const { currentEnvironment } = useEnvironment();
 
   useEffect(() => {
     const fetchGeohashes = async () => {
@@ -50,7 +52,7 @@ export default function DenyListPage() {
       }
     };
     fetchGeohashes();
-  }, []);
+  }, [currentEnvironment]);
 
   const handleBulkAdd = async () => {
     const newHashes = inputGeohashes
