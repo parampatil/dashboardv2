@@ -3,9 +3,9 @@ import { NextResponse } from 'next/server';
 import { createServiceClients, getEnvironmentFromRequest } from '@/app/api/grpc/client';
 import { promisify } from 'util';
 
-export async function GET() {
+export async function GET(request: Request) {
     try {
-      const clients = createServiceClients(getEnvironmentFromRequest());
+      const clients = createServiceClients(getEnvironmentFromRequest(request));
       const denyListService = {
         getGeohash: promisify(clients.denyList.GetGeohash.bind(clients.denyList))
       };

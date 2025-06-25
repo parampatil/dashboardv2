@@ -7,7 +7,7 @@ export async function POST(request: Request) {
     const { geohashes } = await request.json();
     
     try {
-      const clients = createServiceClients(getEnvironmentFromRequest());
+      const clients = createServiceClients(getEnvironmentFromRequest(request));
       const denyListService = {
         deleteGeohash: promisify(clients.denyList.DeleteGeohash.bind(clients.denyList))
       };

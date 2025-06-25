@@ -11,6 +11,7 @@ import { Trash2, AlertCircle } from "lucide-react";
 import { RoleSelector } from "@/components/admin/RoleSelector";
 import { useToast } from "@/hooks/use-toast";
 import EnvironmentSelector from "@/components/admin/EnvironmentAccessSelector";
+import { useAuth } from "@/context/AuthContext";
 
 import {
   Dialog,
@@ -31,6 +32,7 @@ import {
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 
 export default function UserManagement() {
+  const { user } = useAuth();
   const [users, setUsers] = useState<User[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
@@ -138,7 +140,7 @@ export default function UserManagement() {
 
   const handleDeleteUser = async () => {
     try {
-      await deleteUser(deleteConfirm!);
+      await deleteUser(deleteConfirm!, user?.email || "Admin");
       toast({
         title: "User Deleted",
         description: "The user has been deleted successfully.",

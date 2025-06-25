@@ -65,3 +65,4 @@ if (!communicationDevApp) {
 export const adminDb: Firestore = getFirestore(defaultApp);
 export const adminAuth: Auth = getAuth(defaultApp);
 export const adminRemoteConfig: RemoteConfig = getRemoteConfig(communicationDevApp);
+export const dashboardRemoteConfig: RemoteConfig = getRemoteConfig(defaultApp);

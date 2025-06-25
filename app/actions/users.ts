@@ -2,11 +2,13 @@
 "use server";
 
 import { adminDb, adminAuth } from "@/lib/firebase-admin";
+import { FieldValue } from "firebase-admin/firestore";
 
 interface UserData {
   allowedRoutes: { [key: string]: string };
   roles: string[];
   allowedEnvironments: { [key: string]: string };
+  email?: string;
 }
 
 interface RoleData {
@@ -121,7 +123,7 @@ export async function addEnvironmentToUser(
     // Add the new environment
     const updatedEnvironments = {
       ...currentEnvironments,
-      [envKey]: envName
+      [envKey]: envName,
     };
 
     await userRef.update({
@@ -167,14 +169,69 @@ export async function removeEnvironmentFromUser(
   }
 }
 
-export async function deleteUser(userId: string) {
+export async function deleteUser(userId: string, deletedBy: string) {
   try {
-    // Delete user from Firebase Authentication
-    await adminAuth.deleteUser(userId);
+    // Fetch user data to check for associated email
+    const userDoc = await adminDb.collection("users").doc(userId).get();
+    if (!userDoc.exists) {
+      throw new Error("User not found");
+    }
+    const userData = userDoc.data() as UserData;
+    if (!userData || !userData.email) {
+      throw new Error("User data is incomplete or email is missing");
+    }
 
-    // Delete user from Firestore
-    await adminDb.collection("users").doc(userId).delete();
+    // Try both operations and collect any errors
+    const authError = await adminAuth.deleteUser(userId).catch((err) => err);
+    const dbError = await adminDb
+      .collection("users")
+      .doc(userId)
+      .delete()
+      .catch((err) => err);
 
+    // Check if either operation failed
+    if (authError instanceof Error || dbError instanceof Error) {
+      console.error("Auth delete error:", authError);
+      console.error("Database delete error:", dbError);
+
+      // Determine which operations succeeded/failed for the error message
+      const failedOps = [];
+      if (authError instanceof Error) failedOps.push("auth account");
+      if (dbError instanceof Error) failedOps.push("database record");
+
+      if (failedOps.length === 2) {
+        throw new Error("Failed to delete user");
+      } else {
+        console.warn(
+          `Partial success: deleted user ${
+            failedOps.length === 1 ? "except " + failedOps[0] : ""
+          }`
+        );
+      }
+    }
+    // If both operations succeeded, return success
+    console.log("User deleted successfully from both auth and database");
+
+    // set the invitation status to "deleted"
+    const inviteSnap = await adminDb
+      .collection("invitations")
+      .where("email", "==", userData.email)
+      .limit(1)
+      .get();
+
+    if (!inviteSnap.empty) {
+      const inviteDoc = inviteSnap.docs[0];
+      await inviteDoc.ref.update({
+        status: "deleted",
+        updatedAt: new Date(),
+        history: FieldValue.arrayUnion({
+          timestamp: new Date(),
+          action: "User account deleted",
+          details: `User with ID ${userId} and email ${userData.email} has been deleted. This action was performed by ${deletedBy}.`,
+        }),
+
+      });
+    }
     return { success: true };
   } catch (error) {
     console.error("Error deleting user:", error);

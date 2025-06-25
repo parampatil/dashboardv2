@@ -61,7 +61,7 @@ function AppContent({ children }: { children: React.ReactNode }) {
         }}
       >
         {/* Adjust top padding for mobile if a fixed mobile header/trigger is part of NewDashboardSidebar */}
-        <div className={cn("p-4 sm:p-6 lg:p-8 w-full", 
+        <div className={cn("p-4 sm:p-6 lg:p-8 w-full min-h-full flex flex-col", 
             // isMobileView ? "pt-16 sm:pt-20" : "pt-6" // Increased top padding for mobile if sidebar trigger is fixed top-left
         )}>
           {children}

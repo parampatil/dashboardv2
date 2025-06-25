@@ -49,5 +49,6 @@ export const ROUTES = {
     { path: '/admin', name: 'Admin Panel' },
     { path: '/admin/roles', name: 'Roles' },
     { path: '/admin/users', name: 'Users' },
+    { path: '/admin/invitations', name: 'Invitations' },
   ]
 } as const;
