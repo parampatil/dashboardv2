@@ -900,6 +900,21 @@ export interface AuthServiceClient extends grpc.Client {
     request: SoftDeleteUserRequest,
     callback: (error: Error | null, response: SoftDeleteUserResponse) => void
   ) => void;
+
+  GetAllAffiliateRequest: (
+    request: GetAllAffiliateRequest,
+    callback: (error: Error | null, response: GetAllAffiliateResponse) => void
+  ) => void;
+
+  RequestAffiliateConvertRequest: (
+    request: RequestAffiliateConvertRequestType,
+    callback: (error: Error | null, response: RequestAffiliateConvertResponse) => void
+  ) => void;
+
+  UpdateAffiliateRequest: (
+    request: AffiliateUpdateRequest,
+    callback: (error: Error | null, response: UpdateAffiliateRequestResponse) => void
+  ) => void;
 }
 
 export interface SoftDeleteUserRequest {
@@ -909,6 +924,41 @@ export interface SoftDeleteUserRequest {
 export interface SoftDeleteUserResponse {
   success: boolean;
   message: string;
+}
+
+export type AffiliateRequestStatus = "REQUESTED" | "APPROVED" | "REJECTED";
+
+export type GetAllAffiliateRequest = object;
+
+export interface AffiliateRequest {
+  request_id: number;
+  requestor_user_id: number;
+  status: AffiliateRequestStatus;
+  requested_at: ProtoTimestamp;
+  approved_by?: string;
+  approved_at?: ProtoTimestamp | null;
+}
+
+export interface GetAllAffiliateResponse {
+  requests: AffiliateRequest[];
+}
+
+export interface RequestAffiliateConvertRequestType {
+  user_id: number;
+}
+
+export interface RequestAffiliateConvertResponse {
+  status: string;
+}
+
+export interface AffiliateUpdateRequest {
+  request_id: number;
+  status: AffiliateRequestStatus;
+  approver_user_id: string;
+}
+
+export interface UpdateAffiliateRequestResponse {
+  status: string;
 }
 
 // Helper interface to format protobuf timestamp

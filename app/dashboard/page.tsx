@@ -131,7 +131,17 @@ const MainDashboard = () => {
           { path: "/dashboard/demo/globe", name: "Demo Globe" },
           { path: "/dashboard/demo/globe2", name: "Demo Globe 2" },
         ]
-      }
+      },
+      {
+        name: "Affiliate",
+        icon: <MapPin className="h-5 w-5" />,
+        color: "bg-blue-500",
+        routes: [
+          // { path: "/dashboard/affiliate", name: "Affiliate Dashboard" },
+          { path: "/dashboard/affiliate/affiliate-requests", name: "Affiliate Requests" },
+          { path: "/dashboard/affiliate/create-affiliate-request", name: "Create Affiliate Request" },
+        ]
+      },
     ];
 
     // Filter categories to only include those with at least one allowed route

@@ -4,6 +4,18 @@ import { Notebook, Clock, Rocket, Wand2, Bug } from "lucide-react";
 
 const updates = [
   {
+    id: 8,
+    date: "2025-06-29",
+    title: "Affiliate Onboarding",
+    icon: <Notebook className="w-4 h-4" />,
+    color: "text-orange-500",
+    description: "Affiliate Onboarding flow completed",
+    bulletPoints: [
+      "Added affiliate request form",
+      "Implemented admin approval workflow",
+    ],
+  },
+  {
     id: 7,
     date: "2025-06-25",
     title: "New Signup Flow",
@@ -111,10 +123,10 @@ export default function UpdatesTimeline() {
 
   const item = {
     hidden: { opacity: 0, y: 20 },
-    show: { 
-      opacity: 1, 
+    show: {
+      opacity: 1,
       y: 0,
-      transition: { duration: 0.5, ease: "easeOut" }
+      transition: { duration: 0.5, ease: "easeOut" },
     },
   };
 
@@ -124,7 +136,7 @@ export default function UpdatesTimeline() {
         <Clock className="text-orange-500" />
         Release Timeline
       </h2>
-      
+
       <motion.div
         className="relative"
         variants={container}
@@ -133,7 +145,7 @@ export default function UpdatesTimeline() {
       >
         {/* Timeline line */}
         <div className="absolute left-4 md:left-5 top-0 w-0.5 h-full bg-gradient-to-b from-blue-100 to-purple-100" />
-        
+
         {updates.map((update) => (
           <motion.div
             key={update.id}
@@ -147,7 +159,7 @@ export default function UpdatesTimeline() {
             >
               {update.icon}
             </motion.div>
-            
+
             {/* Card with responsive padding */}
             <motion.div
               whileHover={{ y: -5 }}
@@ -158,11 +170,11 @@ export default function UpdatesTimeline() {
                   ⚡ Latest
                 </div>
               )}
-              
+
               <span className="text-xs md:text-sm text-gray-400">
                 {formatDate(update.date)}
               </span>
-              
+
               <h3 className="text-base md:text-lg font-semibold mt-1">
                 {update.title}
               </h3>

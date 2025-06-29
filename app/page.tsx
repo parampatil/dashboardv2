@@ -27,12 +27,12 @@ export default function Home() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.6 }}
-      className="flex-grow bg-white rounded-lg flex flex-col"
+      className="flex-grow bg-white rounded-lg flex flex-col p-4"
       >
       <motion.img
         src={LandingBannerImg.src}
         alt="360 Dashboards Banner"
-        className="hidden md:block w-full mx-auto rounded-t-lg shadow-lg mb-6 h-[40vh] object-cover"
+        className="hidden md:block w-full mx-auto rounded-t-lg shadow-lg rounded h-[30vh] object-cover"
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.7, delay: 0.2 }}
@@ -42,7 +42,7 @@ export default function Home() {
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.1, type: "spring" }}
-        className="flex flex-col items-center justify-center flex-1 text-center py-8 px-4"
+        className="flex flex-col items-center justify-center flex-1 text-center py-8"
       >
         <motion.div
           initial={{ scale: 0.95, opacity: 0 }}

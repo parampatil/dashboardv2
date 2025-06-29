@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+import "google/protobuf/timestamp.proto";
+
 package auth;
 
 option go_package = "git.360world.com/backend-team/auth-service;";
@@ -20,6 +22,9 @@ service AuthService {
 
   // User accepts NDA
   rpc AcceptNDA(AcceptNDARequest) returns (AcceptNDAResponse);
+
+  // Change NDA status
+  rpc ChangeNDAStatus(ChangeNDAStatusRequest) returns (ChangeNDAStatusResponse);
 
   // User rejects NDA
   rpc RejectNDA(RejectNDARequest) returns (RejectNDAResponse);
@@ -46,7 +51,81 @@ service AuthService {
   
   // Soft delete user
   rpc SoftDeleteUser(SoftDeleteUserRequest) returns (SoftDeleteUserResponse);
- 
+
+  // Add reward to user
+  rpc AddReward(AddRewardRequest) returns (AddRewardResponse);
+
+  rpc TestRpc(TestRpcRequest) returns (TestRpcResponse);
+
+  rpc RequestAffiliateConvertRequest(AffiliateRequest) returns (AffiliateResponse);
+
+  rpc UpdateAffiliateRequest(AffiliateUpdateRequest) returns (AffiliateResponse);
+
+  rpc GetAllAffiliateRequest(Empty) returns (AffiliateRequestList);
+}
+
+enum STATUS {
+  REQUESTED = 0;
+  APPROVED = 1;
+  REJECTED = 2;
+}
+
+message Empty {}
+
+message AffiliateRequestList {
+  repeated AffiliateRequestItem requests = 1;
+}
+
+//Add other columns
+message AffiliateRequestItem {
+  int64 request_id = 1;
+  int64 requestor_user_id = 2;
+  string status = 3;
+  google.protobuf.Timestamp requested_at = 4;
+  string approved_by = 5;
+  google.protobuf.Timestamp approved_at = 6;
+}
+
+message AffiliateUpdateRequest {
+  int64 request_id = 1;
+  STATUS status = 2;
+  string approver_user_id = 3;
+}
+
+message AffiliateRequest {
+  int64 user_id = 1;
+}
+
+message AffiliateResponse {
+  string status = 1;
+}
+
+message TestRpcRequest{
+
+}
+message TestRpcResponse{
+  string message = 1;
+}
+
+message AddRewardRequest {
+  int64 user_id = 1;
+}
+
+message AddRewardResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// Request for changing NDA status
+message ChangeNDAStatusRequest {
+  string email = 1;
+  string nda_status = 2; // e.g., "accepted", "rejected", "pending"
+}
+
+// Response for changing NDA status
+message ChangeNDAStatusResponse {
+  bool success = 1;
+  string message = 2;
 }
 // Request for getting all users
 message GetAllUsersRequest {
